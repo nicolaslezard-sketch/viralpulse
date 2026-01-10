@@ -7,8 +7,25 @@ export const runtime = "nodejs";
    CONFIG MVP (ajustable)
 ========================= */
 
-const MAX_TRANSCRIPT_CHARS = 9000; // control fuerte de costos
+const MAX_TRANSCRIPT_CHARS = 9000;
 const MIN_TRANSCRIPT_CHARS = 120;
+
+/* =========================
+   SECCIONES CANÓNICAS
+========================= */
+
+const CANONICAL_SECTIONS = [
+  "SUMMARY",
+  "VIRAL REASON",
+  "KEY MOMENT",
+  "TITLE IDEAS",
+  "HASHTAGS",
+  "REMIX IDEAS",
+  "REACTION SCRIPT",
+  "MEME TEMPLATES",
+  "HOOKS",
+  "PREDICTED LONGEVITY",
+];
 
 /* =========================
    HELPERS
@@ -28,8 +45,9 @@ function extractYouTubeVideoId(url: string): string | null {
 
       const parts = u.pathname.split("/").filter(Boolean);
       const shortsIndex = parts.indexOf("shorts");
-      if (shortsIndex !== -1 && parts[shortsIndex + 1])
+      if (shortsIndex !== -1 && parts[shortsIndex + 1]) {
         return parts[shortsIndex + 1];
+      }
     }
 
     return null;
@@ -53,27 +71,53 @@ function smartTruncate(text: string, maxChars: number) {
   return `${start}\n...\n${middle}\n...\n${end}`;
 }
 
-function enforceStructure(raw: string) {
-  const sections = [
-    "1) SUMMARY",
-    "2) VIRAL REASON",
-    "3) KEY MOMENT",
-    "4) TITLE IDEAS",
-    "5) HASHTAGS",
-    "6) REMIX IDEAS",
-    "7) REACTION SCRIPT",
-    "8) MEME TEMPLATES",
-    "9) HOOKS",
-    "10) PREDICTED LONGEVITY",
-  ];
+/* =========================
+   NORMALIZACIÓN DE OUTPUT
+========================= */
 
-  let output = raw;
+function normalizeOutput(raw: string) {
+  const lines = raw.split("\n");
 
-  for (const section of sections) {
-    if (!output.includes(section)) {
-      output += `\n\n${section}\n(Not provided by model)`;
+  const sections: Record<string, string[]> = {};
+  let currentSection: string | null = null;
+
+  function detectSection(line: string) {
+    const clean = line
+      .toUpperCase()
+      .replace(/[^A-Z\s]/g, "")
+      .trim();
+
+    return CANONICAL_SECTIONS.find((s) => clean.startsWith(s));
+  }
+
+  for (const line of lines) {
+    const matched = detectSection(line);
+
+    if (matched) {
+      currentSection = matched;
+      if (!sections[currentSection]) sections[currentSection] = [];
+      continue;
+    }
+
+    if (currentSection) {
+      sections[currentSection].push(line);
     }
   }
+
+  // reconstruimos salida final SIEMPRE igual
+  let output = "";
+
+  CANONICAL_SECTIONS.forEach((section, index) => {
+    const body = sections[section]?.join("\n").trim();
+
+    output += `${index + 1}) ${section}\n`;
+
+    if (body && body.length > 0) {
+      output += body + "\n\n";
+    } else {
+      output += "(No data provided)\n\n";
+    }
+  });
 
   return output.trim();
 }
@@ -206,7 +250,7 @@ ${transcript}
         ? data.output_text
         : "No output generated.";
 
-    const analysis = enforceStructure(rawOutput);
+    const analysis = normalizeOutput(rawOutput);
 
     return NextResponse.json({
       platform: "youtube",

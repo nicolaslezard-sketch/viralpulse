@@ -18,6 +18,11 @@ export default function HomePage() {
           <p style={{ marginTop: 10, color: "rgba(255,255,255,0.75)" }}>
             Paste a YouTube link and get a structured viral breakdown in seconds.
           </p>
+
+          <p style={{ marginTop: 6, fontSize: 13, color: "rgba(255,255,255,0.5)" }}>
+  Works best with videos that include spoken dialogue or captions.
+</p>
+
         </header>
 
         <InputBox />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import LoadingSpinner from "./LoadingSpinner";
 import ResultBlock from "./ResultBlock";
 
@@ -10,7 +10,18 @@ export default function InputBox() {
   const [analysis, setAnalysis] = useState<string>("");
   const [error, setError] = useState<string>("");
 
-  const canAnalyze = useMemo(() => url.trim().length > 0 && !loading, [url, loading]);
+  const resultRef = useRef<HTMLDivElement | null>(null);
+
+  const canAnalyze = useMemo(
+    () => url.trim().length > 0 && !loading,
+    [url, loading]
+  );
+
+  useEffect(() => {
+    if (analysis && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [analysis]);
 
   async function handleAnalyze() {
     setError("");
@@ -35,7 +46,7 @@ export default function InputBox() {
       }
 
       setAnalysis(data.analysis || "");
-    } catch (e: any) {
+    } catch {
       setError("Network error. Try again.");
     } finally {
       setLoading(false);
@@ -59,7 +70,7 @@ export default function InputBox() {
           style={{
             flex: "1 1 520px",
             minWidth: 240,
-            padding: "12px 12px",
+            padding: "12px",
             borderRadius: 12,
             border: "1px solid rgba(255,255,255,0.16)",
             background: "rgba(0,0,0,0.25)",
@@ -72,25 +83,26 @@ export default function InputBox() {
           onClick={handleAnalyze}
           disabled={!canAnalyze}
           style={{
-            padding: "12px 14px",
+            padding: "12px 16px",
             borderRadius: 12,
             border: "1px solid rgba(255,255,255,0.16)",
-            background: canAnalyze ? "#ffffff" : "rgba(255,255,255,0.35)",
+            background: canAnalyze ? "#ffffff" : "rgba(255,255,255,0.25)",
             color: "#0b0b0f",
             cursor: canAnalyze ? "pointer" : "not-allowed",
             fontWeight: 700,
+            opacity: canAnalyze ? 1 : 0.7,
           }}
         >
-          Analyze
+          {loading ? "Analyzing…" : "Analyze"}
         </button>
       </div>
 
-      <div style={{ marginTop: 12 }}>
+      <div style={{ marginTop: 14 }}>
         {loading && (
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <LoadingSpinner />
-            <span style={{ color: "rgba(255,255,255,0.75)" }}>
-              Analyzing… (YouTube transcript → AI report)
+            <span style={{ color: "rgba(255,255,255,0.75)", fontSize: 14 }}>
+              Analyzing video… this may take ~10 seconds
             </span>
           </div>
         )}
@@ -111,7 +123,7 @@ export default function InputBox() {
         )}
 
         {analysis && (
-          <div style={{ marginTop: 14 }}>
+          <div ref={resultRef} style={{ marginTop: 18 }}>
             <ResultBlock analysis={analysis} />
           </div>
         )}
