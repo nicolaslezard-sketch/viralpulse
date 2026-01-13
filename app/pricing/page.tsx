@@ -48,7 +48,7 @@ export default function PricingPage() {
           </p>
 
           <div className="mt-6 text-3xl font-semibold">
-            $— <span className="text-base font-normal">/ month</span>
+            $15 <span className="text-base font-normal">/ month</span>
           </div>
 
           <ul className="mt-6 space-y-3 text-sm">
