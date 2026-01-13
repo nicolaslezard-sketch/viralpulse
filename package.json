@@ -10,9 +10,12 @@
   },
   "dependencies": {
     "next": "16.1.1",
+    "openai": "^6.16.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "youtube-transcript": "^1.2.1"
+    "stripe": "^20.1.2",
+    "youtube-transcript": "^1.2.1",
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
