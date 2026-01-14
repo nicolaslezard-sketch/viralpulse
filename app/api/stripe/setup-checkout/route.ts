@@ -1,36 +1,28 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-
-// ⚠️ TEMPORAL — luego se conecta a auth real
-async function getUserFromSession() {
-  return {
-    email: "test@example.com",
-    name: "Test User",
-    stripeCustomerId: null as string | null,
-  };
-}
-
-async function getOrCreateCustomer(user: {
-  email: string;
-  name: string;
-  stripeCustomerId: string | null;
-}) {
-  if (user.stripeCustomerId) return user.stripeCustomerId;
-
-  const customer = await stripe.customers.create({
-    email: user.email,
-    name: user.name,
-  });
-
-  // TODO: guardar customer.id en DB
-  return customer.id;
-}
+import { getOrCreateUser } from "@/lib/user";
+import { prisma } from "@/lib/prisma";
 
 export async function POST() {
   try {
-    const user = await getUserFromSession();
+    const user = await getOrCreateUser();
 
-    const customerId = await getOrCreateCustomer(user);
+    let customerId = user.stripeCustomerId;
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user.email ?? "test@example.com",
+        name: "Test User",
+      });
+
+      customerId = customer.id;
+
+      // ✅ CLAVE: persistir customerId
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { stripeCustomerId: customerId },
+      });
+    }
 
     const appUrl =
       process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -46,10 +38,14 @@ export async function POST() {
       ],
       success_url: `${appUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/pricing`,
+      client_reference_id: user.id,
+      metadata: {
+        userId: user.id,
+      },
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (err: any) {
+  } catch (err) {
     console.error("Stripe checkout error:", err);
     return NextResponse.json(
       { error: "Unable to create checkout session" },
