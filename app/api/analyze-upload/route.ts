@@ -7,6 +7,7 @@ import { getOrCreateUser } from "@/lib/user";
 
 export const runtime = "nodejs";
 
+/* ================= OPENAI ================= */
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
@@ -22,15 +23,31 @@ function getMaxDurationSeconds(plan: Plan) {
   return plan === "free" ? 180 : 1200;
 }
 
-/* ================= ROUTE ================= */
+/* ================= BLOCK GET ================= */
+export async function GET() {
+  return NextResponse.json(
+    { error: "METHOD_NOT_ALLOWED" },
+    { status: 405 }
+  );
+}
+
+/* ================= POST ================= */
 export async function POST(req: Request) {
   try {
+    // 🛡️ Solo multipart
+    if (!req.headers.get("content-type")?.includes("multipart/form-data")) {
+      return NextResponse.json(
+        { error: "INVALID_CONTENT_TYPE" },
+        { status: 400 }
+      );
+    }
+
     /* ================= USER ================= */
     const user = await getOrCreateUser();
     const plan = normalizePlan(user.plan);
     const cardOnFile = Boolean(user.stripeCustomerId);
 
-    // 🔒 FREE sin tarjeta → Stripe
+    // 🔒 FREE sin tarjeta
     if (plan === "free" && !cardOnFile) {
       return NextResponse.json(
         { error: "CARD_REQUIRED" },
@@ -104,10 +121,7 @@ export async function POST(req: Request) {
       "Analysis could not be generated.";
 
     const fullReport = parseViralReport(raw);
-    const reportForUser = buildReportForUser(
-      fullReport,
-      plan
-    );
+    const reportForUser = buildReportForUser(fullReport, plan);
 
     return NextResponse.json({
       transcript: plan === "pro" ? transcript : undefined,
