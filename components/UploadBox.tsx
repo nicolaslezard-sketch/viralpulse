@@ -75,9 +75,10 @@ async function redirectToStripe() {
       form.append("file", file);
 
       const res = await fetch("/api/analyze-upload", {
-        method: "POST",
-        body: form,
-      });
+  method: "POST",
+  body: form,
+});
+
 
       if (!res.ok) {
         const data = await res.json();
