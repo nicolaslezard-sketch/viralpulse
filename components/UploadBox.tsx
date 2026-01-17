@@ -199,13 +199,15 @@ async function redirectToStripe() {
       )}
 
       {/* CTA */}
-      <button
-        onClick={handleAnalyze}
-        disabled={!file || loading}
-        className="mt-6 w-full rounded-xl bg-white px-6 py-4 text-black font-medium hover:bg-zinc-200 transition disabled:opacity-50"
-      >
-        {loading ? "Analyzing…" : "Analyze now"}
-      </button>
+<button
+  type="button" // 👈 CLAVE ABSOLUTA
+  onClick={handleAnalyze}
+  disabled={!file || loading}
+  className="mt-6 w-full rounded-xl bg-white px-6 py-4 text-black font-medium hover:bg-zinc-200 transition disabled:opacity-50"
+>
+  {loading ? "Analyzing…" : "Analyze now"}
+</button>
+
       {loading && <LoadingSteps step={step} />}
     </div>
   );
