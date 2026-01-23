@@ -5,9 +5,11 @@ export const runtime = "nodejs";
 
 export async function POST() {
   await inngest.send({
-    name: "test/event",
-    data: { hello: "world" },
+    name: "report/analyze",
+    data: {
+      reportId: "TEST_ID",
+    },
   });
 
-  return NextResponse.json({ sent: true });
+  return NextResponse.json({ ok: true });
 }
