@@ -15,7 +15,7 @@ enum Plan {
 model User {
   id                   String   @id @default(cuid())
   email                String?  @unique
-  plan                 Plan   @default("free")
+  plan                 Plan     @default(free)
 
   stripeCustomerId     String?  @unique
   stripeSubscriptionId String?  @unique
@@ -25,6 +25,7 @@ model User {
 
   reports              AnalysisReport[]
 }
+
 
 
 
