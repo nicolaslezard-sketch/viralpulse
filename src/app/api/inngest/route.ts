@@ -4,6 +4,8 @@ import { analyzeReport } from "@/lib/inngest/functions/analyzeReport";
 
 export const runtime = "nodejs";
 
+console.log("Inngest endpoint loaded with analyzeReport");
+
 export const { GET, POST } = serve({
   client: inngest,
   functions: [analyzeReport],
