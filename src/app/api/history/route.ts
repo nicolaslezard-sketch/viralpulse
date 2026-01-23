@@ -18,15 +18,6 @@ export async function GET() {
 
   const userId = session.user.id;
 
-  await prisma.user.upsert({
-    where: { id: userId },
-    update: {},
-    create: {
-      id: userId,
-      plan: "free",
-    },
-  });
-
   const plan = await getUserPlan(userId);
 
   if (plan !== "pro") {

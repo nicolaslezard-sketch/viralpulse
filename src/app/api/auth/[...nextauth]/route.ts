@@ -46,19 +46,40 @@ export const authOptions: NextAuthOptions = {
      * 🔑 JWT = SOURCE OF TRUTH para middleware
      */
     async jwt({ token, user }) {
+  // En login inicial
   if (user?.email) {
     const dbUser = await prisma.user.findUnique({
       where: { email: user.email },
+      select: { id: true, plan: true },
     });
 
     if (dbUser) {
       token.id = dbUser.id;
-      token.plan = dbUser.plan as UserPlan; // ✅ FIX
+      token.plan = dbUser.plan as UserPlan;
+      (token as any).planCheckedAt = Date.now();
+    }
+    return token;
+  }
+
+  // En requests normales: refresco con TTL
+  const TTL_MS = 60_000;
+  const last = (token as any).planCheckedAt as number | undefined;
+
+  if (token.id && (!last || Date.now() - last > TTL_MS)) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: token.id as string },
+      select: { plan: true },
+    });
+
+    if (dbUser) {
+      token.plan = dbUser.plan as UserPlan;
+      (token as any).planCheckedAt = Date.now();
     }
   }
 
   return token;
 },
+
 
     /**
      * 🧠 Session = lo que usa el frontend

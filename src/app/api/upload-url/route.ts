@@ -48,15 +48,6 @@ if (!session?.user?.id) {
 
 const userId = session.user.id;
 
-await prisma.user.upsert({
-  where: { id: userId },
-  update: {},
-  create: {
-    id: userId,
-    plan: "free",
-  },
-});
-
 
     const plan = (await getUserPlan(userId)) as PlanKey; // ideal: que getUserPlan ya devuelva PlanKey
     const { maxBytes, ttl } = limitsByPlan[plan];

@@ -1,39 +1,54 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
+export const runtime = "nodejs";
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // ⬇️ Next 15: params es Promise
   const { id: reportId } = await params;
 
-  if (!reportId) {
-    return NextResponse.json(
-      { error: "Missing report id" },
-      { status: 400 }
-    );
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const userId = session.user.id;
 
   const report = await prisma.analysisReport.findUnique({
     where: { id: reportId },
-    include: {
-      user: {
-        select: {
-          plan: true,
-        },
-      },
+    select: {
+      id: true,
+      userId: true,
+      status: true,
+      durationSec: true,
+      wasTrimmed: true,
+      createdAt: true,
+      reportFull: true,
+      reportFree: true,
+      transcript: true,
     },
   });
 
   if (!report) {
-    return NextResponse.json(
-      { error: "Report not found" },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: "Report not found" }, { status: 404 });
   }
 
-  const isPro = report.user.plan === "pro";
+  // 🔒 Ownership
+  if (report.userId !== userId) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // 🔑 Gating por plan del viewer (DB)
+  const viewer = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { plan: true },
+  });
+
+  const isPro = viewer?.plan === "pro";
 
   return NextResponse.json({
     id: report.id,
@@ -41,11 +56,8 @@ export async function GET(
     duration: report.durationSec,
     wasTrimmed: report.wasTrimmed,
     createdAt: report.createdAt,
-
-    // 🔑 BACKEND decide qué contenido ve el usuario
     report: isPro ? report.reportFull : report.reportFree,
     transcript: isPro ? report.transcript : null,
-
     isPro,
   });
 }

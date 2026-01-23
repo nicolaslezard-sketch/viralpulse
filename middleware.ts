@@ -10,36 +10,26 @@ export async function middleware(req: NextRequest) {
 
   const { pathname } = req.nextUrl;
 
-  // 🔒 Rutas PRO (ajustá si querés)
-  const PRO_ROUTES = ["/history", "/billing", "/report"];
+  // Reglas:
+  // - /report y /billing: requieren login (FREE puede entrar)
+  // - /history: PRO only
+  const AUTH_ROUTES = ["/report", "/billing", "/history"];
+  const PRO_ONLY_ROUTES = ["/history"];
 
-  const isProRoute = PRO_ROUTES.some((r) =>
-    pathname.startsWith(r)
-  );
+  const isAuthRoute = AUTH_ROUTES.some((r) => pathname.startsWith(r));
+  const isProOnly = PRO_ONLY_ROUTES.some((r) => pathname.startsWith(r));
 
-  if (isProRoute) {
-    // No logueado
-    if (!token) {
-      return NextResponse.redirect(
-        new URL("/api/auth/signin", req.url)
-      );
-    }
+  if (isAuthRoute && !token) {
+    return NextResponse.redirect(new URL("/api/auth/signin", req.url));
+  }
 
-    // No PRO
-    if (token.plan !== "pro") {
-      return NextResponse.redirect(
-        new URL("/pricing", req.url)
-      );
-    }
+  if (isProOnly && token?.plan !== "pro") {
+    return NextResponse.redirect(new URL("/pricing", req.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/history/:path*",
-    "/billing/:path*",
-    "/report/:path*",
-  ],
+  matcher: ["/history/:path*", "/billing/:path*", "/report/:path*"],
 };
