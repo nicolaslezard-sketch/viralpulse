@@ -7,25 +7,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Plan {
+  free  
+  pro
+}
+
 model User {
-  id                   String   @id
+  id                   String   @id @default(cuid())
   email                String?  @unique
-  plan                 String   @default("free")
+  plan                 Plan   @default("free")
+
   stripeCustomerId     String?  @unique
-  stripeSubscriptionId String?
+  stripeSubscriptionId String?  @unique
+
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  reports              Report[]
+  reports              AnalysisReport[]
 }
 
-model Report {
-  id        String   @id @default(cuid())
-  userId    String
-  status    String
-  duration  Int
-  result    Json
-  createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
+
+
+model AnalysisReport {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  // estado
+  status      String   // "processing" | "done" | "error"
+
+  // input
+  audioKey    String
+  durationSec Int
+  wasTrimmed  Boolean @default(false)
+
+  // output
+  transcript  String? // PRO only (pero se guarda igual)
+  reportFull  String? // texto completo IA
+  reportFree  String? // versión recortada para FREE
+
+  createdAt   DateTime @default(now())
 }
