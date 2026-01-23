@@ -7,5 +7,5 @@ export const runtime = "nodejs";
 
 export const { GET, POST } = serve({
   client: inngest,
-  functions: [analyzeReport, ping], // 👈 IMPORTANTE
+  functions: [analyzeReport, ping],
 });
