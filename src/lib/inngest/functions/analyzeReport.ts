@@ -58,7 +58,9 @@ export const analyzeReport = inngest.createFunction(
       include: { user: true },
     });
 
-    if (!report) return;
+if (!report) {
+  throw new Error("REPORT_NOT_FOUND_YET");
+}
 
     const userId = report.userId;
     const key = report.audioKey;
