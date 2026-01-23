@@ -49,7 +49,7 @@ if (!session?.user?.id) {
 const userId = session.user.id;
 
 
-    const plan = (await getUserPlan(userId)) as PlanKey; // ideal: que getUserPlan ya devuelva PlanKey
+    const plan = (await getUserPlan(userId)) as PlanKey; // ideal: que getUserPlan devuelva PlanKey
     const { maxBytes, ttl } = limitsByPlan[plan];
 
     if (fileSize > maxBytes) {
