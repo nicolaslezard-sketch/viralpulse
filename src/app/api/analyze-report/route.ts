@@ -22,16 +22,17 @@ export async function POST(req: Request) {
 
     const result = await generateReport(report.transcript);
 
-    await prisma.analysisReport.update({
-      where: { id: reportId },
-      data: {
-        status: "done",
-        reportFull: result.full,
-        reportFree: result.free,
-        transcript: result.transcript,
-        durationSec: result.durationSec,
-      },
-    });
+   await prisma.analysisReport.update({
+  where: { id: reportId },
+  data: {
+    status: "done",
+    reportFull: result.fullText,
+    reportFree: result.freeText,
+    transcript: result.transcript,
+    durationSec: result.durationSec,
+  },
+});
+
 
     return NextResponse.json({ ok: true });
   } catch (err: unknown) {

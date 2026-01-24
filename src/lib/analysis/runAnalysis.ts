@@ -42,15 +42,16 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
 
     // 4) Guardar en DB
     await prisma.analysisReport.update({
-      where: { id: reportId },
-      data: {
-        status: "done",
-        reportFull: JSON.stringify(result.full, null, 2),
-        reportFree: JSON.stringify(result.free, null, 2),
-        transcript: transcript, // se guarda siempre; el gating lo hace /api/report/[id]
-        durationSec,
-      },
-    });
+  where: { id: reportId },
+  data: {
+    status: "done",
+    reportFull: result.fullText,
+    reportFree: result.freeText,
+    transcript,
+    durationSec,
+  },
+});
+
   } catch (err: unknown) {
     console.error("runAnalysis failed", err);
 
