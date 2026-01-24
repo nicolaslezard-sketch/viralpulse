@@ -1,11 +1,12 @@
 import { parseViralReport } from "./parseReport";
 import { buildReportForUser } from "./buildReportForUser";
+import { serializeReport } from "./serializeReport";
 import { getOpenAIClient } from "@/lib/openai";
 import { VIRAL_PROMPT } from "@/lib/prompts/viralPrompt";
 
 export type GenerateReportResult = {
-  full: any;
-  free: any;
+  fullText: string;
+  freeText: string;
   transcript: string;
   durationSec: number;
 };
@@ -27,12 +28,12 @@ export async function generateReport(
   const raw = completion.choices[0]?.message?.content ?? "";
 
   const parsed = parseViralReport(raw);
-  const freeVersion = buildReportForUser(parsed, "free");
+  const freeParsed = buildReportForUser(parsed, "free");
 
   return {
-    full: parsed,
-    free: freeVersion,
+    fullText: serializeReport(parsed),
+    freeText: serializeReport(freeParsed),
     transcript,
-    durationSec: Math.floor(transcript.length / 4), // placeholder OK
+    durationSec: Math.floor(transcript.length / 4), // placeholder OK por ahora
   };
 }
