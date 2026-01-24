@@ -10,7 +10,6 @@ export async function transcribeFromR2(audioKey: string): Promise<{
   transcript: string;
   durationSec: number;
 }> {
-  // 1) Descargar de R2 a /tmp
   const obj = await r2.send(
     new GetObjectCommand({
       Bucket: process.env.R2_BUCKET!,
@@ -20,13 +19,16 @@ export async function transcribeFromR2(audioKey: string): Promise<{
 
   if (!obj.Body) throw new Error("R2 object has no body");
 
-  const tmpPath = path.join(os.tmpdir(), `vp-${Date.now()}-${Math.random()}.bin`);
+  const ext = path.extname(audioKey).toLowerCase() || ".mp3";
+
+  const tmpPath = path.join(
+    os.tmpdir(),
+    `vp-${Date.now()}-${Math.random()}${ext}`
+  );
+
   await pipeline(obj.Body as any, fs.createWriteStream(tmpPath));
 
   try {
-    // 2) Transcribir con OpenAI
-    // Usamos whisper-1 verbose_json + timestamps => podemos calcular durationSec
-    // (Y además es simple y muy estable)
     const openai = getOpenAIClient();
 
     const resp: any = await openai.audio.transcriptions.create({
@@ -45,7 +47,6 @@ export async function transcribeFromR2(audioKey: string): Promise<{
 
     return { transcript, durationSec };
   } finally {
-    // 3) Cleanup
     try {
       fs.unlinkSync(tmpPath);
     } catch {}

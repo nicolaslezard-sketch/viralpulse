@@ -35,26 +35,31 @@ export async function POST(req: Request) {
     }
 
     // ✅ Plan gating mínimo (1 análisis/día para FREE)
-    const plan = (await getUserPlan(userId)) as PlanKey;
+const plan = (await getUserPlan(userId)) as PlanKey;
 
-    if (plan === "free") {
-      const start = new Date();
-      start.setUTCHours(0, 0, 0, 0);
+const TEST_EMAILS = ["nicolaslezard@gmail.com"];
 
-      const usedToday = await prisma.analysisReport.count({
-        where: {
-          userId,
-          createdAt: { gte: start },
-        },
-      });
+const isTester = TEST_EMAILS.includes(session.user.email ?? "");
 
-      if (usedToday >= 1) {
-        return NextResponse.json(
-          { error: "Free plan limit: 1 analysis per day." },
-          { status: 429 }
-        );
-      }
-    }
+if (plan === "free" && !isTester) {
+  const start = new Date();
+  start.setUTCHours(0, 0, 0, 0);
+
+  const usedToday = await prisma.analysisReport.count({
+    where: {
+      userId,
+      createdAt: { gte: start },
+    },
+  });
+
+  if (usedToday >= 1) {
+    return NextResponse.json(
+      { error: "Free plan limit: 1 analysis per day." },
+      { status: 429 }
+    );
+  }
+}
+
 
     // 📝 Crear report
     const report = await prisma.analysisReport.create({
