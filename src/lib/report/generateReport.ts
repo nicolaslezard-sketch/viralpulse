@@ -1,5 +1,6 @@
 import { getOpenAIClient } from "@/lib/openai";
 import { VIRAL_PROMPT } from "@/lib/prompts/viralPrompt";
+import { splitReportByTitle } from "./splitReportByTitle";
 
 export type GenerateReportResult = {
   fullText: string;
@@ -22,28 +23,37 @@ export async function generateReport(
     temperature: 0.7,
   });
 
-let raw = completion.choices[0]?.message?.content ?? "";
+  let raw = completion.choices[0]?.message?.content ?? "";
 
-// 🔧 Normalize report text for frontend parser
-raw = raw
-  // remove instruction separators
-  .replace(/=+/g, "")
-  // normalize line endings
-  .replace(/\r\n/g, "\n")
-  // trim leading/trailing whitespace
-  .trim();
+  // limpieza mínima
+  raw = raw.replace(/=+/g, "").replace(/\r\n/g, "\n").trim();
 
-  // 👉 Free = primeros 3 bloques completos + resto truncado
-  const sections = raw.split(/\n\s*\n/);
+  const sections = splitReportByTitle(raw);
 
-  const freeText =
-    sections.slice(0, 3).join("\n\n") +
-    "\n\n🔒 Upgrade to Pro to unlock the full analysis.";
+  const freeSections = sections.map((section, index) => {
+  // primeros 3 completos
+  if (index < 3) {
+    return `${section.title}\n${section.content}`;
+  }
+
+  // resto truncado
+  const lines = section.content.split("\n").filter(Boolean);
+  const keepCount = Math.max(1, Math.floor(lines.length * 0.35));
+
+  const preview = lines.slice(0, keepCount).join("\n");
+
+  return (
+    `${section.title}\n` +
+    `${preview}\n\n` +
+    `🔒 Upgrade to Pro to unlock the full section.`
+  );
+});
+
 
   return {
-    fullText: raw.trim(),
-    freeText: freeText.trim(),
+    fullText: raw,
+    freeText: freeSections.join("\n\n"),
     transcript,
-    durationSec: Math.floor(transcript.length / 4), // OK por ahora
+    durationSec: Math.floor(transcript.length / 4),
   };
 }
