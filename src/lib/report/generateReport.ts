@@ -1,6 +1,3 @@
-import { parseViralReport } from "./parseReport";
-import { buildReportForUser } from "./buildReportForUser";
-import { serializeReport } from "./serializeReport";
 import { getOpenAIClient } from "@/lib/openai";
 import { VIRAL_PROMPT } from "@/lib/prompts/viralPrompt";
 
@@ -25,15 +22,28 @@ export async function generateReport(
     temperature: 0.7,
   });
 
-  const raw = completion.choices[0]?.message?.content ?? "";
+let raw = completion.choices[0]?.message?.content ?? "";
 
-  const parsed = parseViralReport(raw);
-  const freeParsed = buildReportForUser(parsed, "free");
+// 🔧 Normalize report text for frontend parser
+raw = raw
+  // remove instruction separators
+  .replace(/=+/g, "")
+  // normalize line endings
+  .replace(/\r\n/g, "\n")
+  // trim leading/trailing whitespace
+  .trim();
+
+  // 👉 Free = primeros 3 bloques completos + resto truncado
+  const sections = raw.split(/\n\s*\n/);
+
+  const freeText =
+    sections.slice(0, 3).join("\n\n") +
+    "\n\n🔒 Upgrade to Pro to unlock the full analysis.";
 
   return {
-    fullText: serializeReport(parsed),
-    freeText: serializeReport(freeParsed),
+    fullText: raw.trim(),
+    freeText: freeText.trim(),
     transcript,
-    durationSec: Math.floor(transcript.length / 4), // placeholder OK por ahora
+    durationSec: Math.floor(transcript.length / 4), // OK por ahora
   };
 }
