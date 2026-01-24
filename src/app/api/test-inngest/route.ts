@@ -3,10 +3,13 @@ import { inngest } from "@/lib/inngest/client";
 
 export const runtime = "nodejs";
 
-export async function POST() {
+export async function GET() {
   await inngest.send({
-    name: "report/analyze",
-    data: { reportId: "TEST_123" },
+    name: "test.event",
+    data: {
+      hello: "world",
+      at: new Date().toISOString(),
+    },
   });
 
   return NextResponse.json({ ok: true });
