@@ -7,9 +7,9 @@ export const runtime = "nodejs";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const reportId = params.id;
+  const { id: reportId } = await params;
 
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -48,22 +48,13 @@ export async function GET(
 
   const isPro = viewer?.plan === "pro";
 
-  let parsedReport: string | null = null;
-
-  try {
-    const raw = isPro ? report.reportFull : report.reportFree;
-    parsedReport = raw ? JSON.parse(raw) : null;
-  } catch (e) {
-    console.error("Failed to parse report JSON", e);
-  }
-
   return NextResponse.json({
     id: report.id,
     status: report.status,
     duration: report.durationSec,
     wasTrimmed: report.wasTrimmed,
     createdAt: report.createdAt,
-    report: parsedReport,
+    report: isPro ? report.reportFull : report.reportFree,
     transcript: isPro ? report.transcript : null,
     isPro,
   });
