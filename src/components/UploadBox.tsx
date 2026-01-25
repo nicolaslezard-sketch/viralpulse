@@ -2,11 +2,9 @@
 
 import { useState, DragEvent } from "react";
 import { useRouter } from "next/navigation";
-import LoadingSteps from "./LoadingSteps";
 import { uploadToR2 } from "@/lib/uploadToR2";
 import { useSession } from "next-auth/react";
 import LoginCard from "./LoginCard";
-
 
 // ⬅️ alineado con backend
 const ALLOWED_TYPES = [
@@ -18,38 +16,32 @@ const ALLOWED_TYPES = [
   "audio/webm",
 ];
 
+const EXT_OK = [".mp3", ".wav", ".m4a", ".ogg", ".webm"];
+
 export default function UploadBox() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [step, setStep] = useState(0);
   const [showLogin, setShowLogin] = useState(false);
 
+  function handleFile(f: File | null) {
+    setError(null);
+    if (!f) return;
 
-  const EXT_OK = [".mp3", ".wav", ".m4a", ".ogg", ".webm"];
+    const ext = f.name.toLowerCase().slice(f.name.lastIndexOf("."));
 
+    if (!ALLOWED_TYPES.includes(f.type) && !EXT_OK.includes(ext)) {
+      setError(
+        "Unsupported file format. Please upload MP3, WAV, M4A, OGG or WEBM."
+      );
+      return;
+    }
 
-function handleFile(f: File | null) {
-  setError(null);
-  if (!f) return;
-
-  const ext = f.name.toLowerCase().slice(f.name.lastIndexOf("."));
-
-  if (
-    !ALLOWED_TYPES.includes(f.type) &&
-    !EXT_OK.includes(ext)
-  ) {
-    setError("Unsupported file format. Please upload MP3, WAV, M4A, OGG or WEBM.");
-    return;
+    setFile(f);
   }
-
-  setFile(f);
-}
-
 
   function onDrop(e: DragEvent<HTMLDivElement>) {
     e.preventDefault();
@@ -57,69 +49,61 @@ function handleFile(f: File | null) {
     handleFile(e.dataTransfer.files?.[0] ?? null);
   }
 
-  function simulateProgress() {
-    setStep(0);
-    setTimeout(() => setStep(1), 800);
-    setTimeout(() => setStep(2), 1800);
-    setTimeout(() => setStep(3), 3200);
-  }
-
   async function handleAnalyze() {
-  if (!file) return;
+    if (!file) return;
 
-  // 🔐 gate de login
-  if (!session) {
-    setShowLogin(true);
-    return;
-  }
-
-  setLoading(true);
-  setError(null);
-  simulateProgress();
-
-  try {
-
-    const uploadRes = await fetch("/api/upload-url", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filename: file.name,
-        contentType: file.type,
-        fileSize: file.size,
-      }),
-    });
-
-    if (!uploadRes.ok) {
-      const d = await uploadRes.json().catch(() => ({}));
-      setError(d?.error || "Upload failed for your current plan.");
-      setLoading(false);
+    // 🔐 gate de login
+    if (!session) {
+      setShowLogin(true);
       return;
     }
 
-    const { uploadUrl, key } = await uploadRes.json();
-    await uploadToR2(uploadUrl, file);
+    setError(null);
 
-    const analyzeRes = await fetch("/api/analyze-upload", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key }),
-    });
+    try {
+      // 1️⃣ pedir URL de upload
+      const uploadRes = await fetch("/api/upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: file.name,
+          contentType: file.type,
+          fileSize: file.size,
+        }),
+      });
 
-    const result = await analyzeRes.json();
+      if (!uploadRes.ok) {
+        const d = await uploadRes.json().catch(() => ({}));
+        setError(d?.error || "Upload failed for your current plan.");
+        return;
+      }
 
-    if (!analyzeRes.ok) {
-      setError(result.error || "Analysis failed");
-      setLoading(false);
-      return;
+      const { uploadUrl, key } = await uploadRes.json();
+
+      // 2️⃣ subir a R2
+      await uploadToR2(uploadUrl, file);
+
+      // 3️⃣ crear report + disparar análisis
+      const analyzeRes = await fetch("/api/analyze-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key }),
+      });
+
+      const result = await analyzeRes.json();
+
+      if (!analyzeRes.ok) {
+        setError(result.error || "Analysis failed");
+        return;
+      }
+
+      // 4️⃣ redirect inmediato al reporte
+      router.push(`/report/${result.reportId}`);
+    } catch (err) {
+      console.error(err);
+      setError("Network error. Please try again.");
     }
-
-    router.push(`/report/${result.reportId}`);
-  } catch (err) {
-    console.error(err);
-    setError("Network error. Please try again.");
-    setLoading(false);
   }
-}
 
   return (
     <div className="text-white">
@@ -171,7 +155,6 @@ function handleFile(f: File | null) {
           className="hidden"
         />
 
-        {/* ⬅️ formatos visibles */}
         <p className="mt-4 text-xs text-zinc-500">
           Supports: MP3, WAV, M4A, OGG, WEBM
         </p>
@@ -186,11 +169,11 @@ function handleFile(f: File | null) {
         </div>
       )}
 
-{showLogin && !session && (
-  <div className="mt-6">
-    <LoginCard />
-  </div>
-)}
+      {showLogin && !session && (
+        <div className="mt-6">
+          <LoginCard />
+        </div>
+      )}
 
       {error && (
         <div className="mt-5 rounded-2xl border border-red-800/60 bg-red-950/40 px-4 py-3 text-sm text-red-300">
@@ -200,20 +183,18 @@ function handleFile(f: File | null) {
 
       <button
         onClick={handleAnalyze}
-        disabled={!file || loading}
+        disabled={!file}
         className={[
           "mt-6 w-full rounded-2xl px-6 py-4 text-sm font-semibold transition",
           "shadow-[0_18px_50px_rgba(0,0,0,0.35)] cursor-pointer",
-          !file || loading
+          !file
             ? "bg-white/60 text-black/80"
             : "bg-white text-black hover:bg-zinc-200",
           "disabled:cursor-not-allowed disabled:opacity-60",
         ].join(" ")}
       >
-        {loading ? "Analyzing…" : "Analyze now"}
+        Analyze now
       </button>
-
-      {loading && <LoadingSteps step={step} />}
     </div>
   );
 }
