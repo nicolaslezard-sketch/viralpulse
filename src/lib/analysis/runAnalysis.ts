@@ -41,16 +41,18 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
     const result = await generateReport(transcript);
 
     // 4) Guardar en DB
-    await prisma.analysisReport.update({
+   await prisma.analysisReport.update({
   where: { id: reportId },
   data: {
     status: "done",
-    reportFull: result.fullText,
-    reportFree: result.freeText,
+    reportFull: JSON.stringify(result.fullText),
+    reportFree: JSON.stringify(result.freeText),
     transcript,
     durationSec,
   },
 });
+
+
 
   } catch (err: unknown) {
     console.error("runAnalysis failed", err);
