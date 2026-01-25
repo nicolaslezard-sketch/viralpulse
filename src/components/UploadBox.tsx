@@ -203,18 +203,6 @@ export default function UploadBox() {
           <AnalyzingExperience />
         </div>
       )}
-
-     {result && (
-  <div className="mt-14 space-y-10">
-   <ResultsView
-  report={result.report}
-  transcript={result.transcript}
-  isPro={result.isPro}
-  mode="preview"
-/>
-
-  </div>
-)}
     </div>
   );
 }

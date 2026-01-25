@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     /* =========================
        SAVE (PRISMA SAFE)
     ========================= */
-    await prisma.analysisReport.create({
+const savedReport = await prisma.analysisReport.create({
       data: {
         userId,
         audioKey: key,
@@ -88,11 +88,13 @@ export async function POST(req: Request) {
        RESPONSE
     ========================= */
     return NextResponse.json({
-      duration: durationSec,
-      report: plan === "pro" ? result.fullText : result.freeText,
-      transcript: plan === "pro" ? transcript : null,
-      isPro: plan === "pro",
-    });
+  id: savedReport.id, // 🔑 CLAVE
+  duration: durationSec,
+  report: plan === "pro" ? result.fullText : result.freeText,
+  transcript: plan === "pro" ? transcript : null,
+  isPro: plan === "pro",
+});
+
   } catch (err) {
     console.error("❌ analyze error", err);
 
