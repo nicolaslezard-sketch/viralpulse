@@ -95,13 +95,13 @@ function normalizeKey(raw: string): string {
 }
 
 function detectKeyFromHeading(line: string): SectionKey | null {
-  // Accept: "11) VIRALITY SCORE" or "11) VIRALITY SCORE (0-10)" etc.
-  const m = line.match(/^\s*\d+\)\s*(.+)\s*$/);
-  if (!m) return null;
+  const cleaned = line
+    .replace(/^#+\s*/, "")   // quita "## "
+    .replace(/^\d+\)\s*/, "") // quita "1) "
+    .trim();
 
-  const normalized = normalizeKey(m[1]);
+  const normalized = normalizeKey(cleaned);
 
-  // Map normalized to our canonical keys:
   const candidates: Array<{ key: SectionKey; match: string[] }> = [
     { key: "SUMMARY", match: ["SUMMARY"] },
     { key: "VIRAL REASON", match: ["VIRAL REASON"] },
@@ -124,8 +124,9 @@ function detectKeyFromHeading(line: string): SectionKey | null {
   ];
 
   for (const c of candidates) {
-    if (c.match.some((x) => normalized.startsWith(x))) return c.key;
+    if (c.match.some((x) => normalized === x)) return c.key;
   }
+
   return null;
 }
 

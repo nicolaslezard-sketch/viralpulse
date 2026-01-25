@@ -2,27 +2,14 @@
 
 import SectionBlock from "./SectionBlock";
 import type { FullReport } from "@/lib/report/types";
-
-const SECTION_ORDER = [
-  "SUMMARY",
-  "VIRAL REASON",
-  "KEY MOMENT",
-  "HOOKS",
-  "TITLE IDEAS",
-  "HASHTAGS",
-  "REMIX IDEAS",
-  "CLIP IDEAS",
-  "PLATFORM STRATEGY",
-  "WHAT TO FIX",
-  "REPLICATION FRAMEWORK",
-];
+import { REPORT_SECTIONS } from "@/lib/report/sectionNames";
 
 const ACTION_SECTIONS = [
   "TITLE IDEAS",
   "HOOKS",
   "CLIP IDEAS",
   "HASHTAGS",
-];
+] as const;
 
 function handleUpgrade() {
   fetch("/api/stripe/setup-checkout", { method: "POST" }).then(async (r) => {
@@ -43,9 +30,14 @@ export default function ResultsView({
   isPro,
 }: ResultsViewProps) {
   function copyFullReport() {
-    const text = Object.values(report)
-      .map((s) => `${s.title}\n${s.content}`)
+    const text = REPORT_SECTIONS.map((key) => {
+      const section = report[key];
+      if (!section) return "";
+      return `${section.title}\n${section.content}`;
+    })
+      .filter(Boolean)
       .join("\n\n");
+
     navigator.clipboard.writeText(text);
   }
 
@@ -55,10 +47,10 @@ export default function ResultsView({
 
   return (
     <div className="mx-auto max-w-4xl space-y-10 px-4 pb-24 text-white">
-
-      {/* HEADER */}
+      {/* ================= HEADER ================= */}
       <div className="space-y-4">
         <h1 className="text-3xl font-bold">Analysis complete</h1>
+
         {!isPro && (
           <div className="rounded-lg bg-zinc-900/60 p-4 text-sm">
             🔒 You’re viewing a preview. Upgrade to unlock full access.
@@ -66,13 +58,14 @@ export default function ResultsView({
         )}
       </div>
 
-      {/* ACTIONS */}
+      {/* ================= ACTIONS ================= */}
       <div className="flex gap-3">
         {isPro ? (
           <>
             <button onClick={copyFullReport} className="btn-primary">
               Copy full report
             </button>
+
             {transcript && (
               <button onClick={copyTranscript} className="btn-secondary">
                 Copy transcript
@@ -86,13 +79,15 @@ export default function ResultsView({
         )}
       </div>
 
-      {/* ACTION SECTIONS */}
+      {/* ================= READY TO PUBLISH ================= */}
       <div className="rounded-2xl bg-indigo-500/10 p-6 space-y-6">
         <h2 className="text-xl font-semibold">🚀 Ready to publish</h2>
 
-        {SECTION_ORDER.filter((k) => ACTION_SECTIONS.includes(k)).map((key) => {
+        {REPORT_SECTIONS.filter((k) =>
+          ACTION_SECTIONS.includes(k as any)
+        ).map((key) => {
           const section = report[key];
-          if (!section) return null;
+          if (!section || !section.content) return null;
 
           return (
             <SectionBlock
@@ -105,11 +100,13 @@ export default function ResultsView({
         })}
       </div>
 
-      {/* OTHER SECTIONS */}
+      {/* ================= FULL ANALYSIS ================= */}
       <div className="space-y-6">
-        {SECTION_ORDER.filter((k) => !ACTION_SECTIONS.includes(k)).map((key) => {
+        {REPORT_SECTIONS.filter(
+          (k) => !ACTION_SECTIONS.includes(k as any)
+        ).map((key) => {
           const section = report[key];
-          if (!section) return null;
+          if (!section || !section.content) return null;
 
           return (
             <SectionBlock
@@ -122,6 +119,7 @@ export default function ResultsView({
         })}
       </div>
 
+      {/* ================= UPSELL ================= */}
       {!isPro && (
         <div className="rounded-xl bg-zinc-900 p-6 text-center">
           <p className="mb-3">
