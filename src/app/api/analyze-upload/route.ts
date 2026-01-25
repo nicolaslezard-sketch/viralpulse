@@ -71,10 +71,11 @@ if (plan === "free" && !isTester) {
       },
     });
 
-    // 🚀 Disparar análisis (best-effort background en Vercel)
-    await runAnalysis({ reportId: report.id }).catch((err) => {
-      console.error("runAnalysis background crash:", err);
-    });
+    // 🚀 Disparar análisis en background (NO await)
+   runAnalysis({ reportId: report.id }).catch((err) => {
+  console.error("runAnalysis background crash:", err);
+});
+
 
     return NextResponse.json({ reportId: report.id });
   } catch (err: any) {
