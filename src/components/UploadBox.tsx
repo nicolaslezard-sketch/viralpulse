@@ -104,19 +104,7 @@ if (!analyzeUploadRes.ok) {
 
 const reportId = uploadResult.reportId;
 
-// 4️⃣ correr análisis INLINE (🔥 clave)
-const analyzeRes = await fetch("/api/analyze-report", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ reportId }),
-});
-
-if (!analyzeRes.ok) {
-  setError("Analysis failed while processing");
-  return;
-}
-
-// 5️⃣ recién ahora redirigimos
+// 4️⃣ REDIRECT INMEDIATO
 router.push(`/report/${reportId}`);
 
     } catch (err) {
