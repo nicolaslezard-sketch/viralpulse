@@ -204,11 +204,15 @@ export default function UploadBox() {
         </div>
       )}
 
-      {result && (
-        <div className="mt-14 space-y-10">
-<ResultsView data={result} />
-        </div>
-      )}
+     {result && (
+  <div className="mt-14 space-y-10">
+    <ResultsView
+      report={result.report}
+      transcript={result.transcript}
+      isPro={result.isPro}
+    />
+  </div>
+)}
     </div>
   );
 }
