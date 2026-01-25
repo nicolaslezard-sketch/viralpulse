@@ -2,13 +2,16 @@ import { parseViralReport } from "./parseReport";
 import { buildReportForUser } from "./buildReportForUser";
 import { getOpenAIClient } from "@/lib/openai";
 import { VIRAL_PROMPT } from "@/lib/prompts/viralPrompt";
+import type { FullReport } from "./types";
+
 
 export type GenerateReportResult = {
-  fullText: any;
-  freeText: any;
+  fullText: FullReport;
+  freeText: FullReport;
   transcript: string;
   durationSec: number;
 };
+
 
 export async function generateReport(
   transcript: string
