@@ -35,11 +35,8 @@ type ResultsViewProps = {
   reportId?: string; // 👈 para linkear al full
 };
 
-function truncate(text: string, maxLines = 4) {
-  const lines = text.split("\n").filter(Boolean);
-  if (lines.length <= maxLines) return text;
-  return lines.slice(0, maxLines).join("\n") + "\n…";
-}
+
+
 
 export default function ResultsView({
   report,
@@ -104,23 +101,19 @@ export default function ResultsView({
       {/* ================= SECTIONS ================= */}
       <div className="space-y-6">
         {sectionsToRender.map((key) => {
-          const section = report[key];
-          if (!section || !section.content) return null;
+  const section = report[key];
+  if (!section || !section.content) return null;
 
-          const content =
-            mode === "preview"
-              ? truncate(section.content)
-              : section.content;
+  return (
+    <SectionBlock
+      key={key}
+      title={section.title}
+      content={section.content}
+      isPro={isPro}
+    />
+  );
+})}
 
-          return (
-            <SectionBlock
-              key={key}
-              title={section.title}
-              content={content}
-              isPro={isPro}
-            />
-          );
-        })}
       </div>
 
       {/* ================= OPEN FULL REPORT ================= */}

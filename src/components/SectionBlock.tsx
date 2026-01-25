@@ -15,7 +15,10 @@ export default function SectionBlock({
   const meta = SECTION_META[title];
 
   const previewRatio = meta?.freePreviewRatio ?? 1;
-  const shouldTrim = !isPro && previewRatio < 1;
+const shouldTrim =
+  !isPro &&
+  previewRatio < 1 &&
+  title !== "SUMMARY";
 
   const previewText = shouldTrim
     ? content.slice(0, Math.floor(content.length * previewRatio))
@@ -56,7 +59,7 @@ export default function SectionBlock({
         {previewText}
         {shouldTrim && (
           <span className="ml-1 text-zinc-500 italic">
-            …unlock full insights with Pro
+…unlock full insights →
           </span>
         )}
       </div>
