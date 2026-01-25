@@ -11,6 +11,15 @@ const ACTION_SECTIONS = [
   "HASHTAGS",
 ] as const;
 
+// qué se ve en preview
+const PREVIEW_SECTIONS = [
+  "SUMMARY",
+  "HOOKS",
+  "TITLE IDEAS",
+  "CLIP IDEAS",
+  "HASHTAGS",
+] as const;
+
 function handleUpgrade() {
   fetch("/api/stripe/setup-checkout", { method: "POST" }).then(async (r) => {
     const d = await r.json();
@@ -22,13 +31,26 @@ type ResultsViewProps = {
   report: FullReport;
   transcript?: string | null;
   isPro: boolean;
+  mode?: "preview" | "full";
+  reportId?: string; // 👈 para linkear al full
 };
+
+function truncate(text: string, maxLines = 4) {
+  const lines = text.split("\n").filter(Boolean);
+  if (lines.length <= maxLines) return text;
+  return lines.slice(0, maxLines).join("\n") + "\n…";
+}
 
 export default function ResultsView({
   report,
   transcript,
   isPro,
+  mode = "preview",
+  reportId,
 }: ResultsViewProps) {
+  const sectionsToRender =
+    mode === "preview" ? PREVIEW_SECTIONS : REPORT_SECTIONS;
+
   function copyFullReport() {
     const text = REPORT_SECTIONS.map((key) => {
       const section = report[key];
@@ -51,7 +73,7 @@ export default function ResultsView({
       <div className="space-y-4">
         <h1 className="text-3xl font-bold">Analysis complete</h1>
 
-        {!isPro && (
+        {!isPro && mode === "preview" && (
           <div className="rounded-lg bg-zinc-900/60 p-4 text-sm">
             🔒 You’re viewing a preview. Upgrade to unlock full access.
           </div>
@@ -60,7 +82,7 @@ export default function ResultsView({
 
       {/* ================= ACTIONS ================= */}
       <div className="flex gap-3">
-        {isPro ? (
+        {isPro && mode === "full" ? (
           <>
             <button onClick={copyFullReport} className="btn-primary">
               Copy full report
@@ -79,48 +101,47 @@ export default function ResultsView({
         )}
       </div>
 
-      {/* ================= READY TO PUBLISH ================= */}
-      <div className="rounded-2xl bg-indigo-500/10 p-6 space-y-6">
-        <h2 className="text-xl font-semibold">🚀 Ready to publish</h2>
-
-        {REPORT_SECTIONS.filter((k) =>
-          ACTION_SECTIONS.includes(k as any)
-        ).map((key) => {
-          const section = report[key];
-          if (!section || !section.content) return null;
-
-          return (
-            <SectionBlock
-              key={key}
-              title={section.title}
-              content={section.content}
-              isPro={isPro}
-            />
-          );
-        })}
-      </div>
-
-      {/* ================= FULL ANALYSIS ================= */}
+      {/* ================= SECTIONS ================= */}
       <div className="space-y-6">
-        {REPORT_SECTIONS.filter(
-          (k) => !ACTION_SECTIONS.includes(k as any)
-        ).map((key) => {
+        {sectionsToRender.map((key) => {
           const section = report[key];
           if (!section || !section.content) return null;
+
+          const content =
+            mode === "preview"
+              ? truncate(section.content)
+              : section.content;
 
           return (
             <SectionBlock
               key={key}
               title={section.title}
-              content={section.content}
+              content={content}
               isPro={isPro}
             />
           );
         })}
       </div>
+
+      {/* ================= OPEN FULL REPORT ================= */}
+      {mode === "preview" && reportId && (
+        <div className="pt-8 text-center">
+          <a
+            href={`/report/${reportId}`}
+            className="
+              inline-flex items-center gap-2
+              rounded-full bg-indigo-500 px-6 py-3
+              text-sm font-semibold text-white
+              hover:bg-indigo-400 transition
+            "
+          >
+            Open full report →
+          </a>
+        </div>
+      )}
 
       {/* ================= UPSELL ================= */}
-      {!isPro && (
+      {!isPro && mode === "full" && (
         <div className="rounded-xl bg-zinc-900 p-6 text-center">
           <p className="mb-3">
             Want longer audio, transcripts and unlimited analysis?
