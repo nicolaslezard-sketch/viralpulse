@@ -6,27 +6,35 @@ import type { PlanKey } from "@/lib/limits";
 import { limitsByPlan } from "@/lib/limits";
 
 export async function runAnalysis({ reportId }: { reportId: string }) {
-  // 0) Cargar report + user
+  console.log("▶️ runAnalysis start", reportId);
+
+  // 0) cargar report
   const report = await prisma.analysisReport.findUnique({
     where: { id: reportId },
     select: { id: true, userId: true, audioKey: true, status: true },
   });
 
-  if (!report) return;
+  if (!report) {
+    console.log("❌ report not found");
+    return;
+  }
 
-  // idempotencia básica
-  if (report.status !== "processing") return;
+  // idempotencia
+  if (report.status !== "processing") {
+    console.log("⏭ report not in processing state");
+    return;
+  }
 
   const plan = (await getUserPlan(report.userId)) as PlanKey;
   const limits = limitsByPlan[plan];
 
   try {
-    // 1) Transcribir desde R2 (con timestamps para calcular duración)
+    // 1️⃣ transcribir
     const { transcript, durationSec } = await transcribeFromR2(report.audioKey);
+    console.log("✅ transcription done", durationSec);
 
-    // 2) Enforce duración por plan
+    // 2️⃣ límite por plan
     if (durationSec > limits.maxSeconds) {
-      // Por ahora: bloqueamos (simple). Si querés “trim” real después lo hacemos.
       await prisma.analysisReport.update({
         where: { id: reportId },
         data: {
@@ -34,28 +42,29 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
           durationSec,
         },
       });
+      console.log("⛔ duration limit exceeded");
       return;
     }
 
-    // 3) Generar reporte con OpenAI
+    // 3️⃣ generar reporte IA
     const result = await generateReport(transcript);
+    console.log("✅ report generated");
 
-    // 4) Guardar en DB
-   await prisma.analysisReport.update({
-  where: { id: reportId },
-  data: {
-    status: "done",
-    reportFull: JSON.stringify(result.fullText),
-    reportFree: JSON.stringify(result.freeText),
-    transcript,
-    durationSec,
-  },
-});
+    // 4️⃣ guardar resultado
+    await prisma.analysisReport.update({
+      where: { id: reportId },
+      data: {
+        status: "done",
+        reportFull: JSON.stringify(result.fullText),
+        reportFree: JSON.stringify(result.freeText),
+        transcript,
+        durationSec,
+      },
+    });
 
-
-
-  } catch (err: unknown) {
-    console.error("runAnalysis failed", err);
+    console.log("🎉 report saved");
+  } catch (err) {
+    console.error("🔥 runAnalysis failed", err);
 
     await prisma.analysisReport.update({
       where: { id: reportId },
