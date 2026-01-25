@@ -1,10 +1,11 @@
+import { parseViralReport } from "./parseReport";
+import { buildReportForUser } from "./buildReportForUser";
 import { getOpenAIClient } from "@/lib/openai";
 import { VIRAL_PROMPT } from "@/lib/prompts/viralPrompt";
-import { splitReportByTitle } from "./splitReportByTitle";
 
 export type GenerateReportResult = {
-  fullText: string;
-  freeText: string;
+  fullText: any;
+  freeText: any;
   transcript: string;
   durationSec: number;
 };
@@ -23,36 +24,15 @@ export async function generateReport(
     temperature: 0.7,
   });
 
-  let raw = completion.choices[0]?.message?.content ?? "";
+  const raw = completion.choices[0]?.message?.content ?? "";
 
-  // limpieza mínima
-  raw = raw.replace(/=+/g, "").replace(/\r\n/g, "\n").trim();
-
-  const sections = splitReportByTitle(raw);
-
-  const freeSections = sections.map((section, index) => {
-  // primeros 3 completos
-  if (index < 3) {
-    return `${section.title}\n${section.content}`;
-  }
-
-  // resto truncado
-  const lines = section.content.split("\n").filter(Boolean);
-  const keepCount = Math.max(1, Math.floor(lines.length * 0.35));
-
-  const preview = lines.slice(0, keepCount).join("\n");
-
-  return (
-    `${section.title}\n` +
-    `${preview}\n\n` +
-    `🔒 Upgrade to Pro to unlock the full section.`
-  );
-});
-
+  // ✅ nombres reales y consistentes
+  const parsedReport = parseViralReport(raw);
+  const freeReport = buildReportForUser(parsedReport, "free");
 
   return {
-    fullText: raw,
-    freeText: freeSections.join("\n\n"),
+    fullText: parsedReport,
+    freeText: freeReport,
     transcript,
     durationSec: Math.floor(transcript.length / 4),
   };
