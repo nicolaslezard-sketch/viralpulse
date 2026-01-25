@@ -55,8 +55,9 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
       where: { id: reportId },
       data: {
         status: "done",
-        reportFull: JSON.stringify(result.fullText),
-        reportFree: JSON.stringify(result.freeText),
+        reportFull: result.fullText,
+        reportFree: result.freeText,
+
         transcript,
         durationSec,
       },
