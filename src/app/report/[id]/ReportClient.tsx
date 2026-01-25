@@ -105,7 +105,7 @@ export default function ReportClient({ reportId }: { reportId: string }) {
       const res = await fetch(`/api/report/${reportId}`);
       if (!res.ok) throw new Error("Failed to load report");
       const json = await res.json();
-      setData(json);
+setData({ ...json });
     } catch (e: any) {
       setError(e.message || "Error loading report");
     }
