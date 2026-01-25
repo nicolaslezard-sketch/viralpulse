@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import SectionBlock from "@/components/SectionBlock";
 import ResultsView from "@/components/ResultsView";
+import AnalyzingExperience from "@/components/AnalyzingExperience";
+
 
 type ReportStatus = "processing" | "done" | "error";
 
@@ -137,58 +139,13 @@ export default function ReportClient({ reportId }: { reportId: string }) {
     return <div className="p-8 fade-up">⏳ Loading report…</div>;
   }
 
-  /* ==========================
-      PROCESSING
-  ========================== */
-
   if (data.status === "processing") {
-    const stepIndex = Math.min(
-      Math.floor((Date.now() / 3000) % STEPS.length),
-      STEPS.length - 1
-    );
+  return <AnalyzingExperience />;
+}
 
-    const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100);
-    
-    return (
-      <div className="p-8 max-w-xl mx-auto space-y-6 fade-up">
-        <h2 className="text-2xl font-semibold text-center">
-          Analyzing your content
-        </h2>
-
-        <div className="w-full bg-zinc-800 rounded h-2 overflow-hidden">
-          <div
-            className="bg-white h-2 transition-all"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        <p className="text-center text-sm text-zinc-400">
-          {progress}% · {STEPS[stepIndex]}
-        </p>
-
-        <div className="space-y-2 text-xs text-zinc-500">
-          {STEPS.map((s, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <span
-                className={`h-2 w-2 rounded-full ${
-                  i <= stepIndex ? "bg-white" : "bg-zinc-600"
-                }`}
-              />
-              {s}
-            </div>
-          ))}
-        </div>
-
-        <p className="text-center text-xs text-zinc-500">
-          This usually takes less than a minute
-        </p>
-      </div>
-    );
-  }
-
-  if (data.status === "error") {
-    return <div className="p-8 fade-up">❌ Analysis failed</div>;
-  }
+if (data.status === "error") {
+  return <div className="p-8 fade-up">❌ Analysis failed</div>;
+}
 
   /* ==========================
       DONE
