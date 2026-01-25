@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { generateReport } from "@/lib/report/generateReport";
+import { runAnalysis } from "@/lib/analysis/runAnalysis";
 
 export const runtime = "nodejs";
 
@@ -9,35 +8,20 @@ export async function POST(req: Request) {
     const { reportId } = await req.json();
 
     if (!reportId) {
-      return NextResponse.json({ error: "Missing reportId" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing reportId" },
+        { status: 400 }
+      );
     }
 
-    const report = await prisma.analysisReport.findUnique({
-      where: { id: reportId },
-    });
-
-    if (!report || !report.transcript) {
-      return NextResponse.json({ error: "Invalid report" }, { status: 404 });
-    }
-
-    const result = await generateReport(report.transcript);
-
-   await prisma.analysisReport.update({
-  where: { id: reportId },
-  data: {
-    status: "done",
-    reportFull: result.fullText,
-    reportFree: result.freeText,
-    transcript: result.transcript,
-    durationSec: result.durationSec,
-  },
-});
-
+    await runAnalysis({ reportId });
 
     return NextResponse.json({ ok: true });
-  } catch (err: unknown) {
-    console.error("analyze-report failed", err);
-
-    return NextResponse.json({ error: "Failed" }, { status: 500 });
+  } catch (err) {
+    console.error("analyze-report error", err);
+    return NextResponse.json(
+      { error: "Analyze report failed" },
+      { status: 500 }
+    );
   }
 }
