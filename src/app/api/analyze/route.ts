@@ -17,10 +17,7 @@ export async function POST(req: Request) {
     ========================= */
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -38,7 +35,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // seguridad: el audio tiene que ser del usuario
+    // seguridad: el audio debe ser del usuario
     if (!key.startsWith(`uploads/${userId}/`)) {
       return NextResponse.json(
         { error: "Invalid audio key" },
@@ -73,7 +70,7 @@ export async function POST(req: Request) {
     const result = await generateReport(transcript);
 
     /* =========================
-       SAVE (opcional pero recomendado)
+       SAVE (PRISMA SAFE)
     ========================= */
     await prisma.analysisReport.create({
       data: {
@@ -81,8 +78,8 @@ export async function POST(req: Request) {
         audioKey: key,
         status: "done",
         durationSec,
-        reportFull: result.fullText,
-        reportFree: result.freeText,
+        reportFull: JSON.stringify(result.fullText),
+        reportFree: JSON.stringify(result.freeText),
         transcript,
       },
     });
@@ -96,7 +93,6 @@ export async function POST(req: Request) {
       transcript: plan === "pro" ? transcript : null,
       isPro: plan === "pro",
     });
-
   } catch (err) {
     console.error("❌ analyze error", err);
 
