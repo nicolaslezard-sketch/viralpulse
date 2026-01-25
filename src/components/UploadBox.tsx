@@ -88,22 +88,37 @@ setError(null);
       // 2️⃣ subir a R2
       await uploadToR2(uploadUrl, file);
 
-      // 3️⃣ crear report + disparar análisis
-      const analyzeRes = await fetch("/api/analyze-upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key }),
-      });
+      // 3️⃣ crear report
+const analyzeUploadRes = await fetch("/api/analyze-upload", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ key }),
+});
 
-      const result = await analyzeRes.json();
+const uploadResult = await analyzeUploadRes.json();
 
-      if (!analyzeRes.ok) {
-        setError(result.error || "Analysis failed");
-        return;
-      }
+if (!analyzeUploadRes.ok) {
+  setError(uploadResult.error || "Analysis failed");
+  return;
+}
 
-      // 4️⃣ redirect inmediato al reporte
-      router.push(`/report/${result.reportId}`);
+const reportId = uploadResult.reportId;
+
+// 4️⃣ correr análisis INLINE (🔥 clave)
+const analyzeRes = await fetch("/api/analyze-report", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ reportId }),
+});
+
+if (!analyzeRes.ok) {
+  setError("Analysis failed while processing");
+  return;
+}
+
+// 5️⃣ recién ahora redirigimos
+router.push(`/report/${reportId}`);
+
     } catch (err) {
       console.error(err);
       setError("Network error. Please try again.");
