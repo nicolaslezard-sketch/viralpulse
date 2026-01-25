@@ -26,6 +26,7 @@ export default function UploadBox() {
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   function handleFile(f: File | null) {
     setError(null);
@@ -50,13 +51,17 @@ export default function UploadBox() {
   }
 
   async function handleAnalyze() {
-    if (!file) return;
+  if (!file || loading) return;
+
 
     // 🔐 gate de login
     if (!session) {
       setShowLogin(true);
       return;
     }
+    setLoading(true);
+setError(null);
+
 
     setError(null);
 
@@ -182,19 +187,20 @@ export default function UploadBox() {
       )}
 
       <button
-        onClick={handleAnalyze}
-        disabled={!file}
-        className={[
-          "mt-6 w-full rounded-2xl px-6 py-4 text-sm font-semibold transition",
-          "shadow-[0_18px_50px_rgba(0,0,0,0.35)] cursor-pointer",
-          !file
-            ? "bg-white/60 text-black/80"
-            : "bg-white text-black hover:bg-zinc-200",
-          "disabled:cursor-not-allowed disabled:opacity-60",
-        ].join(" ")}
-      >
-        Analyze now
-      </button>
+  onClick={handleAnalyze}
+  disabled={!file || loading}
+  className={[
+    "mt-6 w-full rounded-2xl px-6 py-4 text-sm font-semibold transition",
+    "shadow-[0_18px_50px_rgba(0,0,0,0.35)] cursor-pointer",
+    !file || loading
+      ? "bg-white/60 text-black/80"
+      : "bg-white text-black hover:bg-zinc-200",
+    "disabled:cursor-not-allowed disabled:opacity-60",
+  ].join(" ")}
+>
+  {loading ? "Preparing analysis…" : "Analyze now"}
+</button>
+
     </div>
   );
 }
