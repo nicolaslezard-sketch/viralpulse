@@ -97,6 +97,8 @@ export default function ReportClient({ reportId }: { reportId: string }) {
   const [data, setData] = useState<ReportResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [analysisStarted, setAnalysisStarted] = useState(false);
+
 
   async function fetchReport() {
     try {
@@ -120,6 +122,24 @@ export default function ReportClient({ reportId }: { reportId: string }) {
       return () => clearTimeout(t);
     }
   }, [data?.status]);
+
+useEffect(() => {
+  if (!data) return;
+  if (data.status !== "processing") return;
+  if (analysisStarted) return;
+
+  setAnalysisStarted(true);
+
+  fetch("/api/analyze-report", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ reportId }),
+  }).catch(() => {
+    // si falla, el polling igual lo reintenta
+    setAnalysisStarted(false);
+  });
+}, [data?.status]);
+
 
   function copy(text: string) {
     navigator.clipboard.writeText(text);
