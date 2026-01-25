@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, DragEvent } from "react";
-import { useRouter } from "next/navigation";
 import { uploadToR2 } from "@/lib/uploadToR2";
 import { useSession } from "next-auth/react";
 import LoginCard from "./LoginCard";
+import AnalyzingExperience from "./AnalyzingExperience";
+import ResultsView from "./ResultsView";
 
 // ⬅️ alineado con backend
 const ALLOWED_TYPES = [
@@ -19,14 +20,15 @@ const ALLOWED_TYPES = [
 const EXT_OK = [".mp3", ".wav", ".m4a", ".ogg", ".webm"];
 
 export default function UploadBox() {
-  const router = useRouter();
   const { data: session } = useSession();
 
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
-  const [loading, setLoading] = useState(false);
+
+  const [analyzing, setAnalyzing] = useState(false);
+  const [result, setResult] = useState<any | null>(null);
 
   function handleFile(f: File | null) {
     setError(null);
@@ -51,19 +53,16 @@ export default function UploadBox() {
   }
 
   async function handleAnalyze() {
-  if (!file || loading) return;
+    if (!file || analyzing) return;
 
-
-    // 🔐 gate de login
     if (!session) {
       setShowLogin(true);
       return;
     }
-    setLoading(true);
-setError(null);
-
 
     setError(null);
+    setAnalyzing(true);
+    setResult(null);
 
     try {
       // 1️⃣ pedir URL de upload
@@ -79,8 +78,7 @@ setError(null);
 
       if (!uploadRes.ok) {
         const d = await uploadRes.json().catch(() => ({}));
-        setError(d?.error || "Upload failed for your current plan.");
-        return;
+        throw new Error(d?.error || "Upload failed");
       }
 
       const { uploadUrl, key } = await uploadRes.json();
@@ -88,28 +86,25 @@ setError(null);
       // 2️⃣ subir a R2
       await uploadToR2(uploadUrl, file);
 
-      // 3️⃣ crear report
-const analyzeUploadRes = await fetch("/api/analyze-upload", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ key }),
-});
+      // 3️⃣ ANALYZE (todo en un solo endpoint)
+      const analyzeRes = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key }),
+      });
 
-const uploadResult = await analyzeUploadRes.json();
+      const data = await analyzeRes.json();
 
-if (!analyzeUploadRes.ok) {
-  setError(uploadResult.error || "Analysis failed");
-  return;
-}
+      if (!analyzeRes.ok) {
+        throw new Error(data?.error || "Analysis failed");
+      }
 
-const reportId = uploadResult.reportId;
-
-// 4️⃣ REDIRECT INMEDIATO
-router.push(`/report/${reportId}`);
-
-    } catch (err) {
-      console.error(err);
-      setError("Network error. Please try again.");
+      // 4️⃣ mostrar resultado en el mismo home
+      setResult(data);
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setAnalyzing(false);
     }
   }
 
@@ -190,20 +185,30 @@ router.push(`/report/${reportId}`);
       )}
 
       <button
-  onClick={handleAnalyze}
-  disabled={!file || loading}
-  className={[
-    "mt-6 w-full rounded-2xl px-6 py-4 text-sm font-semibold transition",
-    "shadow-[0_18px_50px_rgba(0,0,0,0.35)] cursor-pointer",
-    !file || loading
-      ? "bg-white/60 text-black/80"
-      : "bg-white text-black hover:bg-zinc-200",
-    "disabled:cursor-not-allowed disabled:opacity-60",
-  ].join(" ")}
->
-  {loading ? "Preparing analysis…" : "Analyze now"}
-</button>
+        onClick={handleAnalyze}
+        disabled={!file || analyzing}
+        className={[
+          "mt-6 w-full rounded-2xl px-6 py-4 text-sm font-semibold transition",
+          "shadow-[0_18px_50px_rgba(0,0,0,0.35)]",
+          analyzing
+            ? "bg-indigo-500/70 text-white cursor-wait"
+            : "bg-white text-black hover:bg-zinc-200",
+        ].join(" ")}
+      >
+        {analyzing ? "Analyzing your content…" : "Analyze now"}
+      </button>
 
+      {analyzing && (
+        <div className="mt-10">
+          <AnalyzingExperience />
+        </div>
+      )}
+
+      {result && (
+        <div className="mt-14 space-y-10">
+<ResultsView data={result} />
+        </div>
+      )}
     </div>
   );
 }
