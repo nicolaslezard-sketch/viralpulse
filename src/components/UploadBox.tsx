@@ -6,6 +6,7 @@ import { apiUrl } from "@/lib/clientBaseUrl";
 import { withRetry } from "@/lib/retry";
 import { getAudioDurationSeconds } from "@/lib/audioDuration";
 import { useSession } from "next-auth/react";
+import { useUserPlan } from "@/lib/useUserPlan";
 import LoginCard from "./LoginCard";
 import AnalyzingExperience from "./AnalyzingExperience";
 import ReportReady from "./ReportReady";
@@ -28,6 +29,7 @@ const MIN_AUDIO_SECONDS = Number(
 
 export default function UploadBox() {
   const { data: session } = useSession();
+  const { hasCard, isLoading: planLoading } = useUserPlan();
 
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -36,6 +38,15 @@ export default function UploadBox() {
 
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<any | null>(null);
+
+  // Esperar a que el plan esté cargado
+  if (planLoading) {
+    return (
+      <div className="rounded-2xl border border-white/10 bg-black/25 p-6 text-center text-sm text-zinc-400">
+        Loading…
+      </div>
+    );
+  }
 
   function handleFile(f: File | null) {
     setError(null);
@@ -61,8 +72,18 @@ export default function UploadBox() {
 
   async function handleAnalyze() {
     if (!file || analyzing) return;
-if (!session) {
+
+    // 🔐 LOGIN OBLIGATORIO
+    if (!session) {
       setShowLogin(true);
+      return;
+    }
+
+    // 💳 TARJETA OBLIGATORIA
+    if (!hasCard) {
+      setError(
+        "Please add a card to continue. We won’t charge you unless you upgrade."
+      );
       return;
     }
 
@@ -75,30 +96,35 @@ if (!session) {
       return;
     }
 
-setError(null);
+    setError(null);
     setAnalyzing(true);
     setResult(null);
+
     setTimeout(() => {
-  document.getElementById("analyzing")?.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-  });
-}, 100);
+      document.getElementById("analyzing")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
 
     try {
       // 1️⃣ pedir URL de upload
-      const uploadRes = await withRetry(() => fetch(apiUrl("/api/upload-url"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          filename: file.name,
-          contentType: file.type,
-          fileSize: file.size,
-        }),
-      }), {
-        retries: 2,
-        baseDelayMs: 600,
-      });
+      const uploadRes = await withRetry(
+        () =>
+          fetch(apiUrl("/api/upload-url"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              filename: file.name,
+              contentType: file.type,
+              fileSize: file.size,
+            }),
+          }),
+        {
+          retries: 2,
+          baseDelayMs: 600,
+        }
+      );
 
       if (!uploadRes.ok) {
         const d = await uploadRes.json().catch(() => ({}));
@@ -110,21 +136,24 @@ setError(null);
       // 2️⃣ subir a R2
       await uploadToR2(uploadUrl, file);
 
-      // 3️⃣ ANALYZE (todo en un solo endpoint)
-      const analyzeRes = await withRetry(() => fetch(apiUrl("/api/analyze"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key }),
-      }), {
-        retries: 2,
-        baseDelayMs: 800,
-        shouldRetry: (err) => !(err as any)?.noRetry,
-      });
+      // 3️⃣ ANALYZE
+      const analyzeRes = await withRetry(
+        () =>
+          fetch(apiUrl("/api/analyze"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key }),
+          }),
+        {
+          retries: 2,
+          baseDelayMs: 800,
+          shouldRetry: (err) => !(err as any)?.noRetry,
+        }
+      );
 
       const data = await analyzeRes.json().catch(() => ({}));
 
       if (!analyzeRes.ok) {
-        // Don't retry logical errors
         if (analyzeRes.status === 422 && data?.code === "AUDIO_TOO_SHORT") {
           const e: any = new Error(data?.message || "Audio too short.");
           e.noRetry = true;
@@ -133,7 +162,7 @@ setError(null);
         throw new Error(data?.error || data?.message || "Analysis failed");
       }
 
-      // 4️⃣ mostrar resultado en el mismo home
+      // 4️⃣ mostrar resultado
       setResult(data);
     } catch (err: any) {
       setError(err.message || "Something went wrong");
@@ -206,9 +235,34 @@ setError(null);
         </div>
       )}
 
+      {/* LOGIN */}
       {showLogin && !session && (
         <div className="mt-6">
           <LoginCard />
+        </div>
+      )}
+
+      {/* ADD CARD CTA */}
+      {session && !hasCard && (
+        <div className="mt-6 text-center">
+          <a
+            href="/add-card"
+            className="
+              inline-flex cursor-pointer items-center justify-center
+              rounded-2xl
+              bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500
+              px-6 py-3
+              text-sm font-semibold text-white
+              shadow-lg shadow-indigo-500/30
+              transition hover:brightness-110
+            "
+          >
+            Add card to continue
+          </a>
+
+          <p className="mt-2 text-xs text-zinc-500">
+            We won’t charge you unless you upgrade to Pro.
+          </p>
         </div>
       )}
 
@@ -220,7 +274,7 @@ setError(null);
 
       <button
         onClick={handleAnalyze}
-        disabled={!file || analyzing}
+        disabled={!file || analyzing || !session || !hasCard}
         className={[
           "mt-6 w-full rounded-2xl px-6 py-4 text-sm font-semibold transition",
           "shadow-[0_18px_50px_rgba(0,0,0,0.35)]",
@@ -233,18 +287,14 @@ setError(null);
       </button>
 
       {analyzing && (
-  <div id="analyzing" className="mt-10">
-    <AnalyzingExperience />
-  </div>
-)}
+        <div id="analyzing" className="mt-10">
+          <AnalyzingExperience />
+        </div>
+      )}
 
-{result && !analyzing && (
-  <ReportReady
-    reportId={result.id}
-    isPro={result.isPro}
-  />
-)}
-
+      {result && !analyzing && (
+        <ReportReady reportId={result.id} isPro={result.isPro} />
+      )}
     </div>
   );
 }

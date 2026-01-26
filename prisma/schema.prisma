@@ -7,33 +7,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/* ======================
+   ENUMS
+====================== */
+
 enum Plan {
-  free  
+  free
+  plus
   pro
 }
+
+/* ======================
+   MODELS
+====================== */
 
 model User {
   id                   String   @id @default(cuid())
   email                String?  @unique
+
+  // Plan actual
   plan                 Plan     @default(free)
 
+  // Stripe
   stripeCustomerId     String?  @unique
   stripeSubscriptionId String?  @unique
+
+  // 🔢 USAGE CONTROL
+  usedMinutesThisMonth Int      @default(0)
+  usageMonth           String?  // "YYYY-MM"
 
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
+  // Relations
   reports              AnalysisReport[]
+  dailyUsage           DailyUsage[]
 }
-
-
-
-
 
 model AnalysisReport {
   id          String   @id @default(cuid())
+
+  // relations
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // estado
   status      String   // "processing" | "done" | "error"
@@ -41,12 +57,27 @@ model AnalysisReport {
   // input
   audioKey    String
   durationSec Int
-  wasTrimmed  Boolean @default(false)
+  wasTrimmed  Boolean  @default(false)
 
   // output
-  transcript  String? // PRO only (pero se guarda igual)
-  reportFull  String? // texto completo IA
-  reportFree  String? // versión recortada para FREE
+  transcript  String?  // se guarda siempre (solo visible en Plus/Pro)
+  reportFull  String?  // reporte completo IA
+  reportFree  String?  // versión recortada (FREE)
 
   createdAt   DateTime @default(now())
+}
+
+/*
+ Free plan: 1 análisis por día
+ Control diario sin cron
+*/
+model DailyUsage {
+  id     String @id @default(cuid())
+  userId String
+  day    String // "YYYY-MM-DD"
+  count  Int    @default(0)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
 }

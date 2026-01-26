@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { Plan } from "@prisma/client";
 
-export type UserPlan = "free" | "pro";
+export type UserPlan = "free" | "plus" | "pro";
 
 export async function getUserPlan(userId: string): Promise<UserPlan> {
   const user = await prisma.user.findUnique({
@@ -8,6 +9,8 @@ export async function getUserPlan(userId: string): Promise<UserPlan> {
     select: { plan: true },
   });
 
-  if (user?.plan === "pro") return "pro";
+  if (user?.plan === Plan.pro) return "pro";
+  if (user?.plan === Plan.plus) return "plus";
+
   return "free";
 }

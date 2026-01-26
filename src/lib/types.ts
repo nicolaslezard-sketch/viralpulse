@@ -1,1 +1,1 @@
-export type UserPlan = "free" | "pro";
+export type UserPlan = "free" | "plus" | "pro";

@@ -1,4 +1,4 @@
-export const PLAN_KEYS = ["free", "pro"] as const;
+export const PLAN_KEYS = ["free", "plus", "pro"] as const;
 export type PlanKey = (typeof PLAN_KEYS)[number];
 
 export type PlanLimits = {
@@ -25,6 +25,19 @@ export const limitsByPlan = {
 
     // Free recorta
     behavior: "trim",
+  },
+  plus: {
+    // UX: hasta 10 min
+    maxSeconds: 10 * 60,
+
+    // Soft limit intermedio (suficiente para audios típicos de 10 min)
+    maxBytes: 80 * 1024 * 1024, // 80 MB
+
+    // Signed URL válida un poco más
+    ttl: 600, // 10 min
+
+    // Plus bloquea si excede (mejor control y menos reclamos)
+    behavior: "block",
   },
   pro: {
     // UX: hasta 20 min

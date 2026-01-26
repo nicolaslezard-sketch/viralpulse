@@ -46,7 +46,8 @@ export async function GET(
     select: { plan: true },
   });
 
-  const isPro = viewer?.plan === "pro";
+  // Plus y Pro desbloquean reporte completo
+  const isPro = viewer?.plan !== "free";
 
   const rawReport = isPro ? report.reportFull : report.reportFree;
   let reportJson: any = {};
