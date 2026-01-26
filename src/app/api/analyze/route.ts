@@ -54,6 +54,26 @@ export async function POST(req: Request) {
     ========================= */
     const { transcript, durationSec } = await transcribeFromR2(key);
 
+    /* =========================
+       MINIMUM DURATION / CONTENT
+    ========================= */
+    const minSeconds = Number(process.env.MIN_AUDIO_SECONDS ?? 8);
+    const minTranscriptChars = Number(process.env.MIN_TRANSCRIPT_CHARS ?? 80);
+
+    const cleanTranscript = (transcript ?? "").trim();
+
+    if ((durationSec ?? 0) < minSeconds || cleanTranscript.length < minTranscriptChars) {
+      return NextResponse.json(
+        {
+          code: "AUDIO_TOO_SHORT",
+          message: `Audio too short to generate a useful report. Please upload at least ${minSeconds}s.`,
+          durationSec,
+        },
+        { status: 422 }
+      );
+    }
+
+
     if (durationSec > limits.maxSeconds) {
       return NextResponse.json(
         {

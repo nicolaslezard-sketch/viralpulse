@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiUrl } from "@/lib/clientBaseUrl";
+import { withRetry } from "@/lib/retry";
 import ResultsView from "@/components/ResultsView";
 
 export default function ReportClient({ reportId }: { reportId: string }) {
@@ -8,7 +10,7 @@ export default function ReportClient({ reportId }: { reportId: string }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/report/${reportId}`)
+    withRetry(() => fetch(apiUrl(`/api/report/${reportId}`)), { retries: 2, baseDelayMs: 600 })
       .then((r) => r.json())
       .then((d) => {
         if (d.error) throw new Error(d.error);

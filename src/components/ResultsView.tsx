@@ -3,6 +3,8 @@
 import SectionBlock from "./SectionBlock";
 import type { FullReport } from "@/lib/report/types";
 import { REPORT_SECTIONS } from "@/lib/report/sectionNames";
+import { apiUrl } from "@/lib/clientBaseUrl";
+import { withRetry } from "@/lib/retry";
 
 const ACTION_SECTIONS = [
   "TITLE IDEAS",
@@ -21,7 +23,7 @@ const PREVIEW_SECTIONS = [
 ] as const;
 
 function handleUpgrade() {
-  fetch("/api/stripe/setup-checkout", { method: "POST" }).then(async (r) => {
+  withRetry(() => fetch(apiUrl("/api/stripe/setup-checkout"), { method: "POST" }), { retries: 2, baseDelayMs: 600 }).then(async (r) => {
     const d = await r.json();
     if (d?.url) window.location.href = d.url;
   });

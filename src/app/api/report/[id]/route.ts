@@ -48,13 +48,21 @@ export async function GET(
 
   const isPro = viewer?.plan === "pro";
 
+  const rawReport = isPro ? report.reportFull : report.reportFree;
+  let reportJson: any = {};
+  try {
+    reportJson = rawReport ? JSON.parse(rawReport) : {};
+  } catch {
+    reportJson = {};
+  }
+
   return NextResponse.json({
     id: report.id,
     status: report.status,
     duration: report.durationSec,
     wasTrimmed: report.wasTrimmed,
     createdAt: report.createdAt,
-    report: isPro ? report.reportFull : report.reportFree,
+    report: reportJson,
     transcript: isPro ? report.transcript : null,
     isPro,
   });

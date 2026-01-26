@@ -2,6 +2,9 @@
 
 import { useState, DragEvent } from "react";
 import { uploadToR2 } from "@/lib/uploadToR2";
+import { apiUrl } from "@/lib/clientBaseUrl";
+import { withRetry } from "@/lib/retry";
+import { getAudioDurationSeconds } from "@/lib/audioDuration";
 import { useSession } from "next-auth/react";
 import LoginCard from "./LoginCard";
 import AnalyzingExperience from "./AnalyzingExperience";
@@ -18,6 +21,10 @@ const ALLOWED_TYPES = [
 ];
 
 const EXT_OK = [".mp3", ".wav", ".m4a", ".ogg", ".webm"];
+
+const MIN_AUDIO_SECONDS = Number(
+  process.env.NEXT_PUBLIC_MIN_AUDIO_SECONDS ?? 8
+);
 
 export default function UploadBox() {
   const { data: session } = useSession();
@@ -54,13 +61,21 @@ export default function UploadBox() {
 
   async function handleAnalyze() {
     if (!file || analyzing) return;
-
-    if (!session) {
+if (!session) {
       setShowLogin(true);
       return;
     }
 
-    setError(null);
+    // Client-side guardrail for very short audios (best-effort)
+    const dur = await getAudioDurationSeconds(file);
+    if (dur !== null && dur < MIN_AUDIO_SECONDS) {
+      setError(
+        `Audio too short (${Math.round(dur)}s). Please upload at least ${MIN_AUDIO_SECONDS}s.`
+      );
+      return;
+    }
+
+setError(null);
     setAnalyzing(true);
     setResult(null);
     setTimeout(() => {
@@ -72,7 +87,7 @@ export default function UploadBox() {
 
     try {
       // 1️⃣ pedir URL de upload
-      const uploadRes = await fetch("/api/upload-url", {
+      const uploadRes = await withRetry(() => fetch(apiUrl("/api/upload-url"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -80,6 +95,9 @@ export default function UploadBox() {
           contentType: file.type,
           fileSize: file.size,
         }),
+      }), {
+        retries: 2,
+        baseDelayMs: 600,
       });
 
       if (!uploadRes.ok) {
@@ -93,16 +111,26 @@ export default function UploadBox() {
       await uploadToR2(uploadUrl, file);
 
       // 3️⃣ ANALYZE (todo en un solo endpoint)
-      const analyzeRes = await fetch("/api/analyze", {
+      const analyzeRes = await withRetry(() => fetch(apiUrl("/api/analyze"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key }),
+      }), {
+        retries: 2,
+        baseDelayMs: 800,
+        shouldRetry: (err) => !(err as any)?.noRetry,
       });
 
-      const data = await analyzeRes.json();
+      const data = await analyzeRes.json().catch(() => ({}));
 
       if (!analyzeRes.ok) {
-        throw new Error(data?.error || "Analysis failed");
+        // Don't retry logical errors
+        if (analyzeRes.status === 422 && data?.code === "AUDIO_TOO_SHORT") {
+          const e: any = new Error(data?.message || "Audio too short.");
+          e.noRetry = true;
+          throw e;
+        }
+        throw new Error(data?.error || data?.message || "Analysis failed");
       }
 
       // 4️⃣ mostrar resultado en el mismo home
