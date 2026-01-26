@@ -72,28 +72,24 @@ export async function POST(req: Request) {
     /* =========================
        SAVE (PRISMA SAFE)
     ========================= */
-const savedReport = await prisma.analysisReport.create({
-      data: {
-        userId,
-        audioKey: key,
-        status: "done",
-        durationSec,
-        reportFull: JSON.stringify(result.fullText),
-        reportFree: JSON.stringify(result.freeText),
-        transcript,
-      },
-    });
+const report = await prisma.analysisReport.create({
+  data: {
+    userId,
+    audioKey: key,
+    status: "done",
+    durationSec,
+    reportFull: JSON.stringify(result.fullText),
+    reportFree: JSON.stringify(result.freeText),
+    transcript,
+  },
+});
 
-    /* =========================
-       RESPONSE
-    ========================= */
-    return NextResponse.json({
-  id: savedReport.id, // 🔑 CLAVE
+return NextResponse.json({
+  id: report.id, // 🔥 ESTE ERA EL FALTANTE
   duration: durationSec,
-  report: plan === "pro" ? result.fullText : result.freeText,
-  transcript: plan === "pro" ? transcript : null,
   isPro: plan === "pro",
 });
+
 
   } catch (err) {
     console.error("❌ analyze error", err);
