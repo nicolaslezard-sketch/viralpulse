@@ -133,7 +133,7 @@ export default function HomePage() {
           {/* trust strip */}
           <div className="mt-6 grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
             <Stat k="18" label="Insights per report" />
-            <Stat k="~2–4m" label="Typical processing" />
+            <Stat k="~1–3m" label="Typical processing" />
             <Stat k="10" label="Hook ideas" />
             <Stat k="10" label="Clip ideas" />
           </div>
