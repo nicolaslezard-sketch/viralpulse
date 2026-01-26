@@ -77,41 +77,40 @@ function AddCardForm({
   const elements = useElements();
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!stripe || !elements) return;
+  e.preventDefault();
 
-    setLoading(true);
-    setError(null);
+  if (!stripe || !elements) return;
 
-    const result = await stripe.confirmSetup({
-      elements,
-      confirmParams: {
-        // Only used if the card requires a redirect (rare). We handle success in-app.
-        return_url: `${window.location.origin}/billing/setup-success`,
-      },
-      redirect: "if_required",
-    });
+  setLoading(true);
+  setError(null);
 
-    if (result.error) {
-      setError(result.error.message ?? "Card verification failed.");
-      setLoading(false);
-      return;
-    }
+  const { error } = await stripe.confirmSetup({
+    elements,
+    redirect: "if_required",
+  });
 
-    setSuccess(true);
+  if (error) {
+    setError(error.message ?? "Card verification failed.");
     setLoading(false);
-
-    // Send the user back to where they came from (best-effort).
-    const returnTo = sessionStorage.getItem("vp_return_to") || "/";
-    sessionStorage.removeItem("vp_return_to");
-
-    // Flag to show a “you’re all set” message back on the return page.
-    sessionStorage.setItem("vp_post_card", "1");
-
-    setTimeout(() => {
-      window.location.href = returnTo;
-    }, 800);
+    return;
   }
+
+  // ✅ SetupIntent completado correctamente
+  setSuccess(true);
+  setLoading(false);
+
+  // fallback seguro
+  const returnTo =
+    sessionStorage.getItem("vp_return_to") || "/dashboard";
+
+  sessionStorage.removeItem("vp_return_to");
+  sessionStorage.setItem("vp_post_card", "1");
+
+  // UX suave
+  setTimeout(() => {
+    window.location.assign(returnTo);
+  }, 700);
+}
 
   return (
     <div className="mx-auto max-w-md px-6 py-24 text-white">
