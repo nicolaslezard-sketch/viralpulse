@@ -76,7 +76,7 @@ function AddCardForm({
   const stripe = useStripe();
   const elements = useElements();
 
-  async function handleSubmit(e: React.FormEvent) {
+ async function handleSubmit(e: React.FormEvent) {
   e.preventDefault();
 
   if (!stripe || !elements) return;
@@ -84,29 +84,36 @@ function AddCardForm({
   setLoading(true);
   setError(null);
 
-  const { error } = await stripe.confirmSetup({
-    elements,
-    redirect: "if_required",
-  });
+  const cardElement = elements.getElement(CardElement);
 
-  if (error) {
-    setError(error.message ?? "Card verification failed.");
+  if (!cardElement) {
+    setError("Card input not ready.");
     setLoading(false);
     return;
   }
 
-  // ✅ SetupIntent completado correctamente
+  const result = await stripe.confirmCardSetup(clientSecret!, {
+    payment_method: {
+      card: cardElement,
+    },
+  });
+
+  if (result.error) {
+    setError(result.error.message ?? "Card verification failed.");
+    setLoading(false);
+    return;
+  }
+
+  // ✅ Tarjeta guardada correctamente
   setSuccess(true);
   setLoading(false);
 
-  // fallback seguro
   const returnTo =
     sessionStorage.getItem("vp_return_to") || "/dashboard";
 
   sessionStorage.removeItem("vp_return_to");
   sessionStorage.setItem("vp_post_card", "1");
 
-  // UX suave
   setTimeout(() => {
     window.location.assign(returnTo);
   }, 700);
