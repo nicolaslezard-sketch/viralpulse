@@ -50,6 +50,7 @@ export default function AddCardClient() {
       </div>
 
       <AddCardForm
+        clientSecret={clientSecret}
         loading={loading}
         setLoading={setLoading}
         error={error}
@@ -66,58 +67,73 @@ export default function AddCardClient() {
 ========================= */
 
 function AddCardForm({
+  clientSecret,
   loading,
   setLoading,
   error,
   setError,
   success,
   setSuccess,
-}: any) {
+}: {
+  clientSecret: string;
+  loading: boolean;
+  setLoading: (v: boolean) => void;
+  error: string | null;
+  setError: (v: string | null) => void;
+  success: boolean;
+  setSuccess: (v: boolean) => void;
+}) {
   const stripe = useStripe();
   const elements = useElements();
 
- async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
 
-  if (!stripe || !elements) return;
+    if (!stripe || !elements) return;
 
-  setLoading(true);
-  setError(null);
+    setLoading(true);
+    setError(null);
 
-  const cardElement = elements.getElement(CardElement);
+    const cardElement = elements.getElement(CardElement);
 
-  if (!cardElement) {
-    setError("Card input not ready.");
+    if (!cardElement) {
+      setError("Card input not ready.");
+      setLoading(false);
+      return;
+    }
+
+    if (!clientSecret) {
+      setError("Payment setup failed. Please refresh and try again.");
+      setLoading(false);
+      return;
+    }
+
+    const result = await stripe.confirmCardSetup(clientSecret, {
+      payment_method: {
+        card: cardElement,
+      },
+    });
+
+    if (result.error) {
+      setError(result.error.message ?? "Card verification failed.");
+      setLoading(false);
+      return;
+    }
+
+    // ✅ Card saved successfully
+    setSuccess(true);
     setLoading(false);
-    return;
+
+    const returnTo =
+      sessionStorage.getItem("vp_return_to") || "/dashboard";
+
+    sessionStorage.removeItem("vp_return_to");
+    sessionStorage.setItem("vp_post_card", "1");
+
+    setTimeout(() => {
+      window.location.assign(returnTo);
+    }, 700);
   }
-
-  const result = await stripe.confirmCardSetup(clientSecret!, {
-    payment_method: {
-      card: cardElement,
-    },
-  });
-
-  if (result.error) {
-    setError(result.error.message ?? "Card verification failed.");
-    setLoading(false);
-    return;
-  }
-
-  // ✅ Tarjeta guardada correctamente
-  setSuccess(true);
-  setLoading(false);
-
-  const returnTo =
-    sessionStorage.getItem("vp_return_to") || "/dashboard";
-
-  sessionStorage.removeItem("vp_return_to");
-  sessionStorage.setItem("vp_post_card", "1");
-
-  setTimeout(() => {
-    window.location.assign(returnTo);
-  }, 700);
-}
 
   return (
     <div className="mx-auto max-w-md px-6 py-24 text-white">
@@ -144,7 +160,9 @@ function AddCardForm({
           }}
         />
 
-        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+        {error && (
+          <p className="mt-4 text-sm text-red-400">{error}</p>
+        )}
 
         {success && (
           <p className="mt-4 text-sm text-green-400">
