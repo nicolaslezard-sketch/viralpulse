@@ -14,7 +14,7 @@ export default function Header() {
           rounded-2xl
           border border-white/10
           bg-black/30
-          px-4 py-3
+          px-5 py-3
           backdrop-blur-xl
         "
       >
@@ -23,25 +23,26 @@ export default function Header() {
           href="/"
           className="
             cursor-pointer
-            flex items-center gap-2
+            text-sm font-semibold tracking-tight
+            bg-gradient-to-r from-indigo-300 via-indigo-400 to-violet-300
+            bg-clip-text text-transparent
           "
         >
-          {/* Optional logo placeholder */}
-          <div className="h-8 w-8 rounded-xl bg-white/10 ring-1 ring-white/10" />
-
-          <span
-            className="
-              text-sm font-semibold tracking-tight
-              bg-gradient-to-r from-indigo-300 via-indigo-400 to-violet-300
-              bg-clip-text text-transparent
-            "
-          >
-            ViralPulse
-          </span>
+          ViralPulse
         </Link>
 
         {/* ACTIONS */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+          {/* future links */}
+          <nav className="hidden items-center gap-4 sm:flex">
+            <span className="cursor-pointer text-sm text-zinc-400 hover:text-white transition">
+              About
+            </span>
+            <span className="cursor-pointer text-sm text-zinc-400 hover:text-white transition">
+              FAQ
+            </span>
+          </nav>
+
           {!session ? (
             <button
               onClick={() => signIn()}
