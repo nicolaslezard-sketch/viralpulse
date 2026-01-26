@@ -85,10 +85,10 @@ const report = await prisma.analysisReport.create({
 });
 
 return NextResponse.json({
-  id: report.id, // 🔥 ESTE ERA EL FALTANTE
-  duration: durationSec,
+  id: report.id,        // 🔥 CLAVE
   isPro: plan === "pro",
 });
+
 
 
   } catch (err) {

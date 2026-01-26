@@ -5,7 +5,7 @@ import { uploadToR2 } from "@/lib/uploadToR2";
 import { useSession } from "next-auth/react";
 import LoginCard from "./LoginCard";
 import AnalyzingExperience from "./AnalyzingExperience";
-import ResultsView from "./ResultsView";
+import ReportReady from "./ReportReady";
 
 // ⬅️ alineado con backend
 const ALLOWED_TYPES = [
@@ -63,6 +63,12 @@ export default function UploadBox() {
     setError(null);
     setAnalyzing(true);
     setResult(null);
+    setTimeout(() => {
+  document.getElementById("analyzing")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}, 100);
 
     try {
       // 1️⃣ pedir URL de upload
@@ -199,10 +205,18 @@ export default function UploadBox() {
       </button>
 
       {analyzing && (
-        <div className="mt-10">
-          <AnalyzingExperience />
-        </div>
-      )}
+  <div id="analyzing" className="mt-10">
+    <AnalyzingExperience />
+  </div>
+)}
+
+{result && !analyzing && (
+  <ReportReady
+    reportId={result.id}
+    isPro={result.isPro}
+  />
+)}
+
     </div>
   );
 }
