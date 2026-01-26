@@ -20,16 +20,10 @@ export default function AddCardClient() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    fetch("/api/stripe/create-setup-intent", {
-      method: "POST",
-    })
+    fetch("/api/stripe/create-setup-intent", { method: "POST" })
       .then((res) => res.json())
-      .then((data) => {
-        setClientSecret(data.clientSecret);
-      })
-      .catch(() => {
-        setError("Failed to initialize payment.");
-      });
+      .then((data) => setClientSecret(data.clientSecret))
+      .catch(() => setError("Failed to initialize payment."));
   }, []);
 
   if (!clientSecret) {
@@ -41,30 +35,30 @@ export default function AddCardClient() {
   }
 
   return (
-  <Elements stripe={stripePromise} options={{ clientSecret }}>
-    <div className="mx-auto max-w-md px-6 pt-24 text-white">
+    <Elements stripe={stripePromise} options={{ clientSecret }}>
       {/* TRUST BANNER */}
-      <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4">
-        <p className="text-sm font-medium text-white">
-          You won’t be charged unless you upgrade to Pro.
-        </p>
-        <p className="mt-1 text-xs text-zinc-300 leading-relaxed">
-          Adding a card doesn’t start a subscription.
-          We only charge you if you explicitly confirm an upgrade.
-        </p>
+      <div className="mx-auto max-w-md px-6 pt-20 text-white">
+        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4">
+          <p className="text-sm font-medium text-white">
+            You won’t be charged unless you upgrade to Pro.
+          </p>
+          <p className="mt-1 text-xs text-zinc-300 leading-relaxed">
+            Adding a card doesn’t start a subscription. We only charge you if you
+            explicitly confirm an upgrade.
+          </p>
+        </div>
       </div>
-    </div>
 
-    <AddCardForm
-      loading={loading}
-      setLoading={setLoading}
-      error={error}
-      setError={setError}
-      success={success}
-      setSuccess={setSuccess}
-    />
-  </Elements>
-);
+      <AddCardForm
+        loading={loading}
+        setLoading={setLoading}
+        error={error}
+        setError={setError}
+        success={success}
+        setSuccess={setSuccess}
+      />
+    </Elements>
+  );
 }
 
 /* =========================
@@ -84,7 +78,6 @@ function AddCardForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
     if (!stripe || !elements) return;
 
     setLoading(true);
@@ -93,7 +86,8 @@ function AddCardForm({
     const result = await stripe.confirmSetup({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/dashboard`,
+        // Only used if the card requires a redirect (rare). We handle success in-app.
+        return_url: `${window.location.origin}/billing/setup-success`,
       },
       redirect: "if_required",
     });
@@ -106,6 +100,17 @@ function AddCardForm({
 
     setSuccess(true);
     setLoading(false);
+
+    // Send the user back to where they came from (best-effort).
+    const returnTo = sessionStorage.getItem("vp_return_to") || "/";
+    sessionStorage.removeItem("vp_return_to");
+
+    // Flag to show a “you’re all set” message back on the return page.
+    sessionStorage.setItem("vp_post_card", "1");
+
+    setTimeout(() => {
+      window.location.href = returnTo;
+    }, 800);
   }
 
   return (
@@ -113,9 +118,9 @@ function AddCardForm({
       <h1 className="text-2xl font-semibold">Add a payment method</h1>
 
       <p className="mt-3 text-zinc-400">
-  Add a card to enable Plus or Pro analyses.
-  You won’t be charged unless you upgrade.
-</p>
+        Add a card to enable Plus or Pro analyses. You won’t be charged unless you
+        upgrade.
+      </p>
 
       <form
         onSubmit={handleSubmit}
@@ -133,13 +138,11 @@ function AddCardForm({
           }}
         />
 
-        {error && (
-          <p className="mt-4 text-sm text-red-400">{error}</p>
-        )}
+        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
         {success && (
           <p className="mt-4 text-sm text-green-400">
-            Card added successfully. You can continue 🎉
+            Card added successfully. Redirecting you back… 🎉
           </p>
         )}
 
@@ -150,16 +153,16 @@ function AddCardForm({
         >
           {loading ? "Saving card…" : "Save card"}
         </button>
+
         <p className="mt-2 text-xs text-zinc-400 text-center">
-  No charge today. Your card is securely stored by Stripe.
-</p>
-
+          No charge today. Your card is securely stored by Stripe.
+        </p>
       </form>
-      <p className="mt-6 text-[11px] leading-relaxed text-zinc-500 text-center">
-  We can’t see or store your full card number.
-  You’re not starting a subscription and can upgrade anytime.
-</p>
 
+      <p className="mt-6 text-[11px] leading-relaxed text-zinc-500 text-center">
+        We can’t see or store your full card number. You’re not starting a
+        subscription and can upgrade anytime.
+      </p>
     </div>
   );
 }

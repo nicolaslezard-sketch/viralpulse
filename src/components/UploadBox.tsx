@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, DragEvent } from "react";
+import { useEffect, useState, DragEvent } from "react";
 import { uploadToR2 } from "@/lib/uploadToR2";
 import { apiUrl } from "@/lib/clientBaseUrl";
 import { withRetry } from "@/lib/retry";
@@ -23,9 +23,7 @@ const ALLOWED_TYPES = [
 
 const EXT_OK = [".mp3", ".wav", ".m4a", ".ogg", ".webm"];
 
-const MIN_AUDIO_SECONDS = Number(
-  process.env.NEXT_PUBLIC_MIN_AUDIO_SECONDS ?? 8
-);
+const MIN_AUDIO_SECONDS = Number(process.env.NEXT_PUBLIC_MIN_AUDIO_SECONDS ?? 8);
 
 export default function UploadBox() {
   const { data: session } = useSession();
@@ -36,8 +34,40 @@ export default function UploadBox() {
   const [error, setError] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
 
+  const [notice, setNotice] = useState<string | null>(null);
+
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<any | null>(null);
+
+  // Post-card UX: show a gentle “you’re all set” notice when returning from /add-card.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const postCard = sessionStorage.getItem("vp_post_card");
+    if (!postCard) return;
+
+    sessionStorage.removeItem("vp_post_card");
+    setNotice("Card saved — you're ready to analyze.");
+  }, []);
+
+  // Best-effort auto-retry: if the browser preserved the selected file (bfcache) and the user now has a card,
+  // automatically start the analysis once.
+  useEffect(() => {
+    if (!notice) return;
+    if (!session) return;
+    if (!hasCard) return;
+    if (!file) return;
+    if (analyzing) return;
+
+    // Only auto-run once per return.
+    if (typeof window !== "undefined") {
+      const ran = sessionStorage.getItem("vp_post_card_ran");
+      if (ran) return;
+      sessionStorage.setItem("vp_post_card_ran", "1");
+    }
+
+    void handleAnalyze();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notice, session, hasCard, file]);
 
   // Esperar a que el plan esté cargado
   if (planLoading) {
@@ -50,6 +80,10 @@ export default function UploadBox() {
 
   function handleFile(f: File | null) {
     setError(null);
+    setNotice(null);
+    try {
+      sessionStorage.removeItem("vp_post_card_ran");
+    } catch {}
     if (!f) return;
 
     const ext = f.name.toLowerCase().slice(f.name.lastIndexOf("."));
@@ -82,9 +116,8 @@ export default function UploadBox() {
     // 💳 TARJETA OBLIGATORIA
     if (!hasCard) {
       setError(
-  "A card is required for Plus or Pro analysis. You won’t be charged unless you upgrade."
-);
-
+        "A card is required for Plus or Pro analysis. You won’t be charged unless you upgrade."
+      );
       return;
     }
 
@@ -198,9 +231,7 @@ export default function UploadBox() {
         <p className="text-base font-semibold text-white/90">
           Drag & drop your audio
         </p>
-        <p className="mt-1 text-sm text-zinc-400">
-          or choose a file to upload
-        </p>
+        <p className="mt-1 text-sm text-zinc-400">or choose a file to upload</p>
 
         <label
           htmlFor="fileInput"
@@ -248,6 +279,17 @@ export default function UploadBox() {
         <div className="mt-6 text-center">
           <a
             href="/add-card"
+            onClick={() => {
+              try {
+                // Remember where to send the user back after saving a card.
+                sessionStorage.setItem(
+                  "vp_return_to",
+                  window.location.pathname + window.location.search
+                );
+                // Allow best-effort auto-retry again after the user returns.
+                sessionStorage.removeItem("vp_post_card_ran");
+              } catch {}
+            }}
             className="
               inline-flex cursor-pointer items-center justify-center
               rounded-2xl
@@ -264,10 +306,16 @@ export default function UploadBox() {
           <p className="mt-2 text-xs text-zinc-500">
             We won’t charge you unless you upgrade to Pro.
           </p>
-          <p className="mt-1 text-[11px] text-zinc-500">
-  Used for verification and future upgrades only.
-</p>
 
+          <p className="mt-1 text-[11px] text-zinc-500">
+            Used for verification and future upgrades only.
+          </p>
+        </div>
+      )}
+
+      {notice && (
+        <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+          {notice}
         </div>
       )}
 

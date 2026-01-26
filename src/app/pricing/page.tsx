@@ -18,9 +18,7 @@ export default function PricingPage() {
         {/* FREE */}
         <div className="rounded-2xl border border-white/10 bg-black/30 p-8 backdrop-blur">
           <h2 className="text-xl font-semibold">Free</h2>
-          <p className="mt-2 text-zinc-400">
-            Try ViralPulse at your own pace
-          </p>
+          <p className="mt-2 text-zinc-400">Try ViralPulse at your own pace</p>
 
           <div className="mt-6 text-3xl font-semibold">$0</div>
 
@@ -31,9 +29,12 @@ export default function PricingPage() {
             <li>✔ No card required</li>
           </ul>
 
-          <button className="mt-8 w-full rounded-xl border border-white/15 px-4 py-3 text-sm hover:bg-white/5">
+          <a
+            href="/"
+            className="mt-8 block w-full rounded-xl border border-white/15 px-4 py-3 text-center text-sm hover:bg-white/5"
+          >
             Continue for free
-          </button>
+          </a>
 
           <p className="mt-2 text-xs text-zinc-500 text-center">
             No credit card required.
@@ -41,7 +42,7 @@ export default function PricingPage() {
         </div>
 
         {/* PLUS */}
-        <div className="relative rounded-2xl border border-indigo-500/40 bg-indigo-500/10 p-8 backdrop-blur">
+        <div className="relative rounded-2xl border border-indigo-500/35 bg-indigo-500/10 p-8 backdrop-blur">
           <div className="absolute -top-3 right-6 rounded-full bg-indigo-500 px-3 py-1 text-xs text-white">
             Most popular
           </div>
@@ -66,20 +67,21 @@ export default function PricingPage() {
             href="/add-card"
             className="mt-8 block w-full rounded-xl bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:brightness-110"
           >
-            Upgrade to Plus
+            Add card (no charge)
           </a>
 
           <p className="mt-2 text-xs text-zinc-300 text-center">
             You won’t be charged unless you upgrade.
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-300/80 text-center">
+            Card on file helps prevent abuse and makes upgrades seamless.
           </p>
         </div>
 
         {/* PRO */}
         <div className="rounded-2xl border border-white bg-white p-8 text-black">
           <h2 className="text-xl font-semibold">Pro</h2>
-          <p className="mt-2 text-zinc-600">
-            For serious creators and teams
-          </p>
+          <p className="mt-2 text-zinc-600">For serious creators and teams</p>
 
           <div className="mt-6 text-3xl font-semibold">
             $19.99 <span className="text-base font-normal">/ month</span>
@@ -94,27 +96,28 @@ export default function PricingPage() {
 
           <button
             onClick={() =>
-              fetch("/api/stripe/setup-checkout", {
-                method: "POST",
-              }).then(async (r) => {
-                const d = await r.json();
-                if (d?.url) window.location.href = d.url;
-              })
+              fetch("/api/stripe/setup-checkout", { method: "POST" }).then(
+                async (r) => {
+                  const d = await r.json();
+                  if (d?.url) window.location.href = d.url;
+                }
+              )
             }
-            className="mt-8 w-full rounded-xl bg-black px-4 py-3 text-sm text-white hover:bg-zinc-800"
+            className="mt-8 w-full rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white hover:bg-zinc-800"
           >
             Go Pro
           </button>
 
           <p className="mt-2 text-xs text-zinc-600 text-center">
-            Card required. No charges unless you upgrade.
+            You won’t be charged unless you confirm the upgrade.
           </p>
         </div>
       </div>
 
       {/* FOOTNOTE */}
       <p className="mt-14 text-center text-xs text-zinc-500">
-        Adding a card doesn’t start a subscription. Payments securely handled by Stripe.
+        Adding a card doesn’t start a subscription. Payments are securely handled
+        by Stripe.
       </p>
     </div>
   );
