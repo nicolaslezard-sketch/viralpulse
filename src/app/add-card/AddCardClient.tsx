@@ -41,17 +41,30 @@ export default function AddCardClient() {
   }
 
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <AddCardForm
-        loading={loading}
-        setLoading={setLoading}
-        error={error}
-        setError={setError}
-        success={success}
-        setSuccess={setSuccess}
-      />
-    </Elements>
-  );
+  <Elements stripe={stripePromise} options={{ clientSecret }}>
+    <div className="mx-auto max-w-md px-6 pt-24 text-white">
+      {/* TRUST BANNER */}
+      <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4">
+        <p className="text-sm font-medium text-white">
+          You won’t be charged unless you upgrade to Pro.
+        </p>
+        <p className="mt-1 text-xs text-zinc-300 leading-relaxed">
+          Adding a card doesn’t start a subscription.
+          We only charge you if you explicitly confirm an upgrade.
+        </p>
+      </div>
+    </div>
+
+    <AddCardForm
+      loading={loading}
+      setLoading={setLoading}
+      error={error}
+      setError={setError}
+      success={success}
+      setSuccess={setSuccess}
+    />
+  </Elements>
+);
 }
 
 /* =========================
@@ -100,8 +113,9 @@ function AddCardForm({
       <h1 className="text-2xl font-semibold">Add a payment method</h1>
 
       <p className="mt-3 text-zinc-400">
-        This card will be used to process your analyses.
-      </p>
+  Add a card to enable Plus or Pro analyses.
+  You won’t be charged unless you upgrade.
+</p>
 
       <form
         onSubmit={handleSubmit}
@@ -136,7 +150,16 @@ function AddCardForm({
         >
           {loading ? "Saving card…" : "Save card"}
         </button>
+        <p className="mt-2 text-xs text-zinc-400 text-center">
+  No charge today. Your card is securely stored by Stripe.
+</p>
+
       </form>
+      <p className="mt-6 text-[11px] leading-relaxed text-zinc-500 text-center">
+  We can’t see or store your full card number.
+  You’re not starting a subscription and can upgrade anytime.
+</p>
+
     </div>
   );
 }

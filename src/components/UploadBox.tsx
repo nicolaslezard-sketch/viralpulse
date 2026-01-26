@@ -82,8 +82,9 @@ export default function UploadBox() {
     // 💳 TARJETA OBLIGATORIA
     if (!hasCard) {
       setError(
-        "Please add a card to continue. We won’t charge you unless you upgrade."
-      );
+  "A card is required for Plus or Pro analysis. You won’t be charged unless you upgrade."
+);
+
       return;
     }
 
@@ -263,6 +264,10 @@ export default function UploadBox() {
           <p className="mt-2 text-xs text-zinc-500">
             We won’t charge you unless you upgrade to Pro.
           </p>
+          <p className="mt-1 text-[11px] text-zinc-500">
+  Used for verification and future upgrades only.
+</p>
+
         </div>
       )}
 
