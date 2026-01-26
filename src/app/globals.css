@@ -54,3 +54,9 @@ body {
 animation: gradientMove 10s ease-in-out infinite;
 }
 
+button,
+a,
+[role="button"],
+.cursor-pointer {
+  cursor: pointer;
+}

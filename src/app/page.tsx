@@ -1,5 +1,6 @@
 import UploadBox from "@/components/UploadBox";
 import GoProButton from "@/components/GoProButton";
+import Header from "@/components/Header";
 
 
 export default function HomePage() {
@@ -16,32 +17,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/35" />
       </div>
 
-      {/* NAV */}
-<header className="relative z-20 mx-auto max-w-6xl px-6 pt-6">
-  <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/30 px-4 py-3 backdrop-blur-xl">
-    <div className="flex items-center gap-2">
-      <div className="h-8 w-8 rounded-xl bg-white/10 ring-1 ring-white/10" />
-      <span className="text-sm font-semibold tracking-tight">ViralPulse</span>
-    </div>
-
-    <div className="flex items-center gap-2">
-      <a
-        href="#pricing"
-        className="hidden sm:inline-flex rounded-xl px-3 py-2 text-sm text-zinc-300 hover:text-white"
-      >
-        Pricing
-      </a>
-
-      <a
-        href="#analyze"
-        className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-zinc-200"
-      >
-        Try it now
-      </a>
-    </div>
-  </div>
-</header>
-
+      <Header />
 
       {/* HERO */}
       <section className="mx-auto max-w-6xl px-6 pt-16 pb-10 md:pt-20">
