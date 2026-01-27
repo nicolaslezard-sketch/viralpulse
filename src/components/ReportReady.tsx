@@ -11,45 +11,60 @@ export default function ReportReady({
     <div
       className="
         mt-14
+        mx-auto max-w-xl
         rounded-3xl
-        border border-white/10
-        bg-gradient-to-b from-zinc-900/80 to-zinc-950/90
+        border border-emerald-400/20
+        bg-black/60
         backdrop-blur-xl
         p-10
         text-center
         text-white
-        shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)]
+        shadow-[0_0_80px_rgba(16,185,129,0.15)]
       "
     >
-      <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-500/20">
-        <span className="text-3xl">🎉</span>
+      {/* Icon */}
+      <div className="mx-auto mb-5 flex justify-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15">
+          <span className="text-2xl font-bold text-emerald-400">✓</span>
+        </div>
       </div>
 
-      <h2 className="text-2xl font-bold">Your report is ready</h2>
+      {/* Eyebrow */}
+      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-400/80">
+        Report ready
+      </div>
 
-      <p className="mt-3 text-zinc-400 max-w-md mx-auto">
-        We’ve finished analyzing your content and generated actionable insights
-        optimized for virality.
+      {/* Title */}
+      <h2 className="text-3xl font-semibold tracking-tight">
+        Your report is ready
+      </h2>
+
+      {/* Description */}
+      <p className="mt-3 max-w-md mx-auto text-sm text-zinc-400">
+        We’ve finished analyzing your content and generated clear,
+        actionable insights optimized for virality.
       </p>
 
+      {/* CTA */}
       <div className="mt-8 flex justify-center">
         <a
           href={`/report/${reportId}`}
           className="
-            inline-flex items-center justify-center
-            rounded-full
-            bg-gradient-to-r from-indigo-500 to-indigo-400
-            px-8 py-3
+            inline-flex items-center gap-2
+            rounded-2xl
+            bg-indigo-500 px-8 py-3
             text-sm font-semibold text-white
-            shadow-lg shadow-indigo-500/25
-            hover:brightness-110
             transition
+            hover:bg-indigo-400
+            hover:shadow-[0_0_30px_rgba(99,102,241,0.5)]
           "
         >
-          View report →
+          Open report
+          <span>→</span>
         </a>
       </div>
 
+      {/* Upsell note */}
       {!isPro && (
         <p className="mt-4 text-xs text-zinc-500">
           Preview available · Upgrade to unlock full access

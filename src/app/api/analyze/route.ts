@@ -13,6 +13,7 @@ import {
   canUseFreeToday,
   consumeFreeToday,
 } from "@/lib/usage/usage";
+import { getAudioDurationSecondsFromR2 } from "@/lib/audio/getAudioDurationFromR2";
 
 export const runtime = "nodejs";
 
@@ -38,7 +39,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing audio key" }, { status: 400 });
     }
 
-    // seguridad: el audio debe ser del usuario
     if (!key.startsWith(`uploads/${userId}/`)) {
       return NextResponse.json({ error: "Invalid audio key" }, { status: 403 });
     }
@@ -48,72 +48,53 @@ export async function POST(req: Request) {
     ========================= */
     const plan = (await getUserPlan(userId)) as PlanKey;
     const limits = limitsByPlan[plan];
-    /* =========================
-   CARD REQUIRED (PLUS / PRO)
-========================= */
-if (plan !== "free") {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { stripeCustomerId: true },
-  });
-
-  let hasCard = false;
-
-  if (user?.stripeCustomerId) {
-    const { stripe } = await import("@/lib/stripe");
-
-    const pms = await stripe.paymentMethods.list({
-      customer: user.stripeCustomerId,
-      type: "card",
-      limit: 1,
-    });
-
-    hasCard = pms.data.length > 0;
-  }
-
-  if (!hasCard) {
-    return NextResponse.json(
-      {
-        code: "CARD_REQUIRED",
-        message: "Please add a payment method to continue.",
-      },
-      { status: 402 }
-    );
-  }
-}
-
 
     /* =========================
-       TRANSCRIPTION
+       CARD REQUIRED (PLUS / PRO)
     ========================= */
-    const { transcript, durationSec } = await transcribeFromR2(key);
+    if (plan !== "free") {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { stripeCustomerId: true },
+      });
 
-    /* =========================
-       MINIMUM DURATION / CONTENT
-    ========================= */
-    const minSeconds = Number(process.env.MIN_AUDIO_SECONDS ?? 8);
-    const minTranscriptChars = Number(process.env.MIN_TRANSCRIPT_CHARS ?? 80);
+      let hasCard = false;
 
-    const cleanTranscript = (transcript ?? "").trim();
+      if (user?.stripeCustomerId) {
+        const { stripe } = await import("@/lib/stripe");
 
-    if ((durationSec ?? 0) < minSeconds || cleanTranscript.length < minTranscriptChars) {
-      return NextResponse.json(
-        {
-          code: "AUDIO_TOO_SHORT",
-          message: `Audio too short to generate a useful report. Please upload at least ${minSeconds}s.`,
-          durationSec,
-        },
-        { status: 422 }
-      );
+        const pms = await stripe.paymentMethods.list({
+          customer: user.stripeCustomerId,
+          type: "card",
+          limit: 1,
+        });
+
+        hasCard = pms.data.length > 0;
+      }
+
+      if (!hasCard) {
+        return NextResponse.json(
+          {
+            code: "CARD_REQUIRED",
+            message: "Please add a payment method to continue.",
+          },
+          { status: 402 }
+        );
+      }
     }
 
-    // Límite por audio (por plan)
+    /* =========================
+       AUDIO DURATION (FREE)
+    ========================= */
+    const durationSec = await getAudioDurationSecondsFromR2(key);
+
     if (durationSec > limits.maxSeconds) {
       return NextResponse.json(
         {
-          error: `Audio too long for your plan. Max ${Math.round(
+          code: "AUDIO_TOO_LONG",
+          message: `Your plan allows up to ${Math.round(
             limits.maxSeconds / 60
-          )} min per audio on ${plan}.`,
+          )} minutes per audio.`,
           durationSec,
         },
         { status: 422 }
@@ -121,10 +102,7 @@ if (plan !== "free") {
     }
 
     /* =========================
-       USAGE GUARDS (BEFORE REPORT)
-       - Free: 1/day
-       - Monthly minutes by plan
-       (No se descuenta hasta que se entregue el reporte)
+       USAGE GUARDS (BEFORE IA)
     ========================= */
     const minutesToConsume = Math.ceil(durationSec / 60);
 
@@ -151,7 +129,7 @@ if (plan !== "free") {
       return NextResponse.json(
         {
           code: "MONTHLY_LIMIT_REACHED",
-          message: "Monthly minute limit reached. Upgrade your plan or wait for reset.",
+          message: "Monthly minute limit reached.",
           remainingMinutes: monthly.remaining,
         },
         { status: 429 }
@@ -159,12 +137,31 @@ if (plan !== "free") {
     }
 
     /* =========================
-       GENERATE REPORT
+       TRANSCRIPTION (OPENAI)
+    ========================= */
+    const { transcript } = await transcribeFromR2(key);
+
+    const minSeconds = Number(process.env.MIN_AUDIO_SECONDS ?? 8);
+    const minTranscriptChars = Number(process.env.MIN_TRANSCRIPT_CHARS ?? 80);
+
+    if (durationSec < minSeconds || transcript.trim().length < minTranscriptChars) {
+      return NextResponse.json(
+        {
+          code: "AUDIO_TOO_SHORT",
+          message: `Audio too short to generate a useful report.`,
+          durationSec,
+        },
+        { status: 422 }
+      );
+    }
+
+    /* =========================
+       GENERATE REPORT (OPENAI)
     ========================= */
     const result = await generateReport(transcript);
 
     /* =========================
-       SAVE (PRISMA SAFE)
+       SAVE REPORT
     ========================= */
     const report = await prisma.analysisReport.create({
       data: {
@@ -179,7 +176,7 @@ if (plan !== "free") {
     });
 
     /* =========================
-       CONSUME USAGE (ONLY AFTER REPORT)
+       CONSUME USAGE
     ========================= */
     await consumeMonthlyMinutes({ userId, minutesToConsume });
     if (plan === "free") {
@@ -188,11 +185,10 @@ if (plan !== "free") {
 
     return NextResponse.json({
       id: report.id,
-      isPro: plan !== "free", // Plus y Pro desbloquean reporte completo
+      isPro: plan !== "free",
     });
   } catch (err) {
     console.error("❌ analyze error", err);
-
     return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
   }
 }
