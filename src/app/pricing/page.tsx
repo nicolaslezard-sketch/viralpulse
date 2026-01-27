@@ -9,7 +9,8 @@ export default function PricingPage() {
           Simple pricing for serious creators
         </h1>
         <p className="mt-4 text-zinc-400 max-w-2xl mx-auto">
-          Start free. You’ll only be charged if you decide to upgrade.
+          Start free. Add a card only to unlock higher limits — you won’t be
+          charged unless you upgrade.
         </p>
       </div>
 
@@ -18,26 +19,28 @@ export default function PricingPage() {
         {/* FREE */}
         <div className="rounded-2xl border border-white/10 bg-black/30 p-8 backdrop-blur">
           <h2 className="text-xl font-semibold">Free</h2>
-          <p className="mt-2 text-zinc-400">Try ViralPulse at your own pace</p>
+          <p className="mt-2 text-zinc-400">
+            Try ViralPulse and test the workflow
+          </p>
 
           <div className="mt-6 text-3xl font-semibold">$0</div>
 
           <ul className="mt-6 space-y-3 text-sm text-zinc-300">
-            <li>✔ 1 analysis per day</li>
+            <li>✔ Limited daily analyses</li>
             <li>✔ Up to 3 minutes per audio</li>
-            <li>✔ Core insights preview</li>
-            <li>✔ No card required</li>
+            <li>✔ Preview insights</li>
+            <li>✔ Card required (anti-abuse)</li>
           </ul>
 
           <a
             href="/"
             className="mt-8 block w-full rounded-xl border border-white/15 px-4 py-3 text-center text-sm hover:bg-white/5"
           >
-            Continue for free
+            Start free
           </a>
 
           <p className="mt-2 text-xs text-zinc-500 text-center">
-            No credit card required.
+            No charge unless you upgrade.
           </p>
         </div>
 
@@ -49,7 +52,7 @@ export default function PricingPage() {
 
           <h2 className="text-xl font-semibold">Plus</h2>
           <p className="mt-2 text-zinc-300">
-            For creators who publish consistently
+            For consistent weekly creators
           </p>
 
           <div className="mt-6 text-3xl font-semibold">
@@ -57,41 +60,40 @@ export default function PricingPage() {
           </div>
 
           <ul className="mt-6 space-y-3 text-sm text-zinc-200">
-            <li>✔ Up to 10 minutes per audio</li>
-            <li>✔ Monthly analysis minutes</li>
+            <li>✔ Up to 120 minutes / month</li>
+            <li>✔ Audio up to 10 minutes</li>
+            <li>✔ Full insights & transcript</li>
             <li>✔ Faster processing</li>
-            <li>✔ All core insights</li>
           </ul>
 
           <a
             href="/add-card"
             className="mt-8 block w-full rounded-xl bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:brightness-110"
           >
-            Add card (no charge)
+            Upgrade to Plus
           </a>
 
           <p className="mt-2 text-xs text-zinc-300 text-center">
-            You won’t be charged unless you upgrade.
-          </p>
-          <p className="mt-1 text-[11px] text-zinc-300/80 text-center">
-            Card on file helps prevent abuse and makes upgrades seamless.
+            You won’t be charged unless you confirm an upgrade.
           </p>
         </div>
 
         {/* PRO */}
         <div className="rounded-2xl border border-white bg-white p-8 text-black">
           <h2 className="text-xl font-semibold">Pro</h2>
-          <p className="mt-2 text-zinc-600">For serious creators and teams</p>
+          <p className="mt-2 text-zinc-600">
+            For daily creators and long-form content
+          </p>
 
           <div className="mt-6 text-3xl font-semibold">
             $19.99 <span className="text-base font-normal">/ month</span>
           </div>
 
           <ul className="mt-6 space-y-3 text-sm">
-            <li>✔ Up to 20 minutes per audio</li>
-            <li>✔ Higher monthly limits</li>
-            <li>✔ Priority analysis</li>
-            <li>✔ Early access to new features</li>
+            <li>✔ Up to 400 minutes / month</li>
+            <li>✔ Audio up to 20 minutes</li>
+            <li>✔ Priority processing</li>
+            <li>✔ Advanced insights & tools</li>
           </ul>
 
           <button
@@ -105,11 +107,11 @@ export default function PricingPage() {
             }
             className="mt-8 w-full rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white hover:bg-zinc-800"
           >
-            Go Pro
+            Upgrade to Pro
           </button>
 
           <p className="mt-2 text-xs text-zinc-600 text-center">
-            You won’t be charged unless you confirm the upgrade.
+            Cancel anytime. No hidden fees.
           </p>
         </div>
       </div>

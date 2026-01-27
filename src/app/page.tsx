@@ -86,13 +86,19 @@ export default function HomePage() {
               </div>
 
               <div className="hidden items-center gap-2 sm:flex">
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-                  Free: ≤ 3 min
-                </span>
-                <span className="rounded-full border border-indigo-400/20 bg-indigo-500/10 px-3 py-1 text-xs text-indigo-200">
-                  Pro: ≤ 20 min + transcript
-                </span>
-              </div>
+  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
+    Free: ≤ 3 min
+  </span>
+
+  <span className="rounded-full border border-indigo-400/20 bg-indigo-500/10 px-3 py-1 text-xs text-indigo-200">
+    Plus: ≤ 10 min · 120 min / month
+  </span>
+
+  <span className="rounded-full border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 py-1 text-xs text-fuchsia-200">
+    Pro: ≤ 20 min · 400 min / month
+  </span>
+</div>
+
             </div>
 
             <div className="p-5 md:p-7">
@@ -141,7 +147,7 @@ export default function HomePage() {
       </section>
 
    {/* WHAT HAPPENS */}
-<section className="mx-auto max-w-6xl px-6 py-14 md:py-16">
+<section className="mx-auto max-w-6xl px-6 py-14 md:py-20">
   <div className="mx-auto max-w-2xl text-center">
     <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
       What happens next
@@ -228,35 +234,104 @@ export default function HomePage() {
 
       {/* PRICING */}
       <section id="pricing" className="mx-auto max-w-6xl px-6 py-14 md:py-16">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            Free vs Pro
-          </h2>
-          <p className="mt-3 text-zinc-400">
-            Start free. Upgrade when you want longer audio and faster workflow.
-          </p>
-        </div>
+       <section
+  id="pricing"
+  className="mx-auto max-w-6xl px-6 py-12 md:py-16 text-white"
+>
 
-        <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-          <Plan title="Free" variant="free">
-            <ul className="space-y-2">
-              <li>• 1 analysis / day</li>
-              <li>• Up to 3 minutes</li>
-              <li>• Viral report (18 insights)</li>
-            </ul>
-          </Plan>
+  {/* TITLE */}
+  <div className="mb-16 text-center">
+    <h2 className="text-4xl font-semibold">
+      Simple pricing, no surprises
+    </h2>
+<p className="mt-8 text-center text-xs text-zinc-500">
+      Add a card only to unlock higher limits.
+      You won’t be charged unless you upgrade.
+    </p>
+  </div>
 
-          <Plan title="Pro" variant="pro">
-            <ul className="space-y-2">
-              <li>• Unlimited analysis</li>
-              <li>• Up to 20 minutes</li>
-              <li>• Full transcript</li>
-              <li>• Full viral report</li>
-              <li>• Priority processing</li>
-              <li>• History & copy tools</li>
-            </ul>
-          </Plan>
-        </div>
+  {/* CARDS */}
+  <div className="grid gap-8 md:grid-cols-3">
+    {/* FREE */}
+    <div className="rounded-2xl border border-white/10 bg-black/30 p-8 backdrop-blur">
+      <h3 className="text-xl font-semibold">Free</h3>
+      <p className="mt-2 text-zinc-400">
+        Try the workflow risk-free
+      </p>
+
+      <div className="mt-6 text-3xl font-semibold">$0</div>
+
+      <ul className="mt-6 space-y-3 text-sm text-zinc-300">
+        <li>✔ Limited daily analyses</li>
+        <li>✔ Up to 3 minutes per audio</li>
+        <li>✔ Preview insights</li>
+        <li>✔ Card required (anti-abuse)</li>
+      </ul>
+
+      <p className="mt-4 text-xs text-zinc-500">
+        No charge unless you upgrade.
+      </p>
+    </div>
+
+    {/* PLUS */}
+    <div className="relative rounded-2xl border border-indigo-500/35 bg-indigo-500/10 p-8 backdrop-blur">
+      <div className="absolute -top-3 right-6 rounded-full bg-indigo-500 px-3 py-1 text-xs text-white">
+        Most popular
+      </div>
+
+      <h3 className="text-xl font-semibold">Plus</h3>
+      <p className="mt-2 text-zinc-300">
+        For consistent weekly creators
+      </p>
+
+      <div className="mt-6 text-3xl font-semibold">
+        $9.99 <span className="text-base font-normal">/ month</span>
+      </div>
+
+      <ul className="mt-6 space-y-3 text-sm text-zinc-200">
+        <li>✔ 120 minutes / month</li>
+        <li>✔ Up to 10 minutes per audio</li>
+        <li>✔ Full transcript & insights</li>
+        <li>✔ Faster processing</li>
+      </ul>
+
+      <a
+        href="/add-card"
+        className="mt-8 block w-full rounded-xl bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:brightness-110"
+      >
+        Upgrade to Plus
+      </a>
+    </div>
+
+    {/* PRO */}
+    <div className="rounded-2xl border border-white bg-white p-8 text-black">
+      <h3 className="text-xl font-semibold">Pro</h3>
+      <p className="mt-2 text-zinc-600">
+        For daily creators & long-form content
+      </p>
+
+      <div className="mt-6 text-3xl font-semibold">
+        $19.99 <span className="text-base font-normal">/ month</span>
+      </div>
+
+      <ul className="mt-6 space-y-3 text-sm">
+        <li>✔ 400 minutes / month</li>
+        <li>✔ Up to 20 minutes per audio</li>
+        <li>✔ Priority processing</li>
+        <li>✔ Advanced tools</li>
+      </ul>
+
+      <GoProButton />
+    </div>
+  </div>
+
+  {/* FOOTNOTE */}
+  <p className="mt-14 text-center text-xs text-zinc-500">
+    Payments are securely handled by Stripe.
+    You’re never charged unless you explicitly upgrade.
+  </p>
+</section>
+
 
         <div className="mt-8 text-center">
           <a

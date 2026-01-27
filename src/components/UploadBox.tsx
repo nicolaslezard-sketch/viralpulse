@@ -234,16 +234,22 @@ export default function UploadBox() {
         <p className="mt-1 text-sm text-zinc-400">or choose a file to upload</p>
 
         <label
-          htmlFor="fileInput"
-          className="
-            mt-6 inline-flex cursor-pointer items-center justify-center
-            rounded-2xl border border-white/10 bg-black/30
-            px-5 py-2.5 text-sm font-semibold text-white
-            transition hover:border-white/20 hover:bg-black/40
-          "
-        >
-          Choose file
-        </label>
+  htmlFor="fileInput"
+  className="
+    mt-6 inline-flex cursor-pointer items-center justify-center
+    rounded-2xl
+    border border-white/25
+    bg-black/40
+    px-6 py-3
+    text-sm font-semibold text-white
+    transition
+    hover:border-indigo-400/60
+    hover:shadow-[0_0_20px_rgba(99,102,241,0.35)]
+  "
+>
+  Choose file
+</label>
+
 
         <input
           id="fileInput"
@@ -254,8 +260,9 @@ export default function UploadBox() {
         />
 
         <p className="mt-4 text-xs text-zinc-500">
-          Supports: MP3, WAV, M4A, OGG, WEBM
-        </p>
+  Supports: MP3, WAV, M4A, OGG, WEBM · Max file size: 25 MB
+</p>
+
       </div>
 
       {file && (

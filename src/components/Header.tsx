@@ -33,15 +33,34 @@ export default function Header() {
 
         {/* ACTIONS */}
         <div className="flex items-center gap-4">
-          {/* future links */}
-          <nav className="hidden items-center gap-4 sm:flex">
-            <span className="cursor-pointer text-sm text-zinc-400 hover:text-white transition">
-              About
-            </span>
-            <span className="cursor-pointer text-sm text-zinc-400 hover:text-white transition">
-              FAQ
-            </span>
-          </nav>
+         <nav className="hidden items-center gap-5 sm:flex">
+  <Link
+    href="/#features"
+    className="text-sm text-zinc-400 hover:text-white transition"
+  >
+    Features
+  </Link>
+
+  <button
+  onClick={() => {
+    document
+      .getElementById("pricing")
+      ?.scrollIntoView({ behavior: "smooth" });
+  }}
+  className="text-sm font-medium text-white/90 hover:text-white transition"
+>
+  Pricing
+</button>
+
+
+  <Link
+    href="/#analyze"
+    className="text-sm text-zinc-400 hover:text-white transition"
+  >
+    Analyze
+  </Link>
+</nav>
+
 
           {!session ? (
             <button
