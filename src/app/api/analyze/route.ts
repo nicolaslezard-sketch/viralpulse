@@ -13,7 +13,6 @@ import {
   canUseFreeToday,
   consumeFreeToday,
 } from "@/lib/usage/usage";
-import { getAudioDurationSecondsFromR2 } from "@/lib/audio/getAudioDurationFromR2";
 
 export const runtime = "nodejs";
 
@@ -84,9 +83,29 @@ export async function POST(req: Request) {
     }
 
     /* =========================
-       AUDIO DURATION (FREE)
+       TRANSCRIPTION (SOURCE OF TRUTH)
     ========================= */
-    const durationSec = await getAudioDurationSecondsFromR2(key);
+    const { transcript, durationSec } = await transcribeFromR2(key);
+
+    /* =========================
+       MINIMUM / MAX DURATION
+    ========================= */
+    const minSeconds = Number(process.env.MIN_AUDIO_SECONDS ?? 8);
+    const minTranscriptChars = Number(process.env.MIN_TRANSCRIPT_CHARS ?? 80);
+
+    if (
+      durationSec < minSeconds ||
+      transcript.trim().length < minTranscriptChars
+    ) {
+      return NextResponse.json(
+        {
+          code: "AUDIO_TOO_SHORT",
+          message: "Audio too short to generate a useful report.",
+          durationSec,
+        },
+        { status: 422 }
+      );
+    }
 
     if (durationSec > limits.maxSeconds) {
       return NextResponse.json(
@@ -102,7 +121,7 @@ export async function POST(req: Request) {
     }
 
     /* =========================
-       USAGE GUARDS (BEFORE IA)
+       USAGE GUARDS
     ========================= */
     const minutesToConsume = Math.ceil(durationSec / 60);
 
@@ -137,26 +156,7 @@ export async function POST(req: Request) {
     }
 
     /* =========================
-       TRANSCRIPTION (OPENAI)
-    ========================= */
-    const { transcript } = await transcribeFromR2(key);
-
-    const minSeconds = Number(process.env.MIN_AUDIO_SECONDS ?? 8);
-    const minTranscriptChars = Number(process.env.MIN_TRANSCRIPT_CHARS ?? 80);
-
-    if (durationSec < minSeconds || transcript.trim().length < minTranscriptChars) {
-      return NextResponse.json(
-        {
-          code: "AUDIO_TOO_SHORT",
-          message: `Audio too short to generate a useful report.`,
-          durationSec,
-        },
-        { status: 422 }
-      );
-    }
-
-    /* =========================
-       GENERATE REPORT (OPENAI)
+       GENERATE REPORT
     ========================= */
     const result = await generateReport(transcript);
 
