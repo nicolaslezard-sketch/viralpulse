@@ -354,11 +354,36 @@ export default function UploadBox() {
           />
         )}
 
-        {error && (
-          <div className="mt-5 rounded-2xl border border-red-800/60 bg-red-950/40 px-4 py-3 text-sm text-red-300">
-            {error}
-          </div>
-        )}
+       {!hasCard && session && file && (
+  <div className="mt-5 flex flex-col items-center gap-3">
+    <a
+      href="/add-card"
+      className="
+        inline-flex w-full max-w-lg items-center justify-center
+        rounded-2xl
+        bg-white px-6 py-3
+        text-sm font-semibold text-black
+        hover:bg-zinc-200
+        transition
+      "
+    >
+      Add card to continue
+    </a>
+
+    <p className="text-xs text-zinc-400">
+      You’ll never be charged unless you upgrade.
+    </p>
+
+    <div className="w-full max-w-lg rounded-2xl border border-red-800/40 bg-red-950/30 px-4 py-3 text-sm text-red-300 text-center">
+      A card is required to unlock Plus or Pro analysis limits.
+    </div>
+  </div>
+)}
+{error && (
+  <div className="mt-5 rounded-2xl border border-red-800/60 bg-red-950/40 px-4 py-3 text-sm text-red-300">
+    {error}
+  </div>
+)}
 
         <button
           onClick={handleAnalyze}
