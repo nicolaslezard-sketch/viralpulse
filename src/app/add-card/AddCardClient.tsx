@@ -125,7 +125,7 @@ function AddCardForm({
     setLoading(false);
 
     const returnTo =
-      sessionStorage.getItem("vp_return_to") || "/dashboard";
+      sessionStorage.getItem("vp_return_to") || "/#analyze";
 
     sessionStorage.removeItem("vp_return_to");
     sessionStorage.setItem("vp_post_card", "1");

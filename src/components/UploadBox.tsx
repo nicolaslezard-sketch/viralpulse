@@ -371,11 +371,11 @@ export default function UploadBox() {
     </a>
 
     <p className="text-xs text-zinc-400">
-      You’ll never be charged unless you upgrade.
+     Your card won’t be charged unless you choose a paid plan.
     </p>
 
     <div className="w-full max-w-lg rounded-2xl border border-red-800/40 bg-red-950/30 px-4 py-3 text-sm text-red-300 text-center">
-      A card is required to unlock Plus or Pro analysis limits.
+     We require a card to prevent abuse and unlock analysis.
     </div>
   </div>
 )}
