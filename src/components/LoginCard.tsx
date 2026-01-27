@@ -4,19 +4,43 @@ import { signIn } from "next-auth/react";
 import GoogleIcon from "@/components/icons/GoogleIcon";
 import GitHubIcon from "@/components/icons/GitHubIcon";
 
-export default function LoginCard() {
+export default function LoginCard({
+  onClose,
+}: {
+  onClose?: () => void;
+}) {
   return (
     <div className="flex justify-center">
       <div
-        className="
-          w-full max-w-md
-          rounded-3xl
-          border border-white/10
-          bg-black/50 backdrop-blur-xl
-          p-8
-          shadow-[0_20px_70px_rgba(0,0,0,0.65)]
-        "
-      >
+  className="
+    relative
+    w-full max-w-md
+    rounded-3xl
+    border border-white/10
+    bg-black/50 backdrop-blur-xl
+    p-8
+    shadow-[0_20px_70px_rgba(0,0,0,0.65)]
+  "
+>
+
+      {onClose && (
+  <button
+    onClick={onClose}
+    className="
+      absolute right-5 top-5
+      rounded-lg
+      p-1
+      text-zinc-400
+      hover:text-white
+      hover:bg-white/5
+      transition
+    "
+    aria-label="Close"
+  >
+    ✕
+  </button>
+)}
+
         {/* Header */}
         <h2 className="text-2xl font-semibold text-white text-center">
           Analyze your audio

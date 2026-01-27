@@ -175,9 +175,6 @@ export default function HomePage() {
     </Step>
   </div>
 </section>
-
-
-
       {/* FEATURES */}
       <section id="features" className="mx-auto max-w-6xl px-6 py-14 md:py-16">
         <div className="mx-auto max-w-2xl text-center">
@@ -233,7 +230,7 @@ export default function HomePage() {
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="mx-auto max-w-6xl px-6 py-14 md:py-16">
+<section className="mx-auto max-w-6xl px-6 py-14 md:py-16">
        <section
   id="pricing"
   className="mx-auto max-w-6xl px-6 py-12 md:py-16 text-white"
@@ -253,7 +250,10 @@ export default function HomePage() {
   {/* CARDS */}
   <div className="grid gap-8 md:grid-cols-3">
     {/* FREE */}
-    <div className="rounded-2xl border border-white/10 bg-black/30 p-8 backdrop-blur">
+<div
+  id="plan-free"
+  className="rounded-2xl border border-white/10 bg-black/30 p-8 backdrop-blur"
+>
       <h3 className="text-xl font-semibold">Free</h3>
       <p className="mt-2 text-zinc-400">
         Try the workflow risk-free
@@ -274,7 +274,10 @@ export default function HomePage() {
     </div>
 
     {/* PLUS */}
-    <div className="relative rounded-2xl border border-indigo-500/35 bg-indigo-500/10 p-8 backdrop-blur">
+<div
+  id="plan-plus"
+  className="relative rounded-2xl border border-indigo-500/35 bg-indigo-500/10 p-8 backdrop-blur"
+>
       <div className="absolute -top-3 right-6 rounded-full bg-indigo-500 px-3 py-1 text-xs text-white">
         Most popular
       </div>
@@ -304,7 +307,10 @@ export default function HomePage() {
     </div>
 
     {/* PRO */}
-    <div className="rounded-2xl border border-white bg-white p-8 text-black">
+<div
+  id="plan-pro"
+  className="rounded-2xl border border-white bg-white p-8 text-black"
+>
       <h3 className="text-xl font-semibold">Pro</h3>
       <p className="mt-2 text-zinc-600">
         For daily creators & long-form content

@@ -10,6 +10,9 @@ import { useUserPlan } from "@/lib/useUserPlan";
 import LoginCard from "./LoginCard";
 import AnalyzingExperience from "./AnalyzingExperience";
 import ReportReady from "./ReportReady";
+import PlanBadge from "@/components/analysis/PlanBadge";
+import UsageIndicator from "@/components/analysis/UsageIndicator";
+import LimitReachedPanel, { type LimitReason } from "@/components/analysis/LimitReachedPanel";
 
 // ⬅️ alineado con backend
 const ALLOWED_TYPES = [
@@ -27,11 +30,13 @@ const MIN_AUDIO_SECONDS = Number(process.env.NEXT_PUBLIC_MIN_AUDIO_SECONDS ?? 8)
 
 export default function UploadBox() {
   const { data: session } = useSession();
-  const { hasCard, isLoading: planLoading } = useUserPlan();
+  const { plan, usage, hasCard, isLoading: planLoading, refresh: refreshPlan } =
+    useUserPlan();
 
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [limitReason, setLimitReason] = useState<LimitReason | null>(null);
   const [showLogin, setShowLogin] = useState(false);
 
   const [notice, setNotice] = useState<string | null>(null);
@@ -80,6 +85,7 @@ export default function UploadBox() {
 
   function handleFile(f: File | null) {
     setError(null);
+    setLimitReason(null);
     setNotice(null);
     try {
       sessionStorage.removeItem("vp_post_card_ran");
@@ -131,6 +137,7 @@ export default function UploadBox() {
     }
 
     setError(null);
+    setLimitReason(null);
     setAnalyzing(true);
     setResult(null);
 
@@ -188,18 +195,55 @@ export default function UploadBox() {
       const data = await analyzeRes.json().catch(() => ({}));
 
       if (!analyzeRes.ok) {
-        if (analyzeRes.status === 422 && data?.code === "AUDIO_TOO_SHORT") {
+        // Known guardrails (friendly inline panel instead of hard errors)
+        const code = data?.code as string | undefined;
+
+        if (analyzeRes.status === 422 && code === "AUDIO_TOO_SHORT") {
           const e: any = new Error(data?.message || "Audio too short.");
           e.noRetry = true;
           throw e;
         }
+
+        // Audio too long (backend returns 422 with message in `error`)
+        if (
+          analyzeRes.status === 422 &&
+          (code === undefined || code === null) &&
+          String(data?.error || "").toLowerCase().includes("audio too long")
+        ) {
+          setLimitReason({
+            kind: "audio_too_long",
+            plan,
+            durationSec:
+              typeof data?.durationSec === "number" ? data.durationSec : undefined,
+          });
+          throw Object.assign(new Error(""), { silent: true });
+        }
+
+        if (analyzeRes.status === 429 && code === "DAILY_LIMIT_REACHED") {
+          setLimitReason({ kind: "daily_limit_reached", plan });
+          throw Object.assign(new Error(""), { silent: true });
+        }
+
+        if (analyzeRes.status === 429 && code === "MONTHLY_LIMIT_REACHED") {
+          setLimitReason({
+            kind: "monthly_limit_reached",
+            plan,
+            remainingMinutes:
+              typeof data?.remainingMinutes === "number" ? data.remainingMinutes : undefined,
+          });
+          throw Object.assign(new Error(""), { silent: true });
+        }
+
         throw new Error(data?.error || data?.message || "Analysis failed");
       }
 
       // 4️⃣ mostrar resultado
       setResult(data);
+      // refresh plan + usage snapshot (minutes/daily remaining)
+      refreshPlan();
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      if (err?.silent) return;
+      setError(err?.message || "Something went wrong");
     } finally {
       setAnalyzing(false);
     }
@@ -207,6 +251,25 @@ export default function UploadBox() {
 
   return (
     <div className="text-white">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <PlanBadge plan={plan} />
+        {usage ? (
+          <UsageIndicator
+            usage={
+              usage.plan === "free"
+                ? {
+                    plan: "free",
+                    freeDailyUsed: usage.freeDailyUsed,
+                    freeDailyRemaining: usage.freeDailyRemaining,
+                  }
+                : { plan: usage.plan, usedMinutesThisMonth: usage.usedMinutesThisMonth }
+            }
+          />
+        ) : (
+          <div className="text-xs text-white/50">Limits update after sign in</div>
+        )}
+      </div>
+
       {/* DROP ZONE */}
       <div
         onDragOver={(e) => {
@@ -234,126 +297,107 @@ export default function UploadBox() {
         <p className="mt-1 text-sm text-zinc-400">or choose a file to upload</p>
 
         <label
-  htmlFor="fileInput"
-  className="
-    mt-6 inline-flex cursor-pointer items-center justify-center
-    rounded-2xl
-    border border-white/25
-    bg-black/40
-    px-6 py-3
-    text-sm font-semibold text-white
-    transition
-    hover:border-indigo-400/60
-    hover:shadow-[0_0_20px_rgba(99,102,241,0.35)]
-  "
->
-  Choose file
-</label>
-
+          htmlFor="fileInput"
+          className="
+            mt-6 inline-flex cursor-pointer items-center justify-center
+            rounded-2xl
+            border border-white/25
+            bg-black/40
+            px-6 py-3
+            text-sm font-semibold text-white
+            transition
+            hover:border-indigo-400/60
+            hover:shadow-[0_0_20px_rgba(99,102,241,0.35)]
+          "
+        >
+          Choose file
+        </label>
 
         <input
           id="fileInput"
           type="file"
-          accept="audio/*"
-          onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+          accept={ALLOWED_TYPES.join(",")}
           className="hidden"
+          onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
         />
 
-        <p className="mt-4 text-xs text-zinc-500">
-  Supports: MP3, WAV, M4A, OGG, WEBM · Max file size: 25 MB
-</p>
+        {file && (
+          <div className="mt-5 w-full max-w-lg rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-left text-sm text-white/80">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="font-medium text-white/90 truncate">{file.name}</div>
+                <div className="mt-0.5 text-xs text-zinc-400">
+                  {(file.size / (1024 * 1024)).toFixed(2)} MB
+                </div>
+              </div>
 
+              <button
+                onClick={() => setFile(null)}
+                className="shrink-0 rounded-xl border border-white/10 px-3 py-1.5 text-xs text-white/70 hover:bg-white/5 hover:text-white/90 transition"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        )}
+
+        {notice && (
+          <div className="mt-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+            {notice}
+          </div>
+        )}
+
+        {limitReason && (
+          <LimitReachedPanel
+            reason={limitReason}
+            onDismiss={() => setLimitReason(null)}
+          />
+        )}
+
+        {error && (
+          <div className="mt-5 rounded-2xl border border-red-800/60 bg-red-950/40 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
+        <button
+          onClick={handleAnalyze}
+          disabled={!file || analyzing}
+          className={[
+            "mt-6 inline-flex w-full max-w-lg items-center justify-center rounded-2xl px-6 py-3",
+            "text-sm font-semibold transition",
+            !file || analyzing
+              ? "bg-white/10 text-white/40"
+              : "bg-white text-black hover:bg-zinc-200",
+          ].join(" ")}
+        >
+          {analyzing ? "Analyzing…" : "Analyze"}
+        </button>
+
+        <p className="mt-3 text-xs text-zinc-500">
+          Max upload size: 25 MB. You’ll never be charged unless you upgrade.
+        </p>
       </div>
 
-      {file && (
-        <div className="mt-4 rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm">
-          <div className="text-zinc-400">Selected file</div>
-          <div className="mt-0.5 break-all font-semibold text-white/90">
-            {file.name}
-          </div>
-        </div>
-      )}
-
-      {/* LOGIN */}
-      {showLogin && !session && (
+      {/* LOGIN MODAL */}
+      {showLogin && (
         <div className="mt-6">
-          <LoginCard />
+          <LoginCard onClose={() => setShowLogin(false)} />
         </div>
       )}
 
-      {/* ADD CARD CTA */}
-      {session && !hasCard && (
-        <div className="mt-6 text-center">
-          <a
-            href="/add-card"
-            onClick={() => {
-              try {
-                // Remember where to send the user back after saving a card.
-                sessionStorage.setItem(
-                  "vp_return_to",
-                  window.location.pathname + window.location.search
-                );
-                // Allow best-effort auto-retry again after the user returns.
-                sessionStorage.removeItem("vp_post_card_ran");
-              } catch {}
-            }}
-            className="
-              inline-flex cursor-pointer items-center justify-center
-              rounded-2xl
-              bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500
-              px-6 py-3
-              text-sm font-semibold text-white
-              shadow-lg shadow-indigo-500/30
-              transition hover:brightness-110
-            "
-          >
-            Add card to continue
-          </a>
-
-          <p className="mt-2 text-xs text-zinc-500">
-            We won’t charge you unless you upgrade to Pro.
-          </p>
-
-          <p className="mt-1 text-[11px] text-zinc-500">
-            Used for verification and future upgrades only.
-          </p>
-        </div>
-      )}
-
-      {notice && (
-        <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-          {notice}
-        </div>
-      )}
-
-      {error && (
-        <div className="mt-5 rounded-2xl border border-red-800/60 bg-red-950/40 px-4 py-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
-
-      <button
-        onClick={handleAnalyze}
-        disabled={!file || analyzing || !session || !hasCard}
-        className={[
-          "mt-6 w-full rounded-2xl px-6 py-4 text-sm font-semibold transition",
-          "shadow-[0_18px_50px_rgba(0,0,0,0.35)]",
-          analyzing
-            ? "bg-indigo-500/70 text-white cursor-wait"
-            : "bg-white text-black hover:bg-zinc-200",
-        ].join(" ")}
-      >
-        {analyzing ? "Analyzing your content…" : "Analyze now"}
-      </button>
-
+      {/* ANALYZING */}
       {analyzing && (
         <div id="analyzing" className="mt-10">
           <AnalyzingExperience />
         </div>
       )}
 
-      {result && !analyzing && (
-        <ReportReady reportId={result.id} isPro={result.isPro} />
+      {/* REPORT READY */}
+      {result?.id && (
+        <div className="mt-10">
+         <ReportReady reportId={result.id} isPro={plan !== "free"} />
+        </div>
       )}
     </div>
   );
