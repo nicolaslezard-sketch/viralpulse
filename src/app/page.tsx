@@ -87,7 +87,7 @@ export default function HomePage() {
 
               <div className="hidden items-center gap-2 sm:flex">
   <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-    Free: ≤ 3 min
+    Free: ≤ 5 min
   </span>
 
   <span className="rounded-full border border-indigo-400/20 bg-indigo-500/10 px-3 py-1 text-xs text-indigo-200">

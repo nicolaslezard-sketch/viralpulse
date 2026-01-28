@@ -10,22 +10,24 @@ export default function ReportReady({
   return (
     <div
       className="
-        mt-14
-        mx-auto max-w-xl
+        mt-8 sm:mt-12
+        mx-auto w-full max-w-xl
         rounded-3xl
         border border-emerald-400/20
         bg-black/60
         backdrop-blur-xl
-        p-10
+        p-6 sm:p-8 md:p-10
         text-center
         text-white
         shadow-[0_0_80px_rgba(16,185,129,0.15)]
       "
     >
       {/* Icon */}
-      <div className="mx-auto mb-5 flex justify-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15">
-          <span className="text-2xl font-bold text-emerald-400">✓</span>
+      <div className="mx-auto mb-4 flex justify-center sm:mb-5">
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500/15 sm:h-12 sm:w-12">
+          <span className="text-xl font-bold text-emerald-400 sm:text-2xl">
+            ✓
+          </span>
         </div>
       </div>
 
@@ -35,22 +37,23 @@ export default function ReportReady({
       </div>
 
       {/* Title */}
-      <h2 className="text-3xl font-semibold tracking-tight">
+      <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
         Your report is ready
       </h2>
 
       {/* Description */}
-      <p className="mt-3 max-w-md mx-auto text-sm text-zinc-400">
-        We’ve finished analyzing your content and generated clear,
-        actionable insights optimized for virality.
+      <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-zinc-400">
+        We’ve finished analyzing your content and generated clear, actionable
+        insights optimized for virality.
       </p>
 
       {/* CTA */}
-      <div className="mt-8 flex justify-center">
+      <div className="mt-6 flex justify-center sm:mt-8">
         <a
           href={`/report/${reportId}`}
           className="
-            inline-flex items-center gap-2
+            inline-flex w-full items-center justify-center gap-2
+            sm:w-auto
             rounded-2xl
             bg-indigo-500 px-8 py-3
             text-sm font-semibold text-white

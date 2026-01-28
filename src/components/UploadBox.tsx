@@ -229,7 +229,9 @@ export default function UploadBox() {
             kind: "monthly_limit_reached",
             plan,
             remainingMinutes:
-              typeof data?.remainingMinutes === "number" ? data.remainingMinutes : undefined,
+              typeof data?.remainingMinutes === "number"
+                ? data.remainingMinutes
+                : undefined,
           });
           throw Object.assign(new Error(""), { silent: true });
         }
@@ -251,7 +253,7 @@ export default function UploadBox() {
 
   return (
     <div className="text-white">
-      <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <PlanBadge plan={plan} />
         {usage ? (
           <UsageIndicator
@@ -262,11 +264,16 @@ export default function UploadBox() {
                     freeDailyUsed: usage.freeDailyUsed,
                     freeDailyRemaining: usage.freeDailyRemaining,
                   }
-                : { plan: usage.plan, usedMinutesThisMonth: usage.usedMinutesThisMonth }
+                : {
+                    plan: usage.plan,
+                    usedMinutesThisMonth: usage.usedMinutesThisMonth,
+                  }
             }
           />
         ) : (
-          <div className="text-xs text-white/50">Limits update after sign in</div>
+          <div className="text-xs text-white/50 sm:text-right">
+            Limits update after sign in
+          </div>
         )}
       </div>
 
@@ -280,14 +287,14 @@ export default function UploadBox() {
         onDrop={onDrop}
         className={[
           "group relative flex flex-col items-center justify-center",
-          "rounded-2xl border p-10 md:p-12 text-center transition",
+          "rounded-2xl border p-6 sm:p-8 md:p-10 text-center transition",
           "bg-black/25 backdrop-blur",
           dragging
             ? "border-white/25 bg-white/5"
             : "border-white/10 hover:border-white/20",
         ].join(" ")}
       >
-        <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 ring-1 ring-white/10">
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 ring-1 ring-white/10 sm:mb-4 sm:h-11 sm:w-11">
           <span className="h-2 w-2 rounded-full bg-indigo-400" />
         </div>
 
@@ -299,15 +306,16 @@ export default function UploadBox() {
         <label
           htmlFor="fileInput"
           className="
-            mt-6 inline-flex cursor-pointer items-center justify-center
+            mt-4 inline-flex cursor-pointer items-center justify-center
             rounded-2xl
             border border-white/25
             bg-black/40
-            px-6 py-3
+            px-5 py-3
             text-sm font-semibold text-white
             transition
             hover:border-indigo-400/60
             hover:shadow-[0_0_20px_rgba(99,102,241,0.35)]
+            sm:mt-6 sm:px-6
           "
         >
           Choose file
@@ -322,10 +330,12 @@ export default function UploadBox() {
         />
 
         {file && (
-          <div className="mt-5 w-full max-w-lg rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-left text-sm text-white/80">
+          <div className="mt-4 w-full max-w-lg rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-left text-sm text-white/80 sm:mt-5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <div className="font-medium text-white/90 truncate">{file.name}</div>
+                <div className="truncate font-medium text-white/90">
+                  {file.name}
+                </div>
                 <div className="mt-0.5 text-xs text-zinc-400">
                   {(file.size / (1024 * 1024)).toFixed(2)} MB
                 </div>
@@ -333,7 +343,7 @@ export default function UploadBox() {
 
               <button
                 onClick={() => setFile(null)}
-                className="shrink-0 rounded-xl border border-white/10 px-3 py-1.5 text-xs text-white/70 hover:bg-white/5 hover:text-white/90 transition"
+                className="shrink-0 rounded-xl border border-white/10 px-3 py-1.5 text-xs text-white/70 transition hover:bg-white/5 hover:text-white/90"
               >
                 Remove
               </button>
@@ -342,7 +352,7 @@ export default function UploadBox() {
         )}
 
         {notice && (
-          <div className="mt-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+          <div className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 sm:mt-5">
             {notice}
           </div>
         )}
@@ -354,42 +364,43 @@ export default function UploadBox() {
           />
         )}
 
-       {!hasCard && session && file && (
-  <div className="mt-5 flex flex-col items-center gap-3">
-    <a
-      href="/add-card"
-      className="
-        inline-flex w-full max-w-lg items-center justify-center
-        rounded-2xl
-        bg-white px-6 py-3
-        text-sm font-semibold text-black
-        hover:bg-zinc-200
-        transition
-      "
-    >
-      Add card to continue
-    </a>
+        {!hasCard && session && file && (
+          <div className="mt-5 flex flex-col items-center gap-3">
+            <a
+              href="/add-card"
+              className="
+                inline-flex w-full max-w-lg items-center justify-center
+                rounded-2xl
+                bg-white px-6 py-3
+                text-sm font-semibold text-black
+                hover:bg-zinc-200
+                transition
+              "
+            >
+              Add card to continue
+            </a>
 
-    <p className="text-xs text-zinc-400">
-     Your card won’t be charged unless you choose a paid plan.
-    </p>
+            <p className="text-xs text-zinc-400">
+              Your card won’t be charged unless you choose a paid plan.
+            </p>
 
-    <div className="w-full max-w-lg rounded-2xl border border-red-800/40 bg-red-950/30 px-4 py-3 text-sm text-red-300 text-center">
-     We require a card to prevent abuse and unlock analysis.
-    </div>
-  </div>
-)}
-{error && (
-  <div className="mt-5 rounded-2xl border border-red-800/60 bg-red-950/40 px-4 py-3 text-sm text-red-300">
-    {error}
-  </div>
-)}
+            <div className="w-full max-w-lg rounded-2xl border border-red-800/40 bg-red-950/30 px-4 py-3 text-center text-sm text-red-300">
+              We require a card to prevent abuse and unlock analysis.
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-4 rounded-2xl border border-red-800/60 bg-red-950/40 px-4 py-3 text-sm text-red-300 sm:mt-5">
+            {error}
+          </div>
+        )}
 
         <button
           onClick={handleAnalyze}
           disabled={!file || analyzing}
           className={[
-            "mt-6 inline-flex w-full max-w-lg items-center justify-center rounded-2xl px-6 py-3",
+            "mt-5 inline-flex w-full max-w-lg items-center justify-center rounded-2xl px-6 py-3 sm:mt-6",
             "text-sm font-semibold transition",
             !file || analyzing
               ? "bg-white/10 text-white/40"
@@ -399,9 +410,15 @@ export default function UploadBox() {
           {analyzing ? "Analyzing…" : "Analyze"}
         </button>
 
-        <p className="mt-3 text-xs text-zinc-500">
-          Max upload size: 25 MB. You’ll never be charged unless you upgrade.
-        </p>
+        <div className="mt-3 text-center text-xs text-zinc-500">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
+            <p>Supported formats: MP3, M4A, WAV</p>
+            <p>
+              Max file size — <span className="text-zinc-400">Free: 10 MB</span> ·{" "}
+              <span className="text-zinc-300">Plus / Pro: 25 MB</span>
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* LOGIN MODAL */}
@@ -413,15 +430,15 @@ export default function UploadBox() {
 
       {/* ANALYZING */}
       {analyzing && (
-        <div id="analyzing" className="mt-10">
+        <div id="analyzing" className="mt-8 sm:mt-10">
           <AnalyzingExperience />
         </div>
       )}
 
       {/* REPORT READY */}
       {result?.id && (
-        <div className="mt-10">
-         <ReportReady reportId={result.id} isPro={plan !== "free"} />
+        <div className="mt-8 sm:mt-10">
+          <ReportReady reportId={result.id} isPro={plan !== "free"} />
         </div>
       )}
     </div>

@@ -4,45 +4,40 @@ import { signIn } from "next-auth/react";
 import GoogleIcon from "@/components/icons/GoogleIcon";
 import GitHubIcon from "@/components/icons/GitHubIcon";
 
-export default function LoginCard({
-  onClose,
-}: {
-  onClose?: () => void;
-}) {
+export default function LoginCard({ onClose }: { onClose?: () => void }) {
   return (
     <div className="flex justify-center">
       <div
-  className="
-    relative
-    w-full max-w-md
-    rounded-3xl
-    border border-white/10
-    bg-black/50 backdrop-blur-xl
-    p-8
-    shadow-[0_20px_70px_rgba(0,0,0,0.65)]
-  "
->
-
-      {onClose && (
-  <button
-    onClick={onClose}
-    className="
-      absolute right-5 top-5
-      rounded-lg
-      p-1
-      text-zinc-400
-      hover:text-white
-      hover:bg-white/5
-      transition
-    "
-    aria-label="Close"
-  >
-    ✕
-  </button>
-)}
+        className="
+          relative
+          w-full max-w-md
+          rounded-3xl
+          border border-white/10
+          bg-black/50 backdrop-blur-xl
+          p-6 sm:p-8
+          shadow-[0_20px_70px_rgba(0,0,0,0.65)]
+        "
+      >
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="
+              absolute right-4 top-4 sm:right-5 sm:top-5
+              rounded-lg
+              p-1
+              text-zinc-400
+              hover:text-white
+              hover:bg-white/5
+              transition
+            "
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        )}
 
         {/* Header */}
-        <h2 className="text-2xl font-semibold text-white text-center">
+        <h2 className="text-center text-2xl font-semibold text-white">
           Analyze your audio
         </h2>
 
@@ -51,48 +46,47 @@ export default function LoginCard({
         </p>
 
         {/* Auth buttons */}
-        <div className="mt-8 space-y-3">
+        <div className="mt-6 space-y-3 sm:mt-8">
           <button
-  onClick={() => signIn("google")}
-  className="
-    flex w-full items-center justify-center gap-3
-    rounded-2xl
-    bg-white
-    px-4 py-3
-    text-sm font-semibold text-black
-    cursor-pointer
-    transition
-    hover:bg-zinc-200
-    active:scale-[0.99]
-  "
->
-  <GoogleIcon className="h-5 w-5" />
-  Continue with Google
-</button>
+            onClick={() => signIn("google")}
+            className="
+              flex w-full items-center justify-center gap-3
+              rounded-2xl
+              bg-white
+              px-4 py-3
+              text-sm font-semibold text-black
+              cursor-pointer
+              transition
+              hover:bg-zinc-200
+              active:scale-[0.99]
+            "
+          >
+            <GoogleIcon className="h-5 w-5" />
+            Continue with Google
+          </button>
 
           <button
-  onClick={() => signIn("github")}
-  className="
-    flex w-full items-center justify-center gap-3
-    rounded-2xl
-    border border-white/10
-    bg-black/60
-    px-4 py-3
-    text-sm font-semibold text-white
-    cursor-pointer
-    transition
-    hover:bg-black/80
-    active:scale-[0.99]
-  "
->
-  <GitHubIcon className="h-5 w-5" />
-  Continue with GitHub
-</button>
-
+            onClick={() => signIn("github")}
+            className="
+              flex w-full items-center justify-center gap-3
+              rounded-2xl
+              border border-white/10
+              bg-black/60
+              px-4 py-3
+              text-sm font-semibold text-white
+              cursor-pointer
+              transition
+              hover:bg-black/80
+              active:scale-[0.99]
+            "
+          >
+            <GitHubIcon className="h-5 w-5" />
+            Continue with GitHub
+          </button>
         </div>
 
         {/* Trust copy */}
-        <div className="mt-6 space-y-1 text-center text-xs text-zinc-500">
+        <div className="mt-5 space-y-1 text-center text-xs text-zinc-500 sm:mt-6">
           <p>✓ Card required only to prevent abuse</p>
           <p>✓ You’ll never be charged unless you upgrade</p>
           <p>✓ Free analysis up to 3 minutes</p>

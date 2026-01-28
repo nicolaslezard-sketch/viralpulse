@@ -22,7 +22,7 @@ export default function UsageIndicator({ usage }: { usage: UsageSnapshot }) {
     const left = clampInt(usage.freeDailyRemaining);
 
     return (
-      <div className="text-right">
+      <div className="text-left sm:text-right">
         <div className="text-xs text-white/60">Today</div>
         <div className="text-sm font-medium text-white/90">
           {left} {left === 1 ? "analysis" : "analyses"} left
@@ -39,7 +39,7 @@ export default function UsageIndicator({ usage }: { usage: UsageSnapshot }) {
   const left = Math.max(0, limit - used);
 
   return (
-    <div className="text-right">
+    <div className="text-left sm:text-right">
       <div className="text-xs text-white/60">Minutes</div>
       <div className="text-sm font-medium text-white/90">
         {used} / {limit} used · {left} left

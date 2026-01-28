@@ -96,7 +96,7 @@ export default function LimitReachedPanel({
   return (
     <div
       className="
-        mt-4 rounded-2xl p-4
+        mt-4 rounded-2xl p-3 sm:p-4
         bg-white/5 backdrop-blur
         border border-white/10
         shadow-[0_0_0_1px_rgba(255,255,255,0.04)]
@@ -109,11 +109,12 @@ export default function LimitReachedPanel({
           <div className="text-sm font-semibold text-white/90">{title}</div>
           <div className="mt-1 text-sm text-white/70">{body}</div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <a
               href="#pricing"
               className="
                 inline-flex items-center justify-center
+                w-full sm:w-auto
                 rounded-xl px-4 py-2 text-sm font-medium
                 bg-white text-black
                 hover:bg-white/90 transition
@@ -125,6 +126,7 @@ export default function LimitReachedPanel({
             <a
               href={anchorForPlan(suggestion)}
               className="
+                w-full sm:w-auto
                 rounded-xl px-4 py-2 text-sm font-medium
                 bg-white/0 text-white/80
                 border border-white/10
@@ -138,6 +140,7 @@ export default function LimitReachedPanel({
               type="button"
               onClick={onDismiss}
               className="
+                w-full sm:w-auto
                 rounded-xl px-4 py-2 text-sm font-medium
                 bg-white/0 text-white/60
                 border border-white/10
@@ -152,7 +155,7 @@ export default function LimitReachedPanel({
         <button
           type="button"
           onClick={onDismiss}
-          className="shrink-0 rounded-lg p-2 text-white/50 hover:text-white/80 hover:bg-white/5 transition"
+          className="shrink-0 rounded-lg p-2 text-white/50 transition hover:bg-white/5 hover:text-white/80"
           aria-label="Dismiss"
         >
           ✕

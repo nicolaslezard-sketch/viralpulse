@@ -13,7 +13,8 @@ export default function PlanBadge({ plan }: { plan: UserPlan }) {
     <div
       className="
         inline-flex items-center gap-2
-        rounded-full px-3 py-1 text-xs font-medium
+        rounded-full px-2.5 py-1 text-xs font-medium
+        sm:px-3
         bg-white/5 backdrop-blur
         border border-white/10
         shadow-[0_0_0_1px_rgba(255,255,255,0.04)]
