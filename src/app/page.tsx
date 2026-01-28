@@ -263,7 +263,7 @@ export default function HomePage() {
 
       <ul className="mt-6 space-y-3 text-sm text-zinc-300">
         <li>✔ Limited daily analyses</li>
-        <li>✔ Up to 3 minutes per audio</li>
+        <li>✔ Up to 5 minutes per audio</li>
         <li>✔ Preview insights</li>
         <li>✔ Card required (anti-abuse)</li>
       </ul>

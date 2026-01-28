@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSession, signIn } from "next-auth/react";
+import UserMenu from "@/components/UserMenu";
 
 export default function Header() {
   const { data: session } = useSession();
@@ -33,40 +34,39 @@ export default function Header() {
 
         {/* ACTIONS */}
         <div className="flex items-center gap-4">
-         <nav className="hidden items-center gap-5 sm:flex">
-  <Link
-    href="/#features"
-    className="text-sm text-zinc-400 hover:text-white transition"
-  >
-    Features
-  </Link>
+          {/* NAV (desktop only) */}
+          <nav className="hidden items-center gap-5 sm:flex">
+            <Link
+              href="/#features"
+              className="text-sm text-zinc-400 hover:text-white transition"
+            >
+              Features
+            </Link>
 
-  <button
-  onClick={() => {
-    document
-      .getElementById("pricing")
-      ?.scrollIntoView({ behavior: "smooth" });
-  }}
-  className="text-sm font-medium text-white/90 hover:text-white transition"
->
-  Pricing
-</button>
+            <button
+              onClick={() => {
+                document
+                  .getElementById("pricing")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="text-sm font-medium text-white/90 hover:text-white transition"
+            >
+              Pricing
+            </button>
 
+            <Link
+              href="/#analyze"
+              className="text-sm text-zinc-400 hover:text-white transition"
+            >
+              Analyze
+            </Link>
+          </nav>
 
-  <Link
-    href="/#analyze"
-    className="text-sm text-zinc-400 hover:text-white transition"
-  >
-    Analyze
-  </Link>
-</nav>
-
-
+          {/* AUTH */}
           {!session ? (
             <button
               onClick={() => signIn()}
               className="
-                cursor-pointer
                 inline-flex items-center justify-center
                 rounded-xl
                 bg-white
@@ -79,19 +79,7 @@ export default function Header() {
               Sign in
             </button>
           ) : (
-            <img
-              src={session.user?.image || ""}
-              alt="User avatar"
-              referrerPolicy="no-referrer"
-              className="
-                h-9 w-9
-                cursor-pointer
-                rounded-full
-                border border-white/10
-                transition
-                hover:border-white/30
-              "
-            />
+            <UserMenu />
           )}
         </div>
       </div>
