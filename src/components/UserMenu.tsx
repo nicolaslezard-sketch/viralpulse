@@ -2,9 +2,13 @@
 
 import { signOut, useSession } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
+import { useUserPlan } from "@/lib/useUserPlan";
+import Link from "next/link";
 
 export default function UserMenu() {
   const { data: session } = useSession();
+  const { plan, usage, isLoading } = useUserPlan();
+
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -44,12 +48,13 @@ export default function UserMenu() {
             src={image}
             alt={name ?? "User"}
             className="h-7 w-7 rounded-full"
+            referrerPolicy="no-referrer"
           />
         ) : (
           <div className="h-7 w-7 rounded-full bg-white/10" />
         )}
 
-        <span className="hidden sm:block max-w-[120px] truncate text-white/80">
+        <span className="hidden sm:block max-w-[140px] truncate text-white/80">
           {email}
         </span>
       </button>
@@ -58,7 +63,7 @@ export default function UserMenu() {
       {open && (
         <div
           className="
-            absolute right-0 z-50 mt-2 w-56
+            absolute right-0 z-50 mt-2 w-64
             rounded-2xl
             border border-white/10
             bg-black/80 backdrop-blur-xl
@@ -66,6 +71,7 @@ export default function UserMenu() {
             overflow-hidden
           "
         >
+          {/* USER INFO */}
           <div className="px-4 py-3">
             <p className="text-sm font-medium text-white truncate">
               {name ?? "Account"}
@@ -75,17 +81,59 @@ export default function UserMenu() {
 
           <div className="h-px bg-white/10" />
 
-          <button
-            onClick={() => signOut({ callbackUrl: "/" })}
-            className="
-              w-full px-4 py-2.5
-              text-left text-sm text-red-400
-              hover:bg-white/5
-              transition
-            "
-          >
-            Log out
-          </button>
+          {/* PLAN INFO */}
+          <div className="px-4 py-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-zinc-400">Plan</span>
+              <span className="font-medium text-white capitalize">
+                {isLoading ? "…" : plan}
+              </span>
+            </div>
+
+            {usage && (
+              <div className="mt-1 text-xs text-zinc-500">
+                {usage.plan === "free" ? (
+                  <>
+                    {usage.freeDailyRemaining} analyses left today
+                  </>
+                ) : (
+                  <>
+                    {usage.usedMinutesThisMonth} min used this month
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="h-px bg-white/10" />
+
+          {/* ACTIONS */}
+          <div className="py-1">
+            <Link
+              href="/#pricing"
+              className="
+                block px-4 py-2.5
+                text-sm text-white/80
+                hover:bg-white/5 hover:text-white
+                transition
+              "
+              onClick={() => setOpen(false)}
+            >
+              Manage plan
+            </Link>
+
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="
+                w-full px-4 py-2.5
+                text-left text-sm text-red-400
+                hover:bg-white/5
+                transition
+              "
+            >
+              Log out
+            </button>
+          </div>
         </div>
       )}
     </div>
