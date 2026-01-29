@@ -301,7 +301,7 @@ export default function UploadBox() {
         <p className="text-base font-semibold text-white/90">
           Drag & drop your audio
         </p>
-        <p className="mt-1 text-sm text-zinc-400">or choose a file to upload</p>
+        <p className="mt-1 text-sm text-zinc-400">or choose a file to upload (MP3, M4A, WAV)</p>
 
         <label
           htmlFor="fileInput"
@@ -411,13 +411,27 @@ export default function UploadBox() {
         </button>
 
         <div className="mt-3 text-center text-xs text-zinc-500">
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
-            <p>Supported formats: MP3, M4A, WAV</p>
-            <p>
-              Max file size — <span className="text-zinc-400">Free: 10 MB</span> ·{" "}
-              <span className="text-zinc-300">Plus / Pro: 25 MB</span>
-            </p>
-          </div>
+         <div className="mt-4 text-center text-xs text-zinc-500">
+  <p className="leading-relaxed">
+    <span className="text-zinc-400">Recommended:</span> MP3 or M4A ·{" "}
+    <span className="hidden sm:inline">
+      WAV files are much larger and won’t improve results ·{" "}
+    </span>
+    <span className="text-zinc-400">
+      Free: <span className="font-medium text-zinc-300">10 MB</span>
+    </span>{" "}
+    ·{" "}
+    <span className="font-semibold text-white">
+      Plus / Pro: <span className="text-indigo-300">25 MB</span>
+    </span>
+  </p>
+
+  <p className="mt-1 sm:hidden">
+    WAV files are much larger and won’t improve results.
+  </p>
+</div>
+
+
         </div>
       </div>
 
