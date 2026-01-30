@@ -28,13 +28,16 @@ model User {
   // Plan actual
   plan                 Plan     @default(free)
 
-  // Stripe
-  stripeCustomerId     String?  @unique
-  stripeSubscriptionId String?  @unique
+  // Lemon Squeezy
+  lemonCustomerId     String?
+  lemonSubscriptionId String? @unique
+  lemonVariantId      String?
+  subscriptionStatus  String?
+  currentPeriodEnd    DateTime?
 
   // 🔢 USAGE CONTROL
   usedMinutesThisMonth Int      @default(0)
-  usageMonth           String?  // "YYYY-MM"
+  usageMonth           String?
 
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
@@ -43,6 +46,7 @@ model User {
   reports              AnalysisReport[]
   dailyUsage           DailyUsage[]
 }
+
 
 model AnalysisReport {
   id          String   @id @default(cuid())

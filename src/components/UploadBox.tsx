@@ -44,7 +44,6 @@ export default function UploadBox() {
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<any | null>(null);
 
-  // Post-card UX: show a gentle “you’re all set” notice when returning from /add-card.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const postCard = sessionStorage.getItem("vp_post_card");
@@ -362,32 +361,6 @@ export default function UploadBox() {
             reason={limitReason}
             onDismiss={() => setLimitReason(null)}
           />
-        )}
-
-        {!hasCard && session && file && (
-          <div className="mt-5 flex flex-col items-center gap-3">
-            <a
-              href="/add-card"
-              className="
-                inline-flex w-full max-w-lg items-center justify-center
-                rounded-2xl
-                bg-white px-6 py-3
-                text-sm font-semibold text-black
-                hover:bg-zinc-200
-                transition
-              "
-            >
-              Add card to continue
-            </a>
-
-            <p className="text-xs text-zinc-400">
-              Your card won’t be charged unless you choose a paid plan.
-            </p>
-
-            <div className="w-full max-w-lg rounded-2xl border border-red-800/40 bg-red-950/30 px-4 py-3 text-center text-sm text-red-300">
-              We require a card to prevent abuse and unlock analysis.
-            </div>
-          </div>
         )}
 
         {error && (

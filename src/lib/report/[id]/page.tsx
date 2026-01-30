@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import ResultsView from "@/components/ResultsView";
+import UpgradeButton from "@/components/UpgradeButton";
 
 type PageProps = {
   params: { id: string };
@@ -42,25 +43,12 @@ export default async function ReportPage({ params }: PageProps) {
               remix strategies and long-form analysis.
             </p>
 
-            <button
-              onClick={async () => {
-                const r = await fetch("/api/stripe/setup-checkout", {
-                  method: "POST",
-                });
-                const d = await r.json();
-                if (d?.url) window.location.href = d.url;
-              }}
-              className="
-                mt-8 inline-flex items-center justify-center
-                rounded-full bg-gradient-to-r from-indigo-500 to-indigo-400
-                px-8 py-4 text-sm font-semibold text-white
-                shadow-xl shadow-indigo-500/30
-                hover:brightness-110
-                transition
-              "
-            >
-              Unlock full report
-            </button>
+            <div className="mt-8 flex justify-center">
+              <UpgradeButton
+                plan="pro"
+                label="Unlock full report"
+              />
+            </div>
           </div>
         )}
       </div>

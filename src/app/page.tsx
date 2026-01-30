@@ -1,192 +1,142 @@
-import UploadBox from "@/components/UploadBox";
-import GoProButton from "@/components/GoProButton";
 import Header from "@/components/Header";
-
+import UploadBox from "@/components/UploadBox";
+import PricingSection from "@/components/PricingSection";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen text-white selection:bg-indigo-500/30">
-      {/* BACKGROUND */}
+    <main className="min-h-screen text-white">
+      {/* Background */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-[#05060a]" />
-        {/* soft gradients */}
         <div className="absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-indigo-600/20 blur-[120px]" />
         <div className="absolute top-40 right-[-120px] h-[520px] w-[520px] rounded-full bg-violet-600/15 blur-[120px]" />
         <div className="absolute bottom-[-220px] left-[-120px] h-[620px] w-[620px] rounded-full bg-sky-500/10 blur-[130px]" />
-        {/* vignette */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/35" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/30" />
       </div>
 
       <Header />
 
       {/* HERO */}
-      <section className="mx-auto max-w-6xl px-6 pt-16 pb-10 md:pt-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-zinc-300 backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-            Audio → viral report in minutes
+      <section className="mx-auto max-w-6xl px-6 pt-20 pb-12 text-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-1 text-xs text-zinc-300 backdrop-blur">
+          <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+          Audio → viral report in minutes
+        </div>
+
+        <h1 className="mt-6 text-5xl font-extrabold tracking-tight md:text-6xl">
+          Make your content go viral{" "}
+          <span className="block bg-gradient-to-r from-indigo-300 to-violet-300 bg-clip-text text-transparent">
+            before you post it
+          </span>
+        </h1>
+
+        <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400">
+          Upload an audio or podcast and get a viral-ready report: hooks, titles,
+          clip ideas, key moments and platform strategy.
+        </p>
+
+        <div className="mt-8 flex justify-center gap-4">
+          <a
+            href="#analyze"
+            className="rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black hover:bg-zinc-200"
+          >
+            Analyze an audio
+          </a>
+          <a
+            href="#features"
+            className="rounded-2xl border border-white/15 bg-black/30 px-6 py-3 text-sm font-semibold hover:border-white/30"
+          >
+            See what you get
+          </a>
+        </div>
+
+        <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <ValueCard title="Instant clarity" desc="Understand what works and why, fast." />
+          <ValueCard title="Clip-first output" desc="Find the best moments for Shorts/Reels." />
+          <ValueCard title="Better hooks" desc="Scroll-stopping hooks and titles every time." />
+        </div>
+      </section>
+
+      {/* ANALYZE CONSOLE */}
+      <section id="analyze" className="mx-auto max-w-6xl px-6 pb-16">
+        <div className="rounded-[28px] border border-white/10 bg-black/35 backdrop-blur-xl">
+          {/* Top bar */}
+          <div className="flex flex-col gap-3 border-b border-white/10 px-6 py-5 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-white/10" />
+                <span className="h-2.5 w-2.5 rounded-full bg-white/10" />
+                <span className="h-2.5 w-2.5 rounded-full bg-white/10" />
+              </div>
+              <div className="text-lg font-semibold">Analysis Console</div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Pill>Free: ≤ 5 min</Pill>
+              <Pill>Plus: ≤ 10 min · 120 min / month</Pill>
+              <Pill glow>Pro: ≤ 20 min · 400 min / month</Pill>
+            </div>
           </div>
 
-          <h1 className="mt-6 text-4xl font-extrabold tracking-tight md:text-6xl">
-            <span className="bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
-              Make your content go viral
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-indigo-300 via-indigo-400 to-violet-300 bg-clip-text text-transparent">
-              before you post it
-            </span>
-          </h1>
+          {/* Body */}
+          <div className="grid grid-cols-1 gap-6 p-6 lg:grid-cols-2">
+            {/* Left */}
+            <div className="rounded-3xl border border-white/10 bg-black/25 p-8">
+              <h2 className="text-4xl font-extrabold tracking-tight">
+                Upload once. Get a viral playbook.
+              </h2>
 
-          <p className="mt-5 text-base text-zinc-400 md:text-lg">
-            Upload an audio or podcast and get a viral-ready report: hooks, titles, clip ideas,
-            key moments and platform strategy.
-          </p>
+              <p className="mt-4 max-w-xl text-base leading-relaxed text-zinc-400">
+                We detect the best moments, generate hooks and titles, and
+                output a report you can copy into your next post.
+              </p>
 
-          <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <a
-              href="#analyze"
-              className="inline-flex w-full items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black hover:bg-zinc-200 sm:w-auto"
-            >
-              Analyze an audio
-            </a>
-            <a
-              href="#features"
-              className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-black/30 px-6 py-3 text-sm font-semibold text-white hover:border-white/20 sm:w-auto"
-            >
-              See what you get
-            </a>
-          </div>
+              <ul className="mt-8 space-y-4 text-lg">
+                <Bullet>5-point summary + viral reason</Bullet>
+                <Bullet>Key moment + clip ideas</Bullet>
+                <Bullet>Hooks, titles, remix angles</Bullet>
+                <Bullet>Platform strategy + what to fix</Bullet>
+              </ul>
 
-          <div className="mt-8 grid grid-cols-1 gap-3 text-left sm:grid-cols-3">
-            <MiniValue title="Instant clarity" desc="Understand what works and why, fast." />
-            <MiniValue title="Clip-first output" desc="Find the best moments for Shorts/Reels." />
-            <MiniValue title="Better hooks" desc="Scroll-stopping hooks and titles every time." />
+              <p className="mt-8 text-sm text-zinc-500">
+                Tip: try a segment where you explain a strong opinion or a
+                surprising result.
+              </p>
+            </div>
+
+            {/* Right */}
+            <div className="rounded-3xl border border-white/10 bg-black/25 p-6">
+              <UploadBox />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ANALYSIS CONSOLE */}
-      <section id="analyze" className="mx-auto max-w-6xl px-6 pb-16 md:pb-20">
-        <div className="relative">
-          {/* subtle glow */}
-          <div className="pointer-events-none absolute inset-0 -z-10 rounded-[28px] bg-gradient-to-r from-indigo-500/15 via-violet-500/10 to-sky-500/10 blur-2xl" />
+      {/* WHAT HAPPENS NEXT */}
+      <section className="mx-auto max-w-6xl px-6 pb-16 text-center">
+        <h2 className="text-3xl font-semibold">What happens next</h2>
+        <p className="mt-3 text-zinc-400">
+          A simple flow that turns raw audio into publish-ready outputs.
+        </p>
 
-          <div className="rounded-[28px] border border-white/10 bg-black/40 backdrop-blur-xl shadow-[0_30px_80px_rgba(0,0,0,0.55)]">
-            {/* app chrome */}
-            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                </div>
-                <span className="ml-2 text-sm font-semibold text-white/90">
-                  Analysis Console
-                </span>
-              </div>
-
-              <div className="hidden items-center gap-2 sm:flex">
-  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-    Free: ≤ 5 min
-  </span>
-
-  <span className="rounded-full border border-indigo-400/20 bg-indigo-500/10 px-3 py-1 text-xs text-indigo-200">
-    Plus: ≤ 10 min · 120 min / month
-  </span>
-
-  <span className="rounded-full border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 py-1 text-xs text-fuchsia-200">
-    Pro: ≤ 20 min · 400 min / month
-  </span>
-</div>
-
-            </div>
-
-            <div className="p-5 md:p-7">
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-                <div className="lg:col-span-5">
-                  <h2 className="text-xl font-semibold tracking-tight md:text-2xl">
-                    Upload once. Get a viral playbook.
-                  </h2>
-                  <p className="mt-2 text-sm text-zinc-400">
-                    We detect the best moments, generate hooks and titles, and output a report you can copy
-                    into your next post.
-                  </p>
-
-                  <div className="mt-5 space-y-3">
-                    <Bullet>5-point summary + viral reason</Bullet>
-                    <Bullet>Key moment + clip ideas</Bullet>
-                    <Bullet>Hooks, titles, remix angles</Bullet>
-                    <Bullet>Platform strategy + what to fix</Bullet>
-                  </div>
-
-                  <p className="mt-6 text-xs text-zinc-500">
-                    Tip: try a segment where you explain a strong opinion or a surprising result.
-                  </p>
-                </div>
-
-                <div className="lg:col-span-7">
-                  <div className="rounded-2xl border border-white/10 bg-black/35 p-4 md:p-5">
-                    <UploadBox />
-                  </div>
-                  <p className="mt-3 text-center text-xs text-zinc-500 sm:hidden">
-                    Free: up to 3 minutes • Pro: up to 20 minutes + transcript
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* trust strip */}
-          <div className="mt-6 grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
-            <Stat k="18" label="Insights per report" />
-            <Stat k="~1–3m" label="Typical processing" />
-            <Stat k="10" label="Hook ideas" />
-            <Stat k="10" label="Clip ideas" />
-          </div>
+        <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-4">
+          <Step title="Transcription" desc="We convert your audio to clean text to understand context." />
+          <Step title="Analysis" desc="We detect patterns: tension, novelty, clarity, pacing." />
+          <Step title="Generation" desc="Hooks, titles, clips, angles — ready to copy." />
+          <Step title="Publish" desc="Pick the best moment and post with confidence." />
         </div>
       </section>
 
-   {/* WHAT HAPPENS */}
-<section className="mx-auto max-w-6xl px-6 py-14 md:py-20">
-  <div className="mx-auto max-w-2xl text-center">
-    <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-      What happens next
-    </h2>
-    <p className="mt-3 text-zinc-400">
-      A simple flow that turns raw audio into publish-ready outputs.
-    </p>
-  </div>
-
-  <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-4 md:gap-6">
-    <Step number="01" title="Transcription">
-      We convert your audio to clean text to understand context.
-    </Step>
-
-    <Step number="02" title="Analysis">
-      We detect patterns: tension, novelty, clarity, pacing.
-    </Step>
-
-    <Step number="03" title="Generation">
-      Hooks, titles, clips, angles — ready to copy.
-    </Step>
-
-    <Step number="04" title="Publish">
-      Pick the best moment and post with confidence.
-    </Step>
-  </div>
-</section>
       {/* FEATURES */}
-      <section id="features" className="mx-auto max-w-6xl px-6 py-14 md:py-16">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            What you get in every analysis
-          </h2>
-          <p className="mt-3 text-zinc-400">
-            One upload. One report. Clear outputs for creators who want results.
-          </p>
-        </div>
+      <section id="features" className="mx-auto max-w-6xl px-6 pb-20">
+        <h2 className="text-center text-3xl font-semibold">
+          What you get in every analysis
+        </h2>
+        <p className="mt-3 text-center text-zinc-400">
+          One upload. One report. Clear outputs for creators who want results.
+        </p>
 
-        <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+        <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-4">
           <FeatureCard
             title="Content understanding"
             items={[
@@ -196,7 +146,6 @@ export default function HomePage() {
               "Virality score (1–10)",
             ]}
           />
-
           <FeatureCard
             title="Hooks & angles"
             items={[
@@ -206,7 +155,6 @@ export default function HomePage() {
               "Reaction script",
             ]}
           />
-
           <FeatureCard
             title="Clips & reuse"
             items={[
@@ -216,7 +164,6 @@ export default function HomePage() {
               "Format classification",
             ]}
           />
-
           <FeatureCard
             title="Strategy & growth"
             items={[
@@ -230,293 +177,68 @@ export default function HomePage() {
       </section>
 
       {/* PRICING */}
-<section className="mx-auto max-w-6xl px-6 py-14 md:py-16">
-       <section
-  id="pricing"
-  className="mx-auto max-w-6xl px-6 py-12 md:py-16 text-white"
->
+      <PricingSection />
 
-  {/* TITLE */}
-  <div className="mb-16 text-center">
-    <h2 className="text-4xl font-semibold">
-      Simple pricing, no surprises
-    </h2>
-<p className="mt-8 text-center text-xs text-zinc-500">
-      Add a card only to unlock higher limits.
-      You won’t be charged unless you upgrade.
-    </p>
-  </div>
-
-  {/* CARDS */}
-  <div className="grid gap-8 md:grid-cols-3">
-    {/* FREE */}
-<div
-  id="plan-free"
-  className="rounded-2xl border border-white/10 bg-black/30 p-8 backdrop-blur"
->
-      <h3 className="text-xl font-semibold">Free</h3>
-      <p className="mt-2 text-zinc-400">
-        Try the workflow risk-free
-      </p>
-
-      <div className="mt-6 text-3xl font-semibold">$0</div>
-
-      <ul className="mt-6 space-y-3 text-sm text-zinc-300">
-        <li>✔ Limited daily analyses</li>
-        <li>✔ Up to 5 minutes per audio</li>
-        <li>✔ Preview insights</li>
-        <li>✔ Card required (anti-abuse)</li>
-      </ul>
-
-      <p className="mt-4 text-xs text-zinc-500">
-        No charge unless you upgrade.
-      </p>
-    </div>
-
-    {/* PLUS */}
-<div
-  id="plan-plus"
-  className="relative rounded-2xl border border-indigo-500/35 bg-indigo-500/10 p-8 backdrop-blur"
->
-      <div className="absolute -top-3 right-6 rounded-full bg-indigo-500 px-3 py-1 text-xs text-white">
-        Most popular
-      </div>
-
-      <h3 className="text-xl font-semibold">Plus</h3>
-      <p className="mt-2 text-zinc-300">
-        For consistent weekly creators
-      </p>
-
-      <div className="mt-6 text-3xl font-semibold">
-        $9.99 <span className="text-base font-normal">/ month</span>
-      </div>
-
-      <ul className="mt-6 space-y-3 text-sm text-zinc-200">
-        <li>✔ 120 minutes / month</li>
-        <li>✔ Up to 10 minutes per audio</li>
-        <li>✔ Full transcript & insights</li>
-        <li>✔ Faster processing</li>
-      </ul>
-
-      <a
-        href="/add-card"
-        className="mt-8 block w-full rounded-xl bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:brightness-110"
-      >
-        Upgrade to Plus
-      </a>
-    </div>
-
-    {/* PRO */}
-<div
-  id="plan-pro"
-  className="rounded-2xl border border-white bg-white p-8 text-black"
->
-      <h3 className="text-xl font-semibold">Pro</h3>
-      <p className="mt-2 text-zinc-600">
-        For daily creators & long-form content
-      </p>
-
-      <div className="mt-6 text-3xl font-semibold">
-        $19.99 <span className="text-base font-normal">/ month</span>
-      </div>
-
-      <ul className="mt-6 space-y-3 text-sm">
-        <li>✔ 400 minutes / month</li>
-        <li>✔ Up to 20 minutes per audio</li>
-        <li>✔ Priority processing</li>
-        <li>✔ Advanced tools</li>
-      </ul>
-
-      <GoProButton />
-    </div>
-  </div>
-
-  {/* FOOTNOTE */}
-  <p className="mt-14 text-center text-xs text-zinc-500">
-    Payments are securely handled by Stripe.
-    You’re never charged unless you explicitly upgrade.
-  </p>
-</section>
-
-
-        <div className="mt-8 text-center">
-          <a
-            href="#analyze"
-            className="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black hover:bg-zinc-200"
-          >
-            Try Free Analysis
-          </a>
-          <p className="mt-3 text-xs text-zinc-500">
-            Preview the full workflow before going Pro.
-          </p>
-        </div>
-      </section>
-
-      <footer className="mx-auto max-w-6xl px-6 py-10">
-        <div className="rounded-2xl border border-white/10 bg-black/30 px-6 py-6 text-center backdrop-blur">
-          <p className="text-sm text-zinc-400">
-            © {new Date().getFullYear()} ViralPulse — audio insights for creators.
-          </p>
-        </div>
+      <footer className="py-10 text-center text-sm text-zinc-500">
+        © {new Date().getFullYear()} ViralPulse
       </footer>
     </main>
   );
 }
 
-/* -----------------------
-   Reusable UI
------------------------- */
+/* ---------- UI helpers (SERVER SAFE) ---------- */
 
-function MiniValue({ title, desc }: { title: string; desc: string }) {
+function Pill({ children, glow }: { children: React.ReactNode; glow?: boolean }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/30 p-4 backdrop-blur">
-      <div className="text-sm font-semibold text-white/90">{title}</div>
-      <div className="mt-1 text-sm text-zinc-400">{desc}</div>
-    </div>
-  );
-}
-
-function Bullet({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-2 text-sm text-zinc-300">
-      <span className="mt-1.5 inline-block h-1.5 w-1.5 flex-none rounded-full bg-indigo-400/90" />
-      <span className="text-zinc-300">{children}</span>
-    </div>
-  );
-}
-
-function Stat({ k, label }: { k: string; label: string }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-4 text-center backdrop-blur">
-      <div className="text-lg font-semibold text-white/90">{k}</div>
-      <div className="mt-1 text-xs text-zinc-500">{label}</div>
-    </div>
-  );
-}
-
-function Step({
-  number,
-  title,
-  children,
-}: {
-  number: string;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className="
-        group relative
-        rounded-2xl
-        border border-white/12
-        bg-black/35
-        backdrop-blur
-        p-5 md:p-6
-        transition
-        hover:border-white/22
-        hover:bg-black/45
-        hover:shadow-[0_0_55px_rgba(99,102,241,0.16)]
-      "
+    <span
+      className={[
+        "rounded-full border px-3 py-1 text-xs text-zinc-200",
+        glow
+          ? "border-violet-400/30 bg-violet-500/10"
+          : "border-white/10 bg-black/30",
+      ].join(" ")}
     >
-      <div className="text-xs text-zinc-500">{number}</div>
+      {children}
+    </span>
+  );
+}
 
-      <h3 className="mt-3 text-base font-semibold text-white/90">{title}</h3>
-
-      <p className="mt-2 text-sm leading-relaxed text-zinc-400">{children}</p>
+function ValueCard({ title, desc }: { title: string; desc: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/30 p-5 text-left">
+      <h3 className="font-semibold">{title}</h3>
+      <p className="mt-2 text-sm text-zinc-400">{desc}</p>
     </div>
   );
 }
 
-
+function Step({ title, desc }: { title: string; desc: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/30 p-6 text-left">
+      <h3 className="font-semibold">{title}</h3>
+      <p className="mt-2 text-sm text-zinc-400">{desc}</p>
+    </div>
+  );
+}
 
 function FeatureCard({ title, items }: { title: string; items: string[] }) {
   return (
-    <div
-      className="
-        group relative
-        rounded-2xl
-        border border-white/10
-        bg-black/30
-        p-6
-        backdrop-blur
-        transition
-        hover:border-white/20
-        hover:bg-black/40
-        hover:shadow-[0_0_55px_rgba(99,102,241,0.16)]
-      "
-    >
-      <h3 className="font-semibold text-white/90">{title}</h3>
+    <div className="rounded-2xl border border-white/10 bg-black/30 p-6">
+      <h3 className="font-semibold">{title}</h3>
       <ul className="mt-4 space-y-2 text-sm text-zinc-400">
         {items.map((i) => (
-          <li key={i} className="flex items-start gap-2">
-            <span className="mt-1.5 inline-block h-1.5 w-1.5 flex-none rounded-full bg-white/25" />
-            <span>{i}</span>
-          </li>
+          <li key={i}>• {i}</li>
         ))}
       </ul>
     </div>
   );
 }
 
-function Plan({
-  title,
-  children,
-  variant = "free",
-}: {
-  title: string;
-  children: React.ReactNode;
-  variant?: "free" | "pro";
-}) {
-  const isPro = variant === "pro";
-
-  async function handleGoPro() {
-    const res = await fetch("/api/stripe/setup-checkout", {
-      method: "POST",
-    });
-    const data = await res.json();
-    if (data?.url) {
-      window.location.href = data.url;
-    }
-  }
-
+function Bullet({ children }: { children: React.ReactNode }) {
   return (
-  <div
-    className={[
-      "relative rounded-2xl p-7 md:p-8 backdrop-blur transition",
-      "border",
-      isPro
-        ? "border-indigo-400/25 bg-gradient-to-b from-indigo-500/12 to-black/30 shadow-[0_0_70px_rgba(99,102,241,0.20)]"
-        : "border-white/10 bg-black/30 hover:border-white/20",
-    ].join(" ")}
-  >
-    {isPro && (
-      <div className="absolute right-4 top-4 rounded-full border border-indigo-400/25 bg-indigo-500/15 px-3 py-1 text-xs font-semibold text-indigo-200">
-        Recommended
-      </div>
-    )}
-
-    <h3 className="text-lg font-semibold text-white/90">{title}</h3>
-    <div className="mt-4 text-sm text-zinc-300">{children}</div>
-
-    <div className="mt-7">
-      {isPro ? (
-        <GoProButton />
-      ) : (
-        <a
-          href="#analyze"
-          className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-black/30 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/20"
-        >
-          Start Free
-        </a>
-      )}
-
-      <p className="mt-3 text-xs text-zinc-500">
-        {isPro
-          ? "Best for weekly creators."
-          : "Card required to prevent abuse. We won’t charge unless you upgrade."}
-      </p>
-    </div>
-  </div>
-);
-
+    <li className="flex items-start gap-3 text-base text-zinc-200">
+      <span className="mt-2 h-2 w-2 flex-none rounded-full bg-indigo-400/80" />
+      <span className="text-zinc-300">{children}</span>
+    </li>
+  );
 }

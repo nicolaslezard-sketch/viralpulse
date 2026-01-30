@@ -21,11 +21,13 @@ export default function SectionBlock({
     ? content.slice(0, Math.floor(content.length * previewRatio))
     : content;
 
-  function handleUpgrade() {
-    fetch("/api/stripe/setup-checkout", { method: "POST" }).then(async (r) => {
-      const d = await r.json();
-      if (d?.url) window.location.href = d.url;
+  async function handleUpgrade() {
+    const res = await fetch("/api/lemon/checkout", {
+      method: "POST",
+      body: JSON.stringify({ plan: "pro" }),
     });
+    const data = await res.json();
+    if (data?.url) window.location.href = data.url;
   }
 
   return (
@@ -53,16 +55,7 @@ export default function SectionBlock({
         </div>
 
         {!isPro && shouldTrim && (
-          <span
-            className="
-              rounded-full
-              border border-white/10
-              bg-white/5
-              px-3 py-1
-              text-[10px] font-semibold uppercase tracking-wide
-              text-indigo-300
-            "
-          >
+          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-300">
             PRO feature
           </span>
         )}
@@ -70,17 +63,15 @@ export default function SectionBlock({
 
       {/* CONTENT */}
       <div className="relative">
-        {/* Readable preview */}
-        <div className="max-w-none whitespace-pre-wrap text-sm leading-relaxed text-zinc-200">
+        <div className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-200">
           {previewText}
           {shouldTrim && (
-            <span className="ml-1 text-zinc-500 italic">
+            <span className="ml-1 italic text-zinc-500">
               …unlock full insights →
             </span>
           )}
         </div>
 
-        {/* Blurred remainder (kept visible, “almost have it”) */}
         {shouldTrim && (
           <div
             className="
@@ -111,15 +102,7 @@ export default function SectionBlock({
         {shouldTrim && (
           <button
             onClick={handleUpgrade}
-            className="
-              rounded-full
-              bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500
-              px-5 py-2.5
-              text-sm font-semibold text-white
-              shadow-lg shadow-indigo-500/20
-              hover:brightness-110
-              transition
-            "
+            className="rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 hover:brightness-110 transition"
           >
             Unlock full report
           </button>

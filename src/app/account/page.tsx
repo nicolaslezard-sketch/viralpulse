@@ -131,21 +131,6 @@ export default function AccountPage() {
               <span className="text-zinc-400">No card added</span>
             )}
           </div>
-
-          <Link
-            href="/add-card"
-            className="
-              inline-flex
-              rounded-xl
-              border border-white/10
-              bg-black/60 px-4 py-2
-              text-sm font-semibold text-white
-              hover:bg-black/80
-              transition
-            "
-          >
-            {hasCard ? "Update card" : "Add card"}
-          </Link>
         </div>
       </section>
 

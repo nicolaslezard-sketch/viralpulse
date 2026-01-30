@@ -48,39 +48,6 @@ export async function POST(req: Request) {
     const plan = (await getUserPlan(userId)) as PlanKey;
     const limits = limitsByPlan[plan];
 
-    /* =========================
-       CARD REQUIRED (PLUS / PRO)
-    ========================= */
-    if (plan !== "free") {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { stripeCustomerId: true },
-      });
-
-      let hasCard = false;
-
-      if (user?.stripeCustomerId) {
-        const { stripe } = await import("@/lib/stripe");
-
-        const pms = await stripe.paymentMethods.list({
-          customer: user.stripeCustomerId,
-          type: "card",
-          limit: 1,
-        });
-
-        hasCard = pms.data.length > 0;
-      }
-
-      if (!hasCard) {
-        return NextResponse.json(
-          {
-            code: "CARD_REQUIRED",
-            message: "Please add a payment method to continue.",
-          },
-          { status: 402 }
-        );
-      }
-    }
 
     /* =========================
        TRANSCRIPTION (SOURCE OF TRUTH)

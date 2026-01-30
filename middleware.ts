@@ -2,36 +2,51 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// ✅ Emails permitidos para testear en producción
+// 👤 Emails permitidos (opcional, lo dejamos como está)
 const ALLOWED_EMAILS = new Set([
   "nicolaslezard@gmail.com",
 ]);
 
 export default withAuth(
   function middleware(req: NextRequest) {
-    // Si llega hasta acá, el usuario está autenticado y autorizado
+    const maintenance = process.env.MAINTENANCE_MODE === "true";
+
+    // 🚧 MODO MANTENIMIENTO
+    if (maintenance) {
+      // Permitimos la página de mantenimiento y assets
+      const { pathname } = req.nextUrl;
+
+      if (
+        pathname === "/maintenance" ||
+        pathname.startsWith("/_next") ||
+        pathname === "/favicon.ico"
+      ) {
+        return NextResponse.next();
+      }
+
+      return NextResponse.redirect(
+        new URL("/maintenance", req.url)
+      );
+    }
+
+    // ✅ Si no hay maintenance, seguimos normal
     return NextResponse.next();
   },
   {
     callbacks: {
       authorized: ({ token }) => {
-        // 1) Debe estar logueado
+        // 1️⃣ Debe estar logueado
         if (!token) return false;
 
-        // 2) Si querés modo "solo allowlist" en prod, se activa acá:
-        //    - Permitimos siempre a tu mail (y podés agregar más)
-        //    - Para el resto, dejamos pasar igual (por ahora) si está logueado
-        //
-        // 👉 Si querés cerrar el acceso para el público, cambiá la línea final
-        //    por: return !!email && ALLOWED_EMAILS.has(email);
         const email =
           typeof (token as any).email === "string"
             ? (token as any).email.toLowerCase()
             : undefined;
 
+        // 2️⃣ Allowlist (opcional, lo dejaste abierto)
         if (email && ALLOWED_EMAILS.has(email)) return true;
 
-        // Público logueado: permitido (comportamiento actual)
+        // Público logueado
         return true;
       },
     },
@@ -41,12 +56,11 @@ export default withAuth(
   }
 );
 
-// Solo proteger rutas sensibles
+// 🔒 Solo protegemos rutas privadas
 export const config = {
   matcher: [
     "/dashboard/:path*",
     "/report/:path*",
     "/analyze/:path*",
-    "/add-card/:path*",
   ],
 };
