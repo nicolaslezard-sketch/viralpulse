@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
-  const { plan, usage, hasCard, isLoading } = useUserPlan();
+  const { plan, usage, isLoading } = useUserPlan();
 
   if (status === "loading") {
     return (
@@ -41,7 +41,7 @@ export default function AccountPage() {
       {/* PAGE TITLE */}
       <h1 className="text-3xl font-semibold tracking-tight">Account</h1>
       <p className="mt-1 text-sm text-zinc-400">
-        Manage your plan, billing and session.
+        Manage your plan and session.
       </p>
 
       {/* ACCOUNT INFO */}
@@ -65,9 +65,6 @@ export default function AccountPage() {
               {user.name ?? "User"}
             </p>
             <p className="text-sm text-zinc-400">{user.email}</p>
-            <p className="mt-1 text-xs text-zinc-500">
-              Signed in with {user.image ? "Google" : "provider"}
-            </p>
           </div>
         </div>
       </section>
@@ -92,7 +89,7 @@ export default function AccountPage() {
                   </>
                 ) : (
                   <>
-                    {usage.usedMinutesThisMonth} minutes used this month
+                    {usage.remainingMinutes} minutes remaining this month
                   </>
                 )}
               </p>
@@ -110,7 +107,7 @@ export default function AccountPage() {
               transition
             "
           >
-            {plan === "pro" ? "View plans" : "Manage plan"}
+            {plan === "free" ? "Upgrade plan" : "Manage subscription"}
           </Link>
         </div>
       </section>
@@ -120,18 +117,9 @@ export default function AccountPage() {
         <h2 className="text-lg font-semibold">Billing</h2>
 
         <p className="mt-2 text-sm text-zinc-400">
-          Your card is only used if you explicitly upgrade your plan.
+          Billing is handled securely via Lemon Squeezy. You can upgrade,
+          downgrade or cancel your subscription at any time.
         </p>
-
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm">
-            {hasCard ? (
-              <span className="text-emerald-400">✓ Card on file</span>
-            ) : (
-              <span className="text-zinc-400">No card added</span>
-            )}
-          </div>
-        </div>
       </section>
 
       {/* SECURITY */}

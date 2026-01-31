@@ -19,25 +19,22 @@ export type UserUsage =
 
 export function useUserPlan() {
   const [plan, setPlan] = useState<UserPlan>("free");
-  const [hasCard, setHasCard] = useState(false);
   const [usage, setUsage] = useState<UserUsage | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchStatus = useCallback(async () => {
     setIsLoading(true);
+
     try {
       const res = await fetch("/api/user-status", { cache: "no-store" });
       const data = await res.json().catch(() => ({}));
 
-      const nextPlan =
-        data?.plan === "pro" || data?.plan === "plus"
-          ? (data.plan as UserPlan)
-          : "free";
+      const nextPlan: UserPlan =
+        data?.plan === "pro" || data?.plan === "plus" ? data.plan : "free";
 
       setPlan(nextPlan);
-      setHasCard(!!data?.hasCard);
 
-      // Usage snapshot (best-effort; server returns zeros if unauthenticated)
+      // Snapshot de uso
       if (nextPlan === "free") {
         setUsage({
           plan: "free",
@@ -53,8 +50,8 @@ export function useUserPlan() {
         });
       }
     } catch {
+      // fallback seguro
       setPlan("free");
-      setHasCard(false);
       setUsage({
         plan: "free",
         freeDailyUsed: 0,
@@ -73,14 +70,11 @@ export function useUserPlan() {
     plan,
     usage,
 
-    // 🔓 Pro y Plus desbloquean lo mismo a nivel features
-    isPro: plan !== "free",
-
-    // flags útiles si después querés diferenciar UX
+    // 🔓 acceso por plan (NO por tarjeta)
+    isPaid: plan !== "free",
     isPlus: plan === "plus",
-    isProOnly: plan === "pro",
+    isPro: plan === "pro",
 
-    hasCard,
     isLoading,
     refresh: fetchStatus,
   };

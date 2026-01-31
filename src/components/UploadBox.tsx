@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, DragEvent } from "react";
+import { useState, DragEvent } from "react";
 import { uploadToR2 } from "@/lib/uploadToR2";
 import { apiUrl } from "@/lib/clientBaseUrl";
 import { withRetry } from "@/lib/retry";
@@ -30,48 +30,17 @@ const MIN_AUDIO_SECONDS = Number(process.env.NEXT_PUBLIC_MIN_AUDIO_SECONDS ?? 8)
 
 export default function UploadBox() {
   const { data: session } = useSession();
-  const { plan, usage, hasCard, isLoading: planLoading, refresh: refreshPlan } =
-    useUserPlan();
-
+  const { plan, usage, isLoading: planLoading, refresh: refreshPlan } =
+  useUserPlan();
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [limitReason, setLimitReason] = useState<LimitReason | null>(null);
   const [showLogin, setShowLogin] = useState(false);
 
-  const [notice, setNotice] = useState<string | null>(null);
 
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<any | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const postCard = sessionStorage.getItem("vp_post_card");
-    if (!postCard) return;
-
-    sessionStorage.removeItem("vp_post_card");
-    setNotice("Card saved — you're ready to analyze.");
-  }, []);
-
-  // Best-effort auto-retry: if the browser preserved the selected file (bfcache) and the user now has a card,
-  // automatically start the analysis once.
-  useEffect(() => {
-    if (!notice) return;
-    if (!session) return;
-    if (!hasCard) return;
-    if (!file) return;
-    if (analyzing) return;
-
-    // Only auto-run once per return.
-    if (typeof window !== "undefined") {
-      const ran = sessionStorage.getItem("vp_post_card_ran");
-      if (ran) return;
-      sessionStorage.setItem("vp_post_card_ran", "1");
-    }
-
-    void handleAnalyze();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notice, session, hasCard, file]);
 
   // Esperar a que el plan esté cargado
   if (planLoading) {
@@ -85,10 +54,6 @@ export default function UploadBox() {
   function handleFile(f: File | null) {
     setError(null);
     setLimitReason(null);
-    setNotice(null);
-    try {
-      sessionStorage.removeItem("vp_post_card_ran");
-    } catch {}
     if (!f) return;
 
     const ext = f.name.toLowerCase().slice(f.name.lastIndexOf("."));
@@ -115,14 +80,6 @@ export default function UploadBox() {
     // 🔐 LOGIN OBLIGATORIO
     if (!session) {
       setShowLogin(true);
-      return;
-    }
-
-    // 💳 TARJETA OBLIGATORIA
-    if (!hasCard) {
-      setError(
-        "A card is required for Plus or Pro analysis. You won’t be charged unless you upgrade."
-      );
       return;
     }
 
@@ -347,12 +304,6 @@ export default function UploadBox() {
                 Remove
               </button>
             </div>
-          </div>
-        )}
-
-        {notice && (
-          <div className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 sm:mt-5">
-            {notice}
           </div>
         )}
 
