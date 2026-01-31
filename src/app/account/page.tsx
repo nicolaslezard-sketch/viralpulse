@@ -3,6 +3,8 @@
 import { useSession, signOut } from "next-auth/react";
 import { useUserPlan } from "@/lib/useUserPlan";
 import Link from "next/link";
+import Image from "next/image";
+
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
@@ -47,12 +49,14 @@ export default function AccountPage() {
 
         <div className="mt-4 flex items-center gap-4">
           {user.image ? (
-            <img
-              src={user.image}
-              alt="Avatar"
-              className="h-12 w-12 rounded-full border border-white/10"
-              referrerPolicy="no-referrer"
-            />
+            <Image
+  src={user.image}
+  alt="Avatar"
+  width={40}
+  height={40}
+  className="rounded-full"
+  referrerPolicy="no-referrer"
+/>
           ) : (
             <div className="h-12 w-12 rounded-full bg-white/10" />
           )}

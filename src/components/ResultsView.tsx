@@ -98,7 +98,7 @@ export default function ResultsView({
         ) : (
           <button
             onClick={handleUpgrade}
-            className="rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 px-6 py-3 text-sm font-semibold shadow-lg shadow-indigo-500/30 hover:brightness-110"
+            className="rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-500 px-6 py-3 text-sm font-semibold shadow-lg shadow-indigo-500/30 hover:brightness-110"
           >
             Unlock full viral analysis
           </button>
@@ -147,7 +147,7 @@ export default function ResultsView({
 
           <button
             onClick={handleUpgrade}
-            className="rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 px-10 py-4 text-base font-semibold shadow-xl shadow-indigo-500/40 hover:brightness-110"
+            className="rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-500 px-10 py-4 text-base font-semibold shadow-xl shadow-indigo-500/40 hover:brightness-110"
           >
             Upgrade to Pro
           </button>

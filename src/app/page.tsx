@@ -8,10 +8,10 @@ export default function HomePage() {
       {/* Background */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-[#05060a]" />
-        <div className="absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-indigo-600/20 blur-[120px]" />
-        <div className="absolute top-40 right-[-120px] h-[520px] w-[520px] rounded-full bg-violet-600/15 blur-[120px]" />
-        <div className="absolute bottom-[-220px] left-[-120px] h-[620px] w-[620px] rounded-full bg-sky-500/10 blur-[130px]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/30" />
+        <div className="absolute -top-40 left-1/2 h-130 w-205 -translate-x-1/2 rounded-full bg-indigo-600/20 blur-[120px]" />
+        <div className="absolute top-40 -right-30 h-130 w-130 rounded-full bg-violet-600/15 blur-[120px]" />
+        <div className="absolute -bottom-55 -left-30 h-155 w-155 rounded-full bg-sky-500/10 blur-[130px]" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/0 via-black/0 to-black/30" />
       </div>
 
       <Header />
@@ -25,7 +25,7 @@ export default function HomePage() {
 
         <h1 className="mt-6 text-5xl font-extrabold tracking-tight md:text-6xl">
           Make your content go viral{" "}
-          <span className="block bg-gradient-to-r from-indigo-300 to-violet-300 bg-clip-text text-transparent">
+          <span className="block bg-linear-to-r from-indigo-300 to-violet-300 bg-clip-text text-transparent">
             before you post it
           </span>
         </h1>

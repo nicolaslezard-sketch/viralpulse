@@ -25,7 +25,7 @@ export default function Header() {
           className="
             cursor-pointer
             text-sm font-semibold tracking-tight
-            bg-gradient-to-r from-indigo-300 via-indigo-400 to-violet-300
+            bg-linear-to-r from-indigo-300 via-indigo-400 to-violet-300
             bg-clip-text text-transparent
           "
         >
