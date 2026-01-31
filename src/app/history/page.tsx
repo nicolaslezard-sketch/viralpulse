@@ -1,29 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useUserPlan } from "@/lib/useUserPlan";
-import UsageIndicator, {
-  type UsageSnapshot,
-} from "@/components/analysis/UsageIndicator";
+import Link from "next/link";
+import UsageIndicator from "@/components/analysis/UsageIndicator";
 
 type HistoryItem = {
   id: string;
   createdAt: string;
   durationSec?: number | null;
-  originalFilename?: string | null;
 };
 
 export default function HistoryPage() {
   const { plan, isLoading } = useUserPlan();
-
   const [items, setItems] = useState<HistoryItem[]>([]);
-  const [usage, setUsage] = useState<UsageSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  /* =========================
-     Load history
-  ========================= */
   useEffect(() => {
     if (plan === "free") return;
 
@@ -36,45 +28,22 @@ export default function HistoryPage() {
       .catch((e) => setError(e.message));
   }, [plan]);
 
-  /* =========================
-     Load usage
-  ========================= */
-  useEffect(() => {
-    if (plan === "free") return;
-
-    fetch("/api/usage")
-      .then((r) => {
-        if (!r.ok) throw new Error("Failed to load usage");
-        return r.json();
-      })
-      .then(setUsage)
-      .catch(() => {
-        /* usage es informativo, no bloquea */
-      });
-  }, [plan]);
-
-  /* =========================
-     Loading
-  ========================= */
   if (isLoading) {
     return <div className="py-24 text-center text-zinc-400">Loading…</div>;
   }
 
-  /* =========================
-     FREE PAYWALL
-  ========================= */
+  // 🔒 FREE PAYWALL
   if (plan === "free") {
     return (
       <main className="mx-auto max-w-2xl px-6 py-24 text-center text-white">
         <h1 className="text-2xl font-semibold">Analysis history</h1>
-
         <p className="mt-3 text-zinc-400">
           Upgrade to save and access your past analyses.
         </p>
 
         <Link
           href="/#pricing"
-          className="mt-6 inline-flex rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200"
+          className="mt-6 inline-flex rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black hover:bg-zinc-200 transition"
         >
           Upgrade to unlock history
         </Link>
@@ -82,12 +51,10 @@ export default function HistoryPage() {
     );
   }
 
-  /* =========================
-     PAID VIEW
-  ========================= */
   return (
-    <main className="mx-auto max-w-3xl px-6 py-20 text-white">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <main className="mx-auto max-w-6xl px-6 py-20 text-white">
+      {/* HEADER */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-semibold">Analysis history</h1>
           <p className="mt-1 text-sm text-zinc-400">
@@ -95,7 +62,12 @@ export default function HistoryPage() {
           </p>
         </div>
 
-        {usage && <UsageIndicator usage={usage} />}
+        <UsageIndicator
+          usage={{
+            plan,
+            usedMinutesThisMonth: 60, // luego lo traés real
+          }}
+        />
       </div>
 
       {error && (
@@ -117,7 +89,7 @@ export default function HistoryPage() {
             href={`/report/${r.id}`}
             className="
               block rounded-2xl border border-white/10 bg-black/40 p-4
-              transition hover:border-indigo-400/40 hover:bg-black/50
+              hover:border-indigo-400/40 hover:bg-black/50 transition
             "
           >
             <div className="flex items-center justify-between">
@@ -128,7 +100,7 @@ export default function HistoryPage() {
                 </p>
               </div>
 
-              {typeof r.durationSec === "number" && (
+              {r.durationSec && (
                 <span className="text-xs text-zinc-400">
                   {Math.ceil(r.durationSec / 60)} min
                 </span>
