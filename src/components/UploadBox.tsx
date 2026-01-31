@@ -11,7 +11,6 @@ import LoginCard from "./LoginCard";
 import AnalyzingExperience from "./AnalyzingExperience";
 import ReportReady from "./ReportReady";
 import PlanBadge from "@/components/analysis/PlanBadge";
-import UsageIndicator from "@/components/analysis/UsageIndicator";
 import LimitReachedPanel, { type LimitReason } from "@/components/analysis/LimitReachedPanel";
 
 // ⬅️ alineado con backend
@@ -211,26 +210,7 @@ export default function UploadBox() {
     <div className="text-white">
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <PlanBadge plan={plan} />
-        {usage ? (
-          <UsageIndicator
-            usage={
-              usage.plan === "free"
-                ? {
-                    plan: "free",
-                    freeDailyUsed: usage.freeDailyUsed,
-                    freeDailyRemaining: usage.freeDailyRemaining,
-                  }
-                : {
-                    plan: usage.plan,
-                    usedMinutesThisMonth: usage.usedMinutesThisMonth,
-                  }
-            }
-          />
-        ) : (
-          <div className="text-xs text-white/50 sm:text-right">
-            Limits update after sign in
-          </div>
-        )}
+         
       </div>
 
       {/* DROP ZONE */}

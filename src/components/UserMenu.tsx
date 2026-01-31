@@ -89,20 +89,10 @@ export default function UserMenu() {
                 {isLoading ? "…" : plan}
               </span>
             </div>
+            <div className="mt-1 text-xs text-zinc-500">
+  Limits apply automatically based on your plan
+</div>
 
-            {usage && (
-              <div className="mt-1 text-xs text-zinc-500">
-                {usage.plan === "free" ? (
-                  <>
-                    {usage.freeDailyRemaining} analyses left today
-                  </>
-                ) : (
-                  <>
-                    {usage.usedMinutesThisMonth} min used this month
-                  </>
-                )}
-              </div>
-            )}
           </div>
 
           <div className="h-px bg-white/10" />

@@ -79,21 +79,6 @@ export default function AccountPage() {
             <p className="text-lg font-semibold capitalize text-white">
               {isLoading ? "…" : plan}
             </p>
-
-            {usage && (
-              <p className="mt-1 text-sm text-zinc-500">
-                {usage.plan === "free" ? (
-                  <>
-                    {usage.freeDailyRemaining} free analysis
-                    {usage.freeDailyRemaining === 1 ? "" : "es"} remaining today
-                  </>
-                ) : (
-                  <>
-                    {usage.remainingMinutes} minutes remaining this month
-                  </>
-                )}
-              </p>
-            )}
           </div>
 
           <Link
