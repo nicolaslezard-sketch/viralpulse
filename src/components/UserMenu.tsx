@@ -14,7 +14,9 @@ export default function UserMenu() {
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -26,6 +28,7 @@ export default function UserMenu() {
 
   return (
     <div ref={ref} className="relative">
+      {/* AVATAR BUTTON */}
       <button
         onClick={() => setOpen((v) => !v)}
         className="
@@ -40,6 +43,7 @@ export default function UserMenu() {
         "
       >
         {image ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={image}
             alt={name ?? "User"}
@@ -50,11 +54,12 @@ export default function UserMenu() {
           <div className="h-7 w-7 rounded-full bg-white/10" />
         )}
 
-        <span className="hidden sm:block max-w-[140px] truncate text-white/80">
+        <span className="hidden sm:block max-w-35 truncate text-white/80">
           {email}
         </span>
       </button>
 
+      {/* DROPDOWN */}
       {open && (
         <div
           className="
@@ -66,13 +71,17 @@ export default function UserMenu() {
             overflow-hidden
           "
         >
+          {/* USER INFO */}
           <div className="px-4 py-3">
-            <p className="text-sm font-medium text-white truncate">{name ?? "Account"}</p>
+            <p className="text-sm font-medium text-white truncate">
+              {name ?? "Account"}
+            </p>
             <p className="text-xs text-zinc-400 truncate">{email}</p>
           </div>
 
           <div className="h-px bg-white/10" />
 
+          {/* PLAN INFO */}
           <div className="px-4 py-3 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-zinc-400">Plan</span>
@@ -87,10 +96,31 @@ export default function UserMenu() {
 
           <div className="h-px bg-white/10" />
 
+          {/* LINKS */}
           <div className="py-1">
+            {plan !== "free" && (
+              <Link
+                href="/history"
+                className="
+                  block px-4 py-2.5 text-sm
+                  text-white/80
+                  hover:bg-white/5 hover:text-white
+                  transition
+                "
+                onClick={() => setOpen(false)}
+              >
+                History
+              </Link>
+            )}
+
             <Link
               href="/account"
-              className="block px-4 py-2.5 text-sm text-white/80 hover:bg-white/5 hover:text-white transition"
+              className="
+                block px-4 py-2.5 text-sm
+                text-white/80
+                hover:bg-white/5 hover:text-white
+                transition
+              "
               onClick={() => setOpen(false)}
             >
               Account
@@ -98,7 +128,12 @@ export default function UserMenu() {
 
             <Link
               href="/#pricing"
-              className="block px-4 py-2.5 text-sm text-white/80 hover:bg-white/5 hover:text-white transition"
+              className="
+                block px-4 py-2.5 text-sm
+                text-white/80
+                hover:bg-white/5 hover:text-white
+                transition
+              "
               onClick={() => setOpen(false)}
             >
               See pricing
@@ -106,22 +141,18 @@ export default function UserMenu() {
 
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="w-full px-4 py-2.5 text-left text-sm text-red-400 hover:bg-white/5 transition"
+              className="
+                w-full px-4 py-2.5 text-left text-sm
+                text-red-400
+                hover:bg-white/5
+                transition
+              "
             >
               Log out
             </button>
           </div>
         </div>
       )}
-      {plan !== "free" && (
-  <Link
-    href="/history"
-    className="block px-4 py-2.5 text-sm text-white/80 hover:bg-white/5 transition"
-  >
-    History
-  </Link>
-)}
-
     </div>
   );
 }
