@@ -1,18 +1,97 @@
 "use client";
 
+import Link from "next/link";
 import UpgradeButton from "@/components/UpgradeButton";
+
+type PlanCardProps = {
+  title: string;
+  subtitle: string;
+  price: string;
+  highlight?: boolean;
+  badge?: string;
+  light?: boolean;
+  children: React.ReactNode;
+};
+
+function PlanCard({
+  title,
+  subtitle,
+  price,
+  highlight,
+  badge,
+  light,
+  children,
+}: PlanCardProps) {
+  return (
+    <div
+      className={[
+        "relative rounded-2xl p-8 backdrop-blur",
+        light
+          ? "bg-white text-black border border-white"
+          : highlight
+            ? "border border-indigo-500/40 bg-indigo-500/10"
+            : "border border-white/10 bg-black/30 text-white",
+      ].join(" ")}
+    >
+      {badge && (
+        <div className="absolute -top-3 right-6 rounded-full bg-indigo-500 px-3 py-1 text-xs font-medium text-white">
+          {badge}
+        </div>
+      )}
+
+      <h3 className="text-xl font-semibold">{title}</h3>
+      <p className={light ? "mt-2 text-zinc-600" : "mt-2 text-zinc-400"}>
+        {subtitle}
+      </p>
+
+      <div className="mt-6 text-3xl font-semibold">{price}</div>
+
+      <ul
+        className={[
+          "mt-6 space-y-3 text-sm",
+          light ? "text-zinc-700" : "text-zinc-300",
+        ].join(" ")}
+      >
+        {children}
+      </ul>
+    </div>
+  );
+}
 
 export default function PricingSection() {
   return (
-    <section id="pricing" className="mx-auto max-w-6xl px-6 pb-24">
-      <h2 className="text-center text-4xl font-semibold">Pricing</h2>
+    <section id="pricing" className="mx-auto max-w-6xl px-6 py-24 text-white">
+      {/* HERO */}
+      <div className="mb-16 text-center">
+        <h2 className="text-4xl font-semibold">
+          Simple pricing for serious creators
+        </h2>
+        <p className="mt-4 mx-auto max-w-2xl text-zinc-400">
+          Start free. Upgrade only when you need higher limits and full
+          insights.
+        </p>
+      </div>
 
-      <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
+      {/* PLANS */}
+      <div className="grid gap-8 md:grid-cols-3">
         {/* FREE */}
         <PlanCard title="Free" subtitle="Try the workflow risk-free" price="$0">
-          <li>Limited daily analyses</li>
-          <li>Up to 5 minutes per audio</li>
-          <li>Preview insights</li>
+          <li>✔ 1 analysis per day</li>
+          <li>✔ Up to 5 minutes per audio</li>
+          <li>✔ Preview viral insights</li>
+          <li className="text-zinc-500">✖ No transcript</li>
+          <li className="text-zinc-500">✖ No analysis history</li>
+
+          <Link
+            href="/"
+            className="mt-6 block w-full rounded-xl border border-white/15 px-4 py-3 text-center text-sm hover:bg-white/5"
+          >
+            Start free
+          </Link>
+
+          <p className="mt-2 text-center text-xs text-zinc-500">
+            No credit card required.
+          </p>
         </PlanCard>
 
         {/* PLUS */}
@@ -23,11 +102,22 @@ export default function PricingSection() {
           highlight
           badge="Most popular"
         >
-          <li>120 minutes / month</li>
-          <li>Up to 10 minutes per audio</li>
-          <li>Full transcript & insights</li>
-          <li>Faster processing</li>
+          <li>✔ Full viral report (all sections)</li>
+          <li>✔ Transcript included</li>
+          <li>✔ Copy full report</li>
+          <li>✔ Analysis history</li>
+          <li className="pt-2">
+            🧾 Up to <span className="font-medium">120 minutes / month</span>
+          </li>
+          <li>
+            🧾 Up to <span className="font-medium">10 min per audio</span>
+          </li>
+
           <UpgradeButton plan="plus" label="Upgrade to Plus" className="mt-6" />
+
+          <p className="mt-2 text-center text-xs text-zinc-300">
+            Secure checkout powered by Lemon.
+          </p>
         </PlanCard>
 
         {/* PRO */}
@@ -37,68 +127,34 @@ export default function PricingSection() {
           price="$19.99 / month"
           light
         >
-          <li>400 minutes / month</li>
-          <li>Up to 20 minutes per audio</li>
-          <li>Priority processing</li>
-          <li>Advanced tools</li>
+          <li>✔ Everything in Plus</li>
+          <li>✔ Priority processing</li>
+          <li>✔ Faster turnaround</li>
+          <li className="pt-2">
+            🧾 Up to <span className="font-medium">400 minutes / month</span>
+          </li>
+          <li>
+            🧾 Up to <span className="font-medium">20 min per audio</span>
+          </li>
+
           <UpgradeButton
             plan="pro"
             label="Upgrade to Pro"
             variant="dark"
             className="mt-6"
           />
+
+          <p className="mt-2 text-center text-xs text-zinc-600">
+            Cancel anytime. No hidden fees.
+          </p>
         </PlanCard>
       </div>
 
-      <p className="mt-6 text-center text-xs text-zinc-500">
-        Secure payments handled by Lemon. You’re never charged unless you upgrade.
+      {/* FOOTNOTE */}
+      <p className="mt-14 text-center text-xs text-zinc-500">
+        Payments are securely handled by Lemon. You’re only charged if you
+        upgrade.
       </p>
     </section>
-  );
-}
-
-function PlanCard({
-  title,
-  subtitle,
-  price,
-  children,
-  highlight,
-  light,
-  badge,
-}: {
-  title: string;
-  subtitle: string;
-  price: string;
-  children: React.ReactNode;
-  highlight?: boolean;
-  light?: boolean;
-  badge?: string;
-}) {
-  return (
-    <div
-      className={[
-        "relative rounded-3xl p-7",
-        light
-          ? "bg-white text-black"
-          : highlight
-          ? "border border-indigo-400/30 bg-indigo-500/10"
-          : "border border-white/10 bg-black/30",
-      ].join(" ")}
-    >
-      {badge ? (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-500 px-3 py-1 text-xs font-semibold text-white">
-          {badge}
-        </div>
-      ) : null}
-
-      <h3 className="text-2xl font-semibold">{title}</h3>
-      <p className={light ? "mt-2 text-black/70" : "mt-2 text-zinc-400"}>
-        {subtitle}
-      </p>
-
-      <div className="mt-6 text-4xl font-extrabold">{price}</div>
-
-      <ul className="mt-6 space-y-3 text-sm">{children}</ul>
-    </div>
   );
 }

@@ -70,7 +70,7 @@ export default function ResultsView({
         {!isPro && mode === "preview" && (
           <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-zinc-900/70 px-4 py-1.5 text-xs font-medium text-zinc-300 backdrop-blur">
             <span className="text-indigo-300">🔒</span>
-            You’re viewing a preview · Upgrade to unlock full access
+            You’re viewing a preview · Unlock the full viral analysis
           </div>
         )}
       </div>
@@ -100,7 +100,7 @@ export default function ResultsView({
             onClick={handleUpgrade}
             className="rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 px-6 py-3 text-sm font-semibold shadow-lg shadow-indigo-500/30 hover:brightness-110"
           >
-            Unlock full report
+            Unlock full viral analysis
           </button>
         )}
       </div>
@@ -122,7 +122,7 @@ export default function ResultsView({
         })}
       </div>
 
-      {/* OPEN FULL REPORT */}
+      {/* OPEN FULL REPORT (from preview) */}
       {mode === "preview" && reportId && (
         <div className="pt-2 text-center">
           <a
@@ -134,7 +134,7 @@ export default function ResultsView({
         </div>
       )}
 
-      {/* UPSELL */}
+      {/* FINAL UPSELL */}
       {!isPro && mode === "full" && (
         <div className="rounded-3xl border border-white/10 bg-indigo-600/15 p-10 text-center backdrop-blur-xl">
           <h2 className="mb-3 text-3xl font-semibold">
@@ -142,7 +142,7 @@ export default function ResultsView({
           </h2>
 
           <p className="mx-auto mb-8 max-w-xl text-sm text-zinc-300">
-            Get longer audio support, transcripts and full insights with Pro.
+            Get all 18 insights, full transcript and copy tools with Pro.
           </p>
 
           <button

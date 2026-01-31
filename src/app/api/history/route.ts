@@ -1,28 +1,22 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { getUserPlan } from "@/lib/auth/getUserPlan";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
-export const runtime = "nodejs";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession();
 
   if (!session?.user?.id) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const userId = session.user.id;
-
   const plan = await getUserPlan(userId);
 
-  if (plan !== "pro") {
+  // 🔒 FREE no tiene historial
+  if (plan === "free") {
     return NextResponse.json(
-      { error: "PRO_ONLY" },
+      { error: "Upgrade required" },
       { status: 403 }
     );
   }
@@ -30,15 +24,13 @@ export async function GET() {
   const reports = await prisma.analysisReport.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
+    take: 50,
     select: {
       id: true,
-      status: true,
-      durationSec: true,
-      wasTrimmed: true,
       createdAt: true,
+      durationSec: true,
     },
   });
 
-  return NextResponse.json(reports);
+  return NextResponse.json({ reports });
 }
-

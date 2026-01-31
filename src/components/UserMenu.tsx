@@ -7,17 +7,14 @@ import Link from "next/link";
 
 export default function UserMenu() {
   const { data: session } = useSession();
-  const { plan, usage, isLoading } = useUserPlan();
+  const { plan, isLoading } = useUserPlan();
 
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // cerrar dropdown al clickear afuera
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -29,9 +26,8 @@ export default function UserMenu() {
 
   return (
     <div ref={ref} className="relative">
-      {/* Trigger */}
       <button
-        onClick={() => setOpen(v => !v)}
+        onClick={() => setOpen((v) => !v)}
         className="
           flex items-center gap-2
           rounded-full
@@ -59,7 +55,6 @@ export default function UserMenu() {
         </span>
       </button>
 
-      {/* Dropdown */}
       {open && (
         <div
           className="
@@ -71,17 +66,13 @@ export default function UserMenu() {
             overflow-hidden
           "
         >
-          {/* USER INFO */}
           <div className="px-4 py-3">
-            <p className="text-sm font-medium text-white truncate">
-              {name ?? "Account"}
-            </p>
+            <p className="text-sm font-medium text-white truncate">{name ?? "Account"}</p>
             <p className="text-xs text-zinc-400 truncate">{email}</p>
           </div>
 
           <div className="h-px bg-white/10" />
 
-          {/* PLAN INFO */}
           <div className="px-4 py-3 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-zinc-400">Plan</span>
@@ -90,42 +81,47 @@ export default function UserMenu() {
               </span>
             </div>
             <div className="mt-1 text-xs text-zinc-500">
-  Limits apply automatically based on your plan
-</div>
-
+              Access is based on your plan.
+            </div>
           </div>
 
           <div className="h-px bg-white/10" />
 
-          {/* ACTIONS */}
           <div className="py-1">
             <Link
-              href="/#pricing"
-              className="
-                block px-4 py-2.5
-                text-sm text-white/80
-                hover:bg-white/5 hover:text-white
-                transition
-              "
+              href="/account"
+              className="block px-4 py-2.5 text-sm text-white/80 hover:bg-white/5 hover:text-white transition"
               onClick={() => setOpen(false)}
             >
-              Manage plan
+              Account
+            </Link>
+
+            <Link
+              href="/#pricing"
+              className="block px-4 py-2.5 text-sm text-white/80 hover:bg-white/5 hover:text-white transition"
+              onClick={() => setOpen(false)}
+            >
+              See pricing
             </Link>
 
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="
-                w-full px-4 py-2.5
-                text-left text-sm text-red-400
-                hover:bg-white/5
-                transition
-              "
+              className="w-full px-4 py-2.5 text-left text-sm text-red-400 hover:bg-white/5 transition"
             >
               Log out
             </button>
           </div>
         </div>
       )}
+      {plan !== "free" && (
+  <Link
+    href="/history"
+    className="block px-4 py-2.5 text-sm text-white/80 hover:bg-white/5 transition"
+  >
+    History
+  </Link>
+)}
+
     </div>
   );
 }

@@ -7,13 +7,27 @@ import { withRetry } from "@/lib/retry";
 import { getAudioDurationSeconds } from "@/lib/audioDuration";
 import { useSession } from "next-auth/react";
 import { useUserPlan } from "@/lib/useUserPlan";
+
 import LoginCard from "./LoginCard";
 import AnalyzingExperience from "./AnalyzingExperience";
 import ReportReady from "./ReportReady";
 import PlanBadge from "@/components/analysis/PlanBadge";
-import LimitReachedPanel, { type LimitReason } from "@/components/analysis/LimitReachedPanel";
+import LimitReachedPanel, {
+  type LimitReason,
+} from "@/components/analysis/LimitReachedPanel";
 
-// ⬅️ alineado con backend
+/* =========================
+   Types
+========================= */
+
+type AnalyzeResult = {
+  id: string;
+};
+
+/* =========================
+   Constants
+========================= */
+
 const ALLOWED_TYPES = [
   "audio/mpeg",
   "audio/wav",
@@ -25,30 +39,42 @@ const ALLOWED_TYPES = [
 
 const EXT_OK = [".mp3", ".wav", ".m4a", ".ogg", ".webm"];
 
-const MIN_AUDIO_SECONDS = Number(process.env.NEXT_PUBLIC_MIN_AUDIO_SECONDS ?? 8);
+const MIN_AUDIO_SECONDS = Number(
+  process.env.NEXT_PUBLIC_MIN_AUDIO_SECONDS ?? 8,
+);
+
+/* =========================
+   Component
+========================= */
 
 export default function UploadBox() {
-  const { data: session } = useSession();
-  const { plan, usage, isLoading: planLoading, refresh: refreshPlan } =
-  useUserPlan();
+  const { data: session, status: sessionStatus } = useSession();
+  const { plan, isLoading: planLoading } = useUserPlan();
+
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [limitReason, setLimitReason] = useState<LimitReason | null>(null);
   const [showLogin, setShowLogin] = useState(false);
 
-
   const [analyzing, setAnalyzing] = useState(false);
-  const [result, setResult] = useState<any | null>(null);
+  const [result, setResult] = useState<AnalyzeResult | null>(null);
 
-  // Esperar a que el plan esté cargado
-  if (planLoading) {
+  /* =========================
+     Guards
+  ========================= */
+
+  if (sessionStatus === "loading" || planLoading) {
     return (
       <div className="rounded-2xl border border-white/10 bg-black/25 p-6 text-center text-sm text-zinc-400">
         Loading…
       </div>
     );
   }
+
+  /* =========================
+     Handlers
+  ========================= */
 
   function handleFile(f: File | null) {
     setError(null);
@@ -59,7 +85,7 @@ export default function UploadBox() {
 
     if (!ALLOWED_TYPES.includes(f.type) && !EXT_OK.includes(ext)) {
       setError(
-        "Unsupported file format. Please upload MP3, WAV, M4A, OGG or WEBM."
+        "Unsupported file format. Please upload MP3, WAV, M4A, OGG or WEBM.",
       );
       return;
     }
@@ -76,17 +102,17 @@ export default function UploadBox() {
   async function handleAnalyze() {
     if (!file || analyzing) return;
 
-    // 🔐 LOGIN OBLIGATORIO
     if (!session) {
       setShowLogin(true);
       return;
     }
 
-    // Client-side guardrail for very short audios (best-effort)
     const dur = await getAudioDurationSeconds(file);
     if (dur !== null && dur < MIN_AUDIO_SECONDS) {
       setError(
-        `Audio too short (${Math.round(dur)}s). Please upload at least ${MIN_AUDIO_SECONDS}s.`
+        `Audio too short (${Math.round(
+          dur,
+        )}s). Please upload at least ${MIN_AUDIO_SECONDS}s.`,
       );
       return;
     }
@@ -104,7 +130,7 @@ export default function UploadBox() {
     }, 100);
 
     try {
-      // 1️⃣ pedir URL de upload
+      /* 1️⃣ Upload URL */
       const uploadRes = await withRetry(
         () =>
           fetch(apiUrl("/api/upload-url"), {
@@ -116,23 +142,25 @@ export default function UploadBox() {
               fileSize: file.size,
             }),
           }),
-        {
-          retries: 2,
-          baseDelayMs: 600,
-        }
+        { retries: 2, baseDelayMs: 600 },
       );
 
       if (!uploadRes.ok) {
-        const d = await uploadRes.json().catch(() => ({}));
-        throw new Error(d?.error || "Upload failed");
+        const d = (await uploadRes.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        throw new Error(d.error || "Upload failed");
       }
 
-      const { uploadUrl, key } = await uploadRes.json();
+      const { uploadUrl, key } = (await uploadRes.json()) as {
+        uploadUrl: string;
+        key: string;
+      };
 
-      // 2️⃣ subir a R2
+      /* 2️⃣ Upload to R2 */
       await uploadToR2(uploadUrl, file);
 
-      // 3️⃣ ANALYZE
+      /* 3️⃣ Analyze */
       const analyzeRes = await withRetry(
         () =>
           fetch(apiUrl("/api/analyze"), {
@@ -140,43 +168,36 @@ export default function UploadBox() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ key }),
           }),
-        {
-          retries: 2,
-          baseDelayMs: 800,
-          shouldRetry: (err) => !(err as any)?.noRetry,
-        }
+        { retries: 2, baseDelayMs: 800 },
       );
 
-      const data = await analyzeRes.json().catch(() => ({}));
+      const data = (await analyzeRes.json().catch(() => ({}))) as Record<
+        string,
+        unknown
+      >;
 
       if (!analyzeRes.ok) {
-        // Known guardrails (friendly inline panel instead of hard errors)
-        const code = data?.code as string | undefined;
+        const code = data.code as string | undefined;
 
         if (analyzeRes.status === 422 && code === "AUDIO_TOO_SHORT") {
-          const e: any = new Error(data?.message || "Audio too short.");
-          e.noRetry = true;
-          throw e;
+          throw new Error((data.message as string) || "Audio too short.");
         }
 
-        // Audio too long (backend returns 422 with message in `error`)
-        if (
-          analyzeRes.status === 422 &&
-          (code === undefined || code === null) &&
-          String(data?.error || "").toLowerCase().includes("audio too long")
-        ) {
+        if (analyzeRes.status === 422 && code === "AUDIO_TOO_LONG") {
           setLimitReason({
             kind: "audio_too_long",
             plan,
             durationSec:
-              typeof data?.durationSec === "number" ? data.durationSec : undefined,
+              typeof data.durationSec === "number"
+                ? data.durationSec
+                : undefined,
           });
-          throw Object.assign(new Error(""), { silent: true });
+          return;
         }
 
         if (analyzeRes.status === 429 && code === "DAILY_LIMIT_REACHED") {
           setLimitReason({ kind: "daily_limit_reached", plan });
-          throw Object.assign(new Error(""), { silent: true });
+          return;
         }
 
         if (analyzeRes.status === 429 && code === "MONTHLY_LIMIT_REACHED") {
@@ -184,33 +205,41 @@ export default function UploadBox() {
             kind: "monthly_limit_reached",
             plan,
             remainingMinutes:
-              typeof data?.remainingMinutes === "number"
+              typeof data.remainingMinutes === "number"
                 ? data.remainingMinutes
                 : undefined,
           });
-          throw Object.assign(new Error(""), { silent: true });
+          return;
         }
 
-        throw new Error(data?.error || data?.message || "Analysis failed");
+        throw new Error(
+          (data.error as string) ||
+            (data.message as string) ||
+            "Analysis failed",
+        );
       }
 
-      // 4️⃣ mostrar resultado
-      setResult(data);
-      // refresh plan + usage snapshot (minutes/daily remaining)
-      refreshPlan();
-    } catch (err: any) {
-      if (err?.silent) return;
-      setError(err?.message || "Something went wrong");
+      /* 4️⃣ Success */
+      setResult({ id: data.id as string });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong");
+      }
     } finally {
       setAnalyzing(false);
     }
   }
 
+  /* =========================
+     Render
+  ========================= */
+
   return (
     <div className="text-white">
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <PlanBadge plan={plan} />
-         
       </div>
 
       {/* DROP ZONE */}
@@ -230,29 +259,13 @@ export default function UploadBox() {
             : "border-white/10 hover:border-white/20",
         ].join(" ")}
       >
-        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 ring-1 ring-white/10 sm:mb-4 sm:h-11 sm:w-11">
-          <span className="h-2 w-2 rounded-full bg-indigo-400" />
-        </div>
-
         <p className="text-base font-semibold text-white/90">
           Drag & drop your audio
         </p>
-        <p className="mt-1 text-sm text-zinc-400">or choose a file to upload (MP3, M4A, WAV)</p>
 
         <label
           htmlFor="fileInput"
-          className="
-            mt-4 inline-flex cursor-pointer items-center justify-center
-            rounded-2xl
-            border border-white/25
-            bg-black/40
-            px-5 py-3
-            text-sm font-semibold text-white
-            transition
-            hover:border-indigo-400/60
-            hover:shadow-[0_0_20px_rgba(99,102,241,0.35)]
-            sm:mt-6 sm:px-6
-          "
+          className="mt-4 inline-flex cursor-pointer rounded-2xl border border-white/25 bg-black/40 px-5 py-3 text-sm font-semibold transition hover:border-indigo-400/60"
         >
           Choose file
         </label>
@@ -265,28 +278,6 @@ export default function UploadBox() {
           onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
         />
 
-        {file && (
-          <div className="mt-4 w-full max-w-lg rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-left text-sm text-white/80 sm:mt-5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="truncate font-medium text-white/90">
-                  {file.name}
-                </div>
-                <div className="mt-0.5 text-xs text-zinc-400">
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB
-                </div>
-              </div>
-
-              <button
-                onClick={() => setFile(null)}
-                className="shrink-0 rounded-xl border border-white/10 px-3 py-1.5 text-xs text-white/70 transition hover:bg-white/5 hover:text-white/90"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        )}
-
         {limitReason && (
           <LimitReachedPanel
             reason={limitReason}
@@ -295,7 +286,7 @@ export default function UploadBox() {
         )}
 
         {error && (
-          <div className="mt-4 rounded-2xl border border-red-800/60 bg-red-950/40 px-4 py-3 text-sm text-red-300 sm:mt-5">
+          <div className="mt-4 rounded-2xl border border-red-800/60 bg-red-950/40 px-4 py-3 text-sm text-red-300">
             {error}
           </div>
         )}
@@ -303,43 +294,13 @@ export default function UploadBox() {
         <button
           onClick={handleAnalyze}
           disabled={!file || analyzing}
-          className={[
-            "mt-5 inline-flex w-full max-w-lg items-center justify-center rounded-2xl px-6 py-3 sm:mt-6",
-            "text-sm font-semibold transition",
-            !file || analyzing
-              ? "bg-white/10 text-white/40"
-              : "bg-white text-black hover:bg-zinc-200",
-          ].join(" ")}
+          className="mt-5 w-full max-w-lg rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black disabled:bg-white/10 disabled:text-white/40"
         >
           {analyzing ? "Analyzing…" : "Analyze"}
         </button>
-
-        <div className="mt-3 text-center text-xs text-zinc-500">
-         <div className="mt-4 text-center text-xs text-zinc-500">
-  <p className="leading-relaxed">
-    <span className="text-zinc-400">Recommended:</span> MP3 or M4A ·{" "}
-    <span className="hidden sm:inline">
-      WAV files are much larger and won’t improve results ·{" "}
-    </span>
-    <span className="text-zinc-400">
-      Free: <span className="font-medium text-zinc-300">10 MB</span>
-    </span>{" "}
-    ·{" "}
-    <span className="font-semibold text-white">
-      Plus / Pro: <span className="text-indigo-300">25 MB</span>
-    </span>
-  </p>
-
-  <p className="mt-1 sm:hidden">
-    WAV files are much larger and won’t improve results.
-  </p>
-</div>
-
-
-        </div>
       </div>
 
-      {/* LOGIN MODAL */}
+      {/* LOGIN */}
       {showLogin && (
         <div className="mt-6">
           <LoginCard onClose={() => setShowLogin(false)} />
@@ -348,14 +309,14 @@ export default function UploadBox() {
 
       {/* ANALYZING */}
       {analyzing && (
-        <div id="analyzing" className="mt-8 sm:mt-10">
+        <div id="analyzing" className="mt-8">
           <AnalyzingExperience />
         </div>
       )}
 
       {/* REPORT READY */}
-      {result?.id && (
-        <div className="mt-8 sm:mt-10">
+      {result && (
+        <div className="mt-8">
           <ReportReady reportId={result.id} isPro={plan !== "free"} />
         </div>
       )}

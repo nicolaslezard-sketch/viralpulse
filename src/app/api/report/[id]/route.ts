@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import type { FullReport } from "@/lib/report/types";
 
 export const runtime = "nodejs";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: reportId } = await params;
 
@@ -50,11 +51,15 @@ export async function GET(
   const isPro = viewer?.plan !== "free";
 
   const rawReport = isPro ? report.reportFull : report.reportFree;
-  let reportJson: any = {};
-  try {
-    reportJson = rawReport ? JSON.parse(rawReport) : {};
-  } catch {
-    reportJson = {};
+
+  let reportJson: FullReport | null = null;
+
+  if (rawReport) {
+    try {
+      reportJson = JSON.parse(rawReport) as FullReport;
+    } catch {
+      reportJson = null;
+    }
   }
 
   return NextResponse.json({

@@ -1,20 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useSession } from "next-auth/react";
+import type { UserPlan } from "@/lib/types";
 
-export type UserPlan = "free" | "plus" | "pro";
+const VALID_PLANS: UserPlan[] = ["free", "plus", "pro"];
+
+function normalizePlan(plan: unknown): UserPlan {
+  return VALID_PLANS.includes(plan as UserPlan) ? (plan as UserPlan) : "free";
+}
 
 export function useUserPlan() {
-  // ⚠️ temporal hasta que expongamos un endpoint real
-  const [plan] = useState<UserPlan>("free");
+  const { data: session, status } = useSession();
+
+  const plan = normalizePlan(session?.user?.plan);
 
   return {
     plan,
+    isLoading: status === "loading",
+
+    // flags simples
     isPaid: plan !== "free",
     isPlus: plan === "plus",
     isPro: plan === "pro",
-    usage: null,
-    isLoading: false,
-    refresh: () => {},
   };
 }
+
+export type { UserPlan };
