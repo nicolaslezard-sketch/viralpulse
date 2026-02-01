@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import UploadBox from "@/components/UploadBox";
 import PricingSection from "@/components/PricingSection";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -197,6 +198,34 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ANALYZE BY FORMAT (SEO ENTRY POINTS) */}
+      <section className="mx-auto max-w-6xl px-6 pb-20">
+        <h2 className="text-center text-3xl font-semibold">
+          Analyze content by format
+        </h2>
+        <p className="mt-3 text-center text-zinc-400">
+          ViralPulse adapts analysis to each platform.
+        </p>
+
+        <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <LinkCard
+            title="Podcast Analyzer"
+            desc="Find viral moments, hooks and clips in podcast audio."
+            href="/podcast-virality-analyzer"
+          />
+          <LinkCard
+            title="TikTok Virality Analyzer"
+            desc="Optimize short-form content for TikTok retention."
+            href="/tiktok-virality-analyzer"
+          />
+          <LinkCard
+            title="YouTube Shorts Analyzer"
+            desc="Detect high-retention hooks for YouTube Shorts."
+            href="/youtube-shorts-virality-analyzer"
+          />
+        </div>
+      </section>
+
       {/* PRICING */}
       <PricingSection />
 
@@ -294,5 +323,31 @@ function Bullet({ children }: { children: React.ReactNode }) {
       <span className="mt-2 h-2 w-2 flex-none rounded-full bg-indigo-400/80" />
       <span className="text-zinc-300">{children}</span>
     </li>
+  );
+}
+function LinkCard({
+  title,
+  desc,
+  href,
+}: {
+  title: string;
+  desc: string;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group rounded-2xl border border-white/10 bg-black/30 p-6 transition hover:border-indigo-400/40 hover:bg-black/40"
+    >
+      <h3 className="text-lg font-semibold transition group-hover:text-indigo-300">
+        {title}
+      </h3>
+
+      <p className="mt-2 text-sm text-zinc-400">{desc}</p>
+
+      <div className="mt-4 text-sm text-indigo-400 opacity-0 transition group-hover:opacity-100">
+        Explore →
+      </div>
+    </Link>
   );
 }

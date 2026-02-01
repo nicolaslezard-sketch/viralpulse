@@ -116,7 +116,7 @@ export default function PricingSection() {
           <UpgradeButton plan="plus" label="Upgrade to Plus" className="mt-6" />
 
           <p className="mt-2 text-center text-xs text-zinc-300">
-            Secure checkout powered by Lemon.
+            Secure checkout. Cancel anytime.
           </p>
         </PlanCard>
 
