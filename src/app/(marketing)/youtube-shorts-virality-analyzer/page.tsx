@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function YouTubeShortsViralityAnalyzerPage() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-24">
+    <main className="mx-auto max-w-6xl px-6 py-24 text-white">
       {/* HERO */}
       <section className="text-center">
         <h1 className="mx-auto max-w-3xl text-4xl font-semibold leading-tight md:text-5xl">
@@ -52,7 +52,7 @@ export default function YouTubeShortsViralityAnalyzerPage() {
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
           <h3 className="text-lg font-semibold">1. Upload audio</h3>
           <p className="mt-3 text-sm text-zinc-300">
-            Upload narration, voiceover or a short-form clip audio.
+            Upload narration, voiceover or short-form clip audio.
           </p>
         </div>
 
@@ -91,6 +91,25 @@ export default function YouTubeShortsViralityAnalyzerPage() {
         </p>
       </section>
 
+      {/* INTERLINKING / CLUSTER */}
+      <section className="mt-32 border-t border-white/10 pt-16">
+        <h3 className="text-xl font-semibold">Analyze other content formats</h3>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <LinkCard
+            title="Podcast Clip Analyzer"
+            desc="Turn podcast episodes into viral short clips."
+            href="/podcast-clip-analyzer"
+          />
+
+          <LinkCard
+            title="TikTok Virality Analyzer"
+            desc="Analyze short-form audio for TikTok retention."
+            href="/tiktok-viral-audio-analysis"
+          />
+        </div>
+      </section>
+
       {/* FINAL CTA */}
       <section className="mt-32 rounded-3xl border border-white/10 bg-linear-to-br from-red-500/20 to-indigo-500/10 p-10 text-center">
         <h2 className="text-3xl font-semibold">
@@ -110,5 +129,32 @@ export default function YouTubeShortsViralityAnalyzerPage() {
         </Link>
       </section>
     </main>
+  );
+}
+
+/* ---------- UI helper ---------- */
+
+function LinkCard({
+  title,
+  desc,
+  href,
+}: {
+  title: string;
+  desc: string;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group rounded-2xl border border-white/10 bg-black/30 p-6 transition hover:border-indigo-400/40 hover:bg-black/40"
+    >
+      <h4 className="text-lg font-semibold transition group-hover:text-indigo-300">
+        {title}
+      </h4>
+      <p className="mt-2 text-sm text-zinc-400">{desc}</p>
+      <div className="mt-4 text-sm text-indigo-400 opacity-0 transition group-hover:opacity-100">
+        Explore →
+      </div>
+    </Link>
   );
 }

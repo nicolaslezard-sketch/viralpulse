@@ -339,16 +339,36 @@ function LinkCard({
   return (
     <Link
       href={href}
-      className="group rounded-2xl border border-white/10 bg-black/30 p-6 transition hover:border-indigo-400/40 hover:bg-black/40"
+      className="
+        group relative overflow-hidden rounded-2xl
+        border border-white/10
+        bg-black/30
+        p-6
+        transition-all duration-300
+        hover:-translate-y-1
+        hover:border-indigo-400/40
+        hover:bg-black/40
+        hover:shadow-[0_0_0_1px_rgba(99,102,241,0.15),0_20px_40px_-20px_rgba(99,102,241,0.4)]
+      "
     >
-      <h3 className="text-lg font-semibold transition group-hover:text-indigo-300">
+      {/* Badge */}
+      <div className="mb-4 inline-flex items-center rounded-full border border-indigo-400/20 bg-indigo-500/10 px-3 py-1 text-xs text-indigo-300">
+        Format analyzer
+      </div>
+
+      <h3 className="text-lg font-semibold transition-colors group-hover:text-indigo-300">
         {title}
       </h3>
 
       <p className="mt-2 text-sm text-zinc-400">{desc}</p>
 
-      <div className="mt-4 text-sm text-indigo-400 opacity-0 transition group-hover:opacity-100">
-        Explore →
+      {/* CTA */}
+      <div className="mt-6 flex items-center justify-between">
+        <span className="text-sm text-zinc-500">Optimized report</span>
+
+        <span className="text-sm font-medium text-indigo-400 transition group-hover:translate-x-1">
+          Analyze →
+        </span>
       </div>
     </Link>
   );
