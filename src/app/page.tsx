@@ -31,8 +31,8 @@ export default function HomePage() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400">
-          Upload an audio or podcast and get a viral-ready report: hooks, titles,
-          clip ideas, key moments and platform strategy.
+          Upload an audio or podcast and get a viral-ready report: hooks,
+          titles, clip ideas, key moments and platform strategy.
         </p>
 
         <div className="mt-8 flex justify-center gap-4">
@@ -51,9 +51,18 @@ export default function HomePage() {
         </div>
 
         <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <ValueCard title="Instant clarity" desc="Understand what works and why, fast." />
-          <ValueCard title="Clip-first output" desc="Find the best moments for Shorts/Reels." />
-          <ValueCard title="Better hooks" desc="Scroll-stopping hooks and titles every time." />
+          <ValueCard
+            title="Instant clarity"
+            desc="Understand what works and why, fast."
+          />
+          <ValueCard
+            title="Clip-first output"
+            desc="Find the best moments for Shorts/Reels."
+          />
+          <ValueCard
+            title="Better hooks"
+            desc="Scroll-stopping hooks and titles every time."
+          />
         </div>
       </section>
 
@@ -120,10 +129,22 @@ export default function HomePage() {
         </p>
 
         <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-4">
-          <Step title="Transcription" desc="We convert your audio to clean text to understand context." />
-          <Step title="Analysis" desc="We detect patterns: tension, novelty, clarity, pacing." />
-          <Step title="Generation" desc="Hooks, titles, clips, angles — ready to copy." />
-          <Step title="Publish" desc="Pick the best moment and post with confidence." />
+          <Step
+            title="Transcription"
+            desc="We convert your audio to clean text to understand context."
+          />
+          <Step
+            title="Analysis"
+            desc="We detect patterns: tension, novelty, clarity, pacing."
+          />
+          <Step
+            title="Generation"
+            desc="Hooks, titles, clips, angles — ready to copy."
+          />
+          <Step
+            title="Publish"
+            desc="Pick the best moment and post with confidence."
+          />
         </div>
       </section>
 
@@ -179,8 +200,35 @@ export default function HomePage() {
       {/* PRICING */}
       <PricingSection />
 
-      <footer className="py-10 text-center text-sm text-zinc-500">
-        © {new Date().getFullYear()} ViralPulse
+      <footer className="border-t border-white/10 py-10">
+        <div className="mx-auto max-w-6xl px-6 text-center text-sm text-zinc-500">
+          <div className="flex flex-wrap justify-center gap-6">
+            <a href="/terms" className="hover:text-white transition">
+              Terms of Service
+            </a>
+
+            <a href="/privacy" className="hover:text-white transition">
+              Privacy Policy
+            </a>
+
+            <a href="/refund" className="hover:text-white transition">
+              Refund Policy
+            </a>
+          </div>
+
+          <p className="mt-6 text-xs text-zinc-500">
+            © {new Date().getFullYear()} ViralPulse. All rights reserved.
+          </p>
+          <p className="mt-4 text-xs text-zinc-500">
+            Support:{" "}
+            <a
+              href="mailto:support@viralpulse.studio"
+              className="underline hover:text-white"
+            >
+              support@viralpulse.studio
+            </a>
+          </p>
+        </div>
       </footer>
     </main>
   );
@@ -188,7 +236,13 @@ export default function HomePage() {
 
 /* ---------- UI helpers (SERVER SAFE) ---------- */
 
-function Pill({ children, glow }: { children: React.ReactNode; glow?: boolean }) {
+function Pill({
+  children,
+  glow,
+}: {
+  children: React.ReactNode;
+  glow?: boolean;
+}) {
   return (
     <span
       className={[

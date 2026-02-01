@@ -298,6 +298,26 @@ export default function UploadBox() {
         >
           {analyzing ? "Analyzing…" : "Analyze"}
         </button>
+        <div className="mt-4 text-center text-xs text-zinc-500">
+          <p className="leading-relaxed">
+            <span className="text-zinc-400">Recommended:</span> MP3 or M4A ·{" "}
+            <span className="hidden sm:inline">
+              WAV files are much larger and won’t improve results ·{" "}
+            </span>
+            <span className="text-zinc-400">
+              Free: <span className="font-medium text-zinc-300">10 MB</span>
+            </span>{" "}
+            ·{" "}
+            <span className="font-semibold text-white">
+              Plus / Pro: <span className="text-indigo-300">25 MB</span>
+            </span>
+          </p>
+
+          {/* Mobile-only WAV disclaimer */}
+          <p className="mt-1 sm:hidden">
+            WAV files are much larger and won’t improve results.
+          </p>
+        </div>
       </div>
 
       {/* LOGIN */}
