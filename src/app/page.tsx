@@ -211,13 +211,15 @@ export default function HomePage() {
           <LinkCard
             title="Podcast Analyzer"
             desc="Find viral moments, hooks and clips in podcast audio."
-            href="/podcast-virality-analyzer"
+            href="/podcast-clip-analyzer"
           />
+
           <LinkCard
             title="TikTok Virality Analyzer"
             desc="Optimize short-form content for TikTok retention."
-            href="/tiktok-virality-analyzer"
+            href="/tiktok-viral-audio-analysis"
           />
+
           <LinkCard
             title="YouTube Shorts Analyzer"
             desc="Detect high-retention hooks for YouTube Shorts."
