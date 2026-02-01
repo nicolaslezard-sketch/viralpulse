@@ -15,5 +15,5 @@ export const MONTHLY_MINUTES_BY_PLAN: Record<PlanKey, number> = {
   pro: 400,
 };
 
-/** Free: 1 análisis por día */
-export const FREE_DAILY_ANALYSIS_LIMIT = 1;
+/** Free: 3 análisis por día */
+export const FREE_DAILY_ANALYSIS_LIMIT = 3;

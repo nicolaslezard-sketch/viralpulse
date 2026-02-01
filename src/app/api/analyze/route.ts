@@ -48,7 +48,6 @@ export async function POST(req: Request) {
     const plan = (await getUserPlan(userId)) as PlanKey;
     const limits = limitsByPlan[plan];
 
-
     /* =========================
        TRANSCRIPTION (SOURCE OF TRUTH)
     ========================= */
@@ -70,7 +69,7 @@ export async function POST(req: Request) {
           message: "Audio too short to generate a useful report.",
           durationSec,
         },
-        { status: 422 }
+        { status: 422 },
       );
     }
 
@@ -79,11 +78,11 @@ export async function POST(req: Request) {
         {
           code: "AUDIO_TOO_LONG",
           message: `Your plan allows up to ${Math.round(
-            limits.maxSeconds / 60
+            limits.maxSeconds / 60,
           )} minutes per audio.`,
           durationSec,
         },
-        { status: 422 }
+        { status: 422 },
       );
     }
 
@@ -98,9 +97,10 @@ export async function POST(req: Request) {
         return NextResponse.json(
           {
             code: "DAILY_LIMIT_REACHED",
-            message: "Daily free limit reached. Try again tomorrow or upgrade.",
+            message:
+              "You’ve used your 3 free analyses today. Upgrade to unlock unlimited audio analysis.",
           },
-          { status: 429 }
+          { status: 429 },
         );
       }
     }
@@ -118,7 +118,7 @@ export async function POST(req: Request) {
           message: "Monthly minute limit reached.",
           remainingMinutes: monthly.remaining,
         },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
