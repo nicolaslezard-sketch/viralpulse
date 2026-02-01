@@ -80,7 +80,7 @@ export async function consumeMonthlyMinutes(params: {
 }
 
 /**
- * Free: 1 análisis por día.
+ * Free: 3 análisis por día.
  * Requiere un modelo Prisma:
  *
  * model DailyUsage {

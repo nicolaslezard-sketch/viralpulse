@@ -98,7 +98,7 @@ export async function POST(req: Request) {
           {
             code: "DAILY_LIMIT_REACHED",
             message:
-              "You’ve used your 3 free analyses today. Upgrade to unlock unlimited audio analysis.",
+              "You’ve used your 3 free analyses today. Try again tomorrow or upgrade.",
           },
           { status: 429 },
         );
