@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "How to Find Viral Podcast Clips (Without Guessing)",
@@ -136,7 +135,12 @@ export default function BlogPost() {
 
           <p>
             Tools like a{" "}
-            <Link href="/podcast-clip-analyzer">podcast clip analyzer</Link>{" "}
+            <a
+              href="/podcast-clip-analyzer"
+              className="font-medium text-indigo-400 underline hover:text-indigo-300"
+            >
+              podcast clip analyzer
+            </a>{" "}
             help creators focus on the moments that matter, saving hours per
             episode and removing much of the guesswork.
           </p>
@@ -159,12 +163,12 @@ export default function BlogPost() {
             <p className="mt-2 text-sm text-zinc-300">
               Analyze your podcast audio and identify high-performing moments
               using the{" "}
-              <Link
+              <a
                 href="/podcast-clip-analyzer"
                 className="font-medium text-indigo-400 underline hover:text-indigo-300"
               >
                 Podcast Clip Analyzer
-              </Link>
+              </a>
               .
             </p>
           </div>
