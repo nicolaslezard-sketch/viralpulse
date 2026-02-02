@@ -1,179 +1,174 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "How to Find Viral Podcast Clips (Without Guessing)",
+  title: "Podcast Clip Analyzer – Find Viral Podcast Moments | ViralPulse",
   description:
-    "Learn how to identify podcast moments with viral potential and turn long-form audio into high-performing short clips for TikTok and YouTube Shorts.",
+    "Analyze podcast audio with AI to discover viral moments, hooks and clip ideas optimized for TikTok, Reels and YouTube Shorts.",
+  alternates: {
+    canonical: "https://viralpulse.studio/podcast-clip-analyzer",
+  },
+  openGraph: {
+    title: "Podcast Clip Analyzer – Find Viral Podcast Moments",
+    description:
+      "AI-powered podcast clip analyzer that detects viral hooks, emotional peaks and high-retention moments.",
+    url: "https://viralpulse.studio/podcast-clip-analyzer",
+    siteName: "ViralPulse",
+    type: "website",
+  },
 };
 
-export default function BlogPost() {
+export default function PodcastClipAnalyzerPage() {
   return (
-    <main className="relative mx-auto max-w-4xl px-6 py-24 text-zinc-200">
-      {/* subtle background glow */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-b from-indigo-500/10 via-transparent to-transparent" />
+    <main className="mx-auto max-w-6xl px-6 py-24 text-white">
+      {/* HERO */}
+      <section className="text-center">
+        <h1 className="mx-auto max-w-3xl text-4xl font-semibold leading-tight md:text-5xl">
+          Podcast Clip Analyzer
+        </h1>
 
-      <article className="rounded-3xl border border-white/10 bg-black/40 p-10 backdrop-blur-md md:p-14">
-        <div className="prose prose-invert max-w-none">
-          <p className="mb-4 text-sm uppercase tracking-wide text-indigo-400">
-            Podcast Growth Guide
+        <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-300">
+          Upload your podcast audio and let AI identify viral moments, hooks and
+          clip ideas — optimized for TikTok, Reels and YouTube Shorts.
+        </p>
+
+        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <Link
+            href="/"
+            className="rounded-xl bg-white px-6 py-3 text-base font-medium text-black transition hover:bg-zinc-200"
+          >
+            Analyze a Podcast
+          </Link>
+
+          <span className="text-sm text-zinc-400">
+            Free analysis · No credit card required
+          </span>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="mt-32 grid gap-12 md:grid-cols-3">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h3 className="text-lg font-semibold">1. Upload your podcast</h3>
+          <p className="mt-3 text-sm text-zinc-300">
+            Upload a full episode or a podcast audio segment.
           </p>
+        </div>
 
-          <h1>How to Find Viral Podcast Clips (Without Guessing)</h1>
-
-          <p>Finding viral podcast clips isn’t about luck.</p>
-
-          <p>
-            It’s about knowing where attention spikes, emotion peaks, and hooks
-            happen — and most creators still guess.
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h3 className="text-lg font-semibold">2. AI analyzes virality</h3>
+          <p className="mt-3 text-sm text-zinc-300">
+            ViralPulse detects hooks, emotional peaks and high-retention
+            moments.
           </p>
+        </div>
 
-          <p>Long-form podcasts are full of moments with viral potential.</p>
-
-          <p>
-            But turning a 60-minute episode into clips that actually perform on
-            TikTok, Reels or YouTube Shorts is harder than it looks.
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h3 className="text-lg font-semibold">3. Get clip-ready insights</h3>
+          <p className="mt-3 text-sm text-zinc-300">
+            Receive timestamps, clip ideas and short-form recommendations.
           </p>
+        </div>
+      </section>
 
-          <p>The real challenge isn’t editing — it’s knowing what to clip.</p>
+      {/* SEO CONTENT */}
+      <section className="mt-32 max-w-3xl text-zinc-300">
+        <h2 className="text-2xl font-semibold text-white">
+          Why analyze podcast audio for viral clips?
+        </h2>
 
-          <h2>Why some podcast clips go viral (and most don’t)</h2>
+        <p className="mt-6">
+          Manually finding viral podcast moments takes hours and relies heavily
+          on intuition. What sounds interesting doesn’t always perform well in
+          short-form.
+        </p>
 
-          <p className="text-lg text-zinc-300">
-            Most viral podcast clips follow the same underlying patterns — even
-            if they look completely different on the surface.
-          </p>
-
-          <ul className="mt-6 space-y-2">
-            <li>
-              <strong>Strong opening hook</strong> in the first seconds
-            </li>
-            <li>
-              <strong>Emotional contrast</strong> (surprise, tension, humor,
-              insight)
-            </li>
-            <li>
-              <strong>Clear, quotable idea</strong> that stands on its own
-            </li>
-            <li>
-              <strong>Pacing</strong> that works outside the full episode
-              context
-            </li>
-          </ul>
-
-          <p>
-            The problem is that these signals aren’t always obvious while
-            listening casually.
-          </p>
-
-          <p>
-            What feels like a good moment doesn’t always translate into
-            short-form performance.
-          </p>
-
-          <h2>The common mistake: finding clips manually</h2>
-
-          <p className="text-lg text-zinc-300">
-            Most podcasters still rely on intuition and repetition.
-          </p>
-
-          <ul className="mt-6 space-y-2">
-            <li>Listening to full episodes again</li>
-            <li>Scrubbing timelines and guessing timestamps</li>
-            <li>Clipping what sounds interesting</li>
-            <li>Posting and hoping something sticks</li>
-          </ul>
-
-          <p>This takes hours per episode and relies heavily on intuition.</p>
-
-          <p>Guessing works sometimes — but it doesn’t scale.</p>
-
-          <p className="mt-8 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
-            Most creators don’t fail because they edit poorly — they fail
-            because they clip the wrong moments.
-          </p>
-
-          <h2>What to look for in a viral podcast clip</h2>
-
-          <p className="text-lg text-zinc-300">
-            High-performing podcast clips tend to share these traits:
-          </p>
-
-          <ul className="mt-6 space-y-3">
-            <li>
-              <strong>Clear hook early:</strong> the listener knows why to keep
-              watching within seconds
-            </li>
-            <li>
-              <strong>Emotional or intellectual payoff:</strong> a strong
-              opinion, insight or relatable moment
-            </li>
-            <li>
-              <strong>Standalone clarity:</strong> the clip makes sense on its
-              own
-            </li>
-            <li>
-              <strong>Natural quotability:</strong> moments people want to share
-            </li>
-            <li>
-              <strong>Short-form pacing:</strong> no long buildup or filler
-            </li>
-          </ul>
-
-          <h2>How creators find viral clips faster (without guessing)</h2>
-
-          <p>
-            Instead of manually re-listening to episodes, many creators now
-            analyze podcast audio to surface moments with viral potential
-            automatically.
-          </p>
-
-          <p>
-            By identifying attention shifts, emotional intensity, clarity and
-            structural hooks, it becomes possible to spot which timestamps are
-            most likely to perform — before editing anything.
-          </p>
-
-          <p>
-            Tools like a{" "}
-            <a
-              href="/podcast-clip-analyzer"
-              className="font-medium text-indigo-400 underline hover:text-indigo-300"
-            >
-              podcast clip analyzer
-            </a>{" "}
-            help creators focus on the moments that matter, saving hours per
-            episode and removing much of the guesswork.
-          </p>
-
-          <h2>Turning long-form podcasts into short-form growth</h2>
-
-          <p>Viral podcast clips aren’t random.</p>
-
-          <p>
-            They follow patterns — and once you can spot those patterns
-            reliably, short-form content becomes a repeatable growth channel
-            instead of a gamble.
-          </p>
-
-          <div className="mt-14 rounded-2xl border border-indigo-400/30 bg-indigo-500/10 p-6">
-            <p className="text-lg font-semibold text-white">
-              Ready to find viral podcast clips without guessing?
-            </p>
-
-            <p className="mt-2 text-sm text-zinc-300">
-              Analyze your podcast audio and identify high-performing moments
-              using the{" "}
-              <a
-                href="/podcast-clip-analyzer"
-                className="font-medium text-indigo-400 underline hover:text-indigo-300"
+        <p className="mt-4">
+          ViralPulse analyzes podcast audio to surface moments with strong
+          hooks, emotional impact and standalone clarity — the key signals
+          short-form platforms reward.
+        </p>
+        {/* SOFT BLOG LINK */}
+        <section className="mt-10 max-w-3xl">
+          <div className="rounded-2xl border border-indigo-400/20 bg-indigo-500/10 p-5">
+            <p className="text-sm text-zinc-300">
+              Want to understand how creators identify viral podcast moments
+              before editing?
+              <Link
+                href="/blog/how-to-find-viral-podcast-clips"
+                className="ml-1 font-medium text-indigo-400 underline hover:text-indigo-300"
               >
-                Podcast Clip Analyzer
-              </a>
-              .
+                Read the full guide →
+              </Link>
             </p>
           </div>
+        </section>
+      </section>
+
+      {/* INTERLINKING / CLUSTER */}
+      <section className="mt-32 border-t border-white/10 pt-16">
+        <h3 className="text-xl font-semibold">Analyze other content formats</h3>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <LinkCard
+            title="TikTok Viral Audio Analysis"
+            desc="Find viral hooks and high-retention TikTok moments."
+            href="/tiktok-viral-audio-analysis"
+          />
+
+          <LinkCard
+            title="YouTube Shorts Analyzer"
+            desc="Detect high-performing hooks for YouTube Shorts."
+            href="/youtube-shorts-virality-analyzer"
+          />
         </div>
-      </article>
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="mt-32 rounded-3xl border border-white/10 bg-linear-to-br from-indigo-500/20 to-purple-500/10 p-10 text-center">
+        <h2 className="text-3xl font-semibold">
+          Turn podcasts into viral short clips
+        </h2>
+
+        <p className="mx-auto mt-4 max-w-xl text-zinc-200">
+          Upload your podcast audio and get AI-powered insights for short-form
+          content.
+        </p>
+
+        <Link
+          href="/"
+          className="mt-8 inline-block rounded-xl bg-white px-8 py-3 font-medium text-black transition hover:bg-zinc-200"
+        >
+          Start Free
+        </Link>
+      </section>
     </main>
+  );
+}
+
+/* ---------- UI helper ---------- */
+
+function LinkCard({
+  title,
+  desc,
+  href,
+}: {
+  title: string;
+  desc: string;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group rounded-2xl border border-white/10 bg-black/30 p-6 transition hover:border-indigo-400/40 hover:bg-black/40"
+    >
+      <h4 className="text-lg font-semibold transition group-hover:text-indigo-300">
+        {title}
+      </h4>
+      <p className="mt-2 text-sm text-zinc-400">{desc}</p>
+      <div className="mt-4 text-sm text-indigo-400 opacity-0 transition group-hover:opacity-100">
+        Explore →
+      </div>
+    </Link>
   );
 }
