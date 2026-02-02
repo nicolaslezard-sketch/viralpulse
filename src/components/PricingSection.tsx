@@ -76,7 +76,7 @@ export default function PricingSection() {
       <div className="grid gap-8 md:grid-cols-3">
         {/* FREE */}
         <PlanCard title="Free" subtitle="Try the workflow risk-free" price="$0">
-          <li>✔ 1 analysis per day</li>
+          <li>✔ 3 analysis per day</li>
           <li>✔ Up to 5 minutes per audio</li>
           <li>✔ Preview viral insights</li>
           <li className="text-zinc-500">✖ No transcript</li>
