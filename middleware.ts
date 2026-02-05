@@ -2,20 +2,13 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// 👤 Emails permitidos (opcional, lo dejamos como está)
-const ALLOWED_EMAILS = new Set([
-  "nicolaslezard@gmail.com",
-]);
-
 export default withAuth(
   function middleware(req: NextRequest) {
     const maintenance = process.env.MAINTENANCE_MODE === "true";
+    const { pathname } = req.nextUrl;
 
-    // 🚧 MODO MANTENIMIENTO
+    // 🚧 Maintenance mode (público)
     if (maintenance) {
-      // Permitimos la página de mantenimiento y assets
-      const { pathname } = req.nextUrl;
-
       if (
         pathname === "/maintenance" ||
         pathname.startsWith("/_next") ||
@@ -24,43 +17,26 @@ export default withAuth(
         return NextResponse.next();
       }
 
-      return NextResponse.redirect(
-        new URL("/maintenance", req.url)
-      );
+      return NextResponse.redirect(new URL("/maintenance", req.url));
     }
 
-    // ✅ Si no hay maintenance, seguimos normal
+    // ✅ Todo OK
     return NextResponse.next();
   },
   {
     callbacks: {
       authorized: ({ token }) => {
-        // 1️⃣ Debe estar logueado
-        if (!token) return false;
-
-        const email =
-          typeof (token as any).email === "string"
-            ? (token as any).email.toLowerCase()
-            : undefined;
-
-        // 2️⃣ Allowlist (opcional, lo dejaste abierto)
-        if (email && ALLOWED_EMAILS.has(email)) return true;
-
-        // Público logueado
-        return true;
+        // 🔒 Solo protegemos rutas privadas
+        return !!token;
       },
     },
     pages: {
       signIn: "/api/auth/signin",
     },
-  }
+  },
 );
 
-// 🔒 Solo protegemos rutas privadas
+// 🎯 SOLO rutas privadas pasan por auth
 export const config = {
-  matcher: [
-    "/dashboard/:path*",
-    "/report/:path*",
-    "/analyze/:path*",
-  ],
+  matcher: ["/dashboard/:path*", "/report/:path*", "/analyze/:path*"],
 };
