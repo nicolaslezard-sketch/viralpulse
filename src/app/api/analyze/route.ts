@@ -156,6 +156,9 @@ export async function POST(req: Request) {
     });
   } catch (err) {
     console.error("❌ analyze error", err);
-    return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Analysis failed. Supported audio size is ≤ 25MB." },
+      { status: 500 },
+    );
   }
 }
