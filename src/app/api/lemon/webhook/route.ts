@@ -22,6 +22,7 @@ type LemonWebhookEvent = {
     attributes?: {
       status?: string;
       renews_at?: string | null;
+      variant_id?: string | number;
       checkout_data?: {
         custom?: {
           userId?: string;
@@ -113,14 +114,19 @@ export async function POST(req: Request) {
     eventName === "subscription_created" ||
     eventName === "subscription_updated"
   ) {
-    const variantId = payload.data?.relationships?.variant?.data?.id ?? null;
-
     const status = payload.data?.attributes?.status ?? null;
 
     const renewsAt = payload.data?.attributes?.renews_at ?? null;
 
+    const variantId =
+      payload.data?.relationships?.variant?.data?.id ??
+      payload.data?.attributes?.variant_id ??
+      null;
+
+    const normalizedVariantId = variantId !== null ? String(variantId) : null;
+
     if (!variantId) {
-      console.log("⚠️ VARIANT ID MISSING");
+      console.log("⚠️ VARIANT ID MISSING (NO ACTION)");
       return NextResponse.json({ ok: true });
     }
 
@@ -131,7 +137,7 @@ export async function POST(req: Request) {
         lemonSubscriptionId: payload.data?.id ?? null,
         lemonCustomerId:
           payload.data?.relationships?.customer?.data?.id ?? null,
-        lemonVariantId: variantId,
+        lemonVariantId: normalizedVariantId,
         subscriptionStatus: status,
         currentPeriodEnd: renewsAt ? new Date(renewsAt) : null,
       },
