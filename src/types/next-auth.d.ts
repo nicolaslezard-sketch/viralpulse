@@ -1,4 +1,5 @@
 import { DefaultSession } from "next-auth";
+import { DefaultJWT } from "next-auth/jwt";
 import type { UserPlan } from "@/lib/types";
 
 declare module "next-auth" {
@@ -11,9 +12,9 @@ declare module "next-auth" {
 }
 
 declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
-    plan: UserPlan;
+  interface JWT extends DefaultJWT {
+    id?: string;
+    plan?: UserPlan;
     planCheckedAt?: number;
   }
 }

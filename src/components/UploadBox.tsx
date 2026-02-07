@@ -277,6 +277,28 @@ export default function UploadBox() {
           className="hidden"
           onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
         />
+        {file && (
+          <div className="mt-4 w-full max-w-lg rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-left text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate font-medium text-white/90">
+                  {file.name}
+                </p>
+                <p className="mt-0.5 text-xs text-zinc-400">
+                  {(file.size / (1024 * 1024)).toFixed(2)} MB ·{" "}
+                  {file.type || "audio"}
+                </p>
+              </div>
+
+              <button
+                onClick={() => setFile(null)}
+                className="text-xs text-red-400 hover:text-red-300"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        )}
 
         {limitReason && (
           <LimitReachedPanel
