@@ -55,6 +55,11 @@ Suggest 5 meme template ideas applicable to this content.
 HOOKS
 Provide 10 strong hooks to capture attention in the first seconds.
 
+PERFORMANCE TAGS
+Provide exactly 3 short performance tags (max 4 words each).
+Each tag should describe a viral or structural strength of the content.
+Write each tag on a new line.
+
 PREDICTED LONGEVITY
 Estimate how long this content could stay relevant and why.
 

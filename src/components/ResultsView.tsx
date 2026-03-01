@@ -2,15 +2,18 @@
 
 import SectionBlock from "./SectionBlock";
 import type { FullReport } from "@/lib/report/types";
-import { REPORT_SECTIONS } from "@/lib/report/sectionNames";
+import {
+  REPORT_SECTIONS,
+  type ReportSectionKey,
+} from "@/lib/report/sectionNames";
 
-const PREVIEW_SECTIONS = [
+const PREVIEW_SECTIONS: ReportSectionKey[] = [
   "SUMMARY",
   "HOOKS",
   "TITLE IDEAS",
   "CLIP IDEAS",
   "HASHTAGS",
-] as const;
+];
 
 type ResultsViewProps = {
   report: FullReport;
@@ -20,6 +23,46 @@ type ResultsViewProps = {
   reportId?: string;
 };
 
+function firstLine(text: string) {
+  return (
+    text
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean)[0] ?? text
+  );
+}
+
+function takeLines(text: string, n: number) {
+  return text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .slice(0, n)
+    .map((l) => `- ${l}`)
+    .join("\n");
+}
+function extractTags(text?: string) {
+  if (!text) return [];
+  return text
+    .split("\n")
+    .map((l) => l.replace(/^-/, "").trim())
+    .filter(Boolean)
+    .slice(0, 3);
+}
+function scoreLabel(score: number) {
+  if (score >= 75)
+    return { label: "🔥 High Viral Potential", color: "text-emerald-300" };
+  if (score >= 50)
+    return {
+      label: "⚡ Decent Potential · Needs Sharpening",
+      color: "text-amber-300",
+    };
+  return {
+    label: "🧊 Low Viral Potential · Major Fixes Needed",
+    color: "text-rose-300",
+  };
+}
+
 export default function ResultsView({
   report,
   transcript,
@@ -27,8 +70,8 @@ export default function ResultsView({
   mode = "preview",
   reportId,
 }: ResultsViewProps) {
-  const sectionsToRender =
-    mode === "preview" ? PREVIEW_SECTIONS : REPORT_SECTIONS;
+  const isFull = mode === "full";
+  const sections = mode === "preview" ? PREVIEW_SECTIONS : REPORT_SECTIONS;
 
   async function handleUpgrade() {
     const res = await fetch("/api/lemon/checkout", {
@@ -41,9 +84,9 @@ export default function ResultsView({
 
   function copyFullReport() {
     const text = REPORT_SECTIONS.map((key) => {
-      const section = report[key];
-      if (!section) return "";
-      return `${section.title}\n${section.content}`;
+      const s = report[key];
+      if (!s) return "";
+      return `${s.title}\n${s.content}`;
     })
       .filter(Boolean)
       .join("\n\n");
@@ -55,103 +98,255 @@ export default function ResultsView({
     if (transcript) navigator.clipboard.writeText(transcript);
   }
 
+  // ---------- HERO DATA ----------
+
+  const performanceTags = report["PERFORMANCE TAGS"];
+
+  const scoreSection = report["VIRALITY SCORE"];
+  let score = 80;
+
+  if (scoreSection?.content) {
+    const match = scoreSection.content.match(/(\d{1,2})/);
+    if (match) {
+      const base = Math.max(1, Math.min(10, Number(match[1])));
+      score = base * 10; // Convert 1–10 to 0–100
+    }
+  }
+
+  const { label: scoreText, color: scoreColor } = scoreLabel(score);
+
+  const summary = report["SUMMARY"];
+  const longevity = report["PREDICTED LONGEVITY"];
+
+  const hooks = report["HOOKS"];
+  const titles = report["TITLE IDEAS"];
+  const clipIdeas = report["CLIP IDEAS"];
+  const keyMoment = report["KEY MOMENT"];
+
+  // ---------- RENDER ----------
+
   return (
-    <div className="mx-auto max-w-5xl space-y-16 px-6 pb-32 text-white">
+    <div className="mx-auto max-w-6xl space-y-14 px-6 pb-32 text-white">
       {/* HEADER */}
-      <div className="space-y-3">
-        <h1 className="text-4xl font-semibold tracking-tight">
-          Viral Content Analysis
-        </h1>
+      <div className="flex flex-col gap-6 md:flex-row md:justify-between md:items-end">
+        <div className="space-y-3">
+          <h1 className="text-4xl font-semibold tracking-tight">
+            Content Command Center
+          </h1>
+          <p className="text-sm text-zinc-400 max-w-2xl">
+            Optimize your content before publishing — faster decisions, stronger
+            hooks, better clips.
+          </p>
+        </div>
 
-        <p className="max-w-2xl text-sm leading-relaxed text-zinc-400">
-          Actionable insights designed to improve reach, retention and engagement.
-        </p>
-
-        {!isPro && mode === "preview" && (
-          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-zinc-900/70 px-4 py-1.5 text-xs font-medium text-zinc-300 backdrop-blur">
-            <span className="text-indigo-300">🔒</span>
-            You’re viewing a preview · Unlock the full viral analysis
-          </div>
-        )}
-      </div>
-
-      {/* ACTIONS */}
-      <div className="flex flex-wrap items-center gap-4">
-        {isPro && mode === "full" ? (
-          <>
-            <button
-              onClick={copyFullReport}
-              className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold hover:border-white/20"
-            >
-              Copy full report
-            </button>
-
-            {transcript && (
+        <div className="flex gap-3 flex-wrap">
+          {isPro && isFull ? (
+            <>
               <button
-                onClick={copyTranscript}
-                className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold hover:border-white/20"
+                onClick={copyFullReport}
+                className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold"
               >
-                Copy transcript
+                Copy full report
               </button>
+              {transcript && (
+                <button
+                  onClick={copyTranscript}
+                  className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold"
+                >
+                  Copy transcript
+                </button>
+              )}
+            </>
+          ) : (
+            <button
+              onClick={handleUpgrade}
+              className="rounded-full bg-indigo-500 px-6 py-3 text-sm font-semibold"
+            >
+              Unlock full command center
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* HERO */}
+      <div className="rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-8">
+          {/* LEFT SIDE */}
+          <div>
+            <div className={`text-6xl font-extrabold ${scoreColor}`}>
+              {score}
+              <span className="text-2xl text-white/60"> / 100</span>
+            </div>
+
+            <div className="mt-2 text-lg font-semibold">{scoreText}</div>
+
+            {isPro && summary ? (
+              <div className="mt-4 text-sm text-zinc-300">
+                <span className="font-semibold text-white/90">
+                  Instant read:
+                </span>{" "}
+                {firstLine(summary.content)}
+              </div>
+            ) : (
+              <div className="mt-4 text-sm text-zinc-400">
+                Unlock the reasoning behind this score to see what’s driving
+                performance.
+              </div>
             )}
-          </>
-        ) : (
-          <button
-            onClick={handleUpgrade}
-            className="rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-500 px-6 py-3 text-sm font-semibold shadow-lg shadow-indigo-500/30 hover:brightness-110"
-          >
-            Unlock full viral analysis
-          </button>
-        )}
+            {isPro && performanceTags && (
+              <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                {extractTags(performanceTags.content).map((tag, i) => (
+                  <span
+                    key={i}
+                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-zinc-200"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            {!isPro && (
+              <div className="mt-6 rounded-xl border border-indigo-500/20 bg-indigo-500/10 px-4 py-3 text-xs text-indigo-200">
+                Pro reveals what’s boosting or hurting this score — and how to
+                fix it.
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT SIDE */}
+          {isPro && longevity && (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-zinc-200 max-w-sm">
+              <div className="text-xs font-semibold text-white/70">
+                Predicted longevity
+              </div>
+              <div className="mt-2">{firstLine(longevity.content)}</div>
+            </div>
+          )}
+        </div>
+      </div>
+      {!isPro && (
+        <div className="mt-6 rounded-xl border border-indigo-500/20 bg-indigo-500/10 px-4 py-3 text-xs text-indigo-200">
+          Pro reveals what’s boosting or hurting this score — and how to fix it.
+        </div>
+      )}
+      {/* INSTANT UPGRADES */}
+      <div>
+        <h2 className="text-xl font-semibold mb-6">Instant Upgrades</h2>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <div className="text-sm font-semibold mb-3">🪝 Stronger Hook</div>
+            <div className="text-sm text-zinc-200 whitespace-pre-wrap">
+              {hooks
+                ? isPro
+                  ? firstLine(hooks.content)
+                  : firstLine(hooks.content) +
+                    "\n\n🔒 More hook variations available in Pro."
+                : "No hooks available."}{" "}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <div className="flex justify-between items-center mb-3">
+              <div className="text-sm font-semibold">🎯 High-CTR Titles</div>
+              {titles && (
+                <button
+                  onClick={() =>
+                    navigator.clipboard.writeText(takeLines(titles.content, 3))
+                  }
+                  className="text-xs"
+                >
+                  Copy top 3
+                </button>
+              )}
+            </div>
+            <div className="text-sm text-zinc-200 whitespace-pre-wrap">
+              {titles
+                ? isPro
+                  ? takeLines(titles.content, 3)
+                  : takeLines(titles.content, 1) +
+                    "\n\n🔒 Unlock 9 more titles with Pro."
+                : "No titles available."}{" "}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <div className="text-sm font-semibold mb-3">
+              🎬 Strongest Viral Clip
+            </div>
+            <div className="text-sm text-zinc-200 whitespace-pre-wrap">
+              {clipIdeas
+                ? isPro
+                  ? firstLine(clipIdeas.content)
+                  : firstLine(clipIdeas.content) +
+                    "\n\n🔒 Full clip breakdown available in Pro."
+                : "No clip ideas available."}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* SECTIONS */}
-      <div className="space-y-8">
-        {sectionsToRender.map((key) => {
-          const section = report[key];
-          if (!section || !section.content) return null;
-
-          return (
-            <SectionBlock
-              key={key}
-              title={section.title}
-              content={section.content}
-              isPro={isPro}
-            />
-          );
-        })}
-      </div>
-
-      {/* OPEN FULL REPORT (from preview) */}
-      {mode === "preview" && reportId && (
-        <div className="pt-2 text-center">
-          <a
-            href={`/report/${reportId}`}
-            className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-7 py-3 text-sm font-semibold hover:border-white/20"
-          >
-            Open full report →
-          </a>
+      {/* CLIP STUDIO */}
+      {keyMoment && (
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <h3 className="text-lg font-semibold mb-3">Best Viral Timing</h3>
+          <div className="text-sm text-zinc-200 whitespace-pre-wrap">
+            {firstLine(keyMoment.content)}
+          </div>
         </div>
       )}
 
-      {/* FINAL UPSELL */}
-      {!isPro && mode === "full" && (
-        <div className="rounded-3xl border border-white/10 bg-indigo-600/15 p-10 text-center backdrop-blur-xl">
-          <h2 className="mb-3 text-3xl font-semibold">
-            Unlock the full viral potential
-          </h2>
+      {/* STRATEGY (COLLAPSIBLE) */}
+      <details className="rounded-3xl border border-white/10 bg-white/5 p-8">
+        <summary className="cursor-pointer text-lg font-semibold">
+          Strategy Insights
+        </summary>
 
-          <p className="mx-auto mb-8 max-w-xl text-sm text-zinc-300">
-            Get all 18 insights, full transcript and copy tools with Pro.
-          </p>
+        <div className="mt-6 space-y-6">
+          {sections.map((key) => {
+            if (
+              key === "SUMMARY" ||
+              key === "HOOKS" ||
+              key === "TITLE IDEAS" ||
+              key === "CLIP IDEAS" ||
+              key === "KEY MOMENT" ||
+              key === "VIRALITY SCORE" ||
+              key === "PREDICTED LONGEVITY"
+            )
+              return null;
 
-          <button
-            onClick={handleUpgrade}
-            className="rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-500 px-10 py-4 text-base font-semibold shadow-xl shadow-indigo-500/40 hover:brightness-110"
-          >
-            Upgrade to Pro
-          </button>
+            const s = report[key];
+            if (!s) return null;
+
+            return (
+              <SectionBlock
+                key={key}
+                title={s.title}
+                content={s.content}
+                isPro={isPro}
+              />
+            );
+          })}
         </div>
+      </details>
+
+      {/* TRANSCRIPT */}
+      {transcript && (
+        <details className="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <summary className="cursor-pointer text-lg font-semibold">
+            Full Transcript {isPro ? "" : "(Pro)"}
+          </summary>
+
+          {isPro ? (
+            <pre className="mt-6 whitespace-pre-wrap text-sm text-zinc-300">
+              {transcript}
+            </pre>
+          ) : (
+            <div className="mt-6 text-sm text-zinc-300">
+              Upgrade to unlock transcript.
+            </div>
+          )}
+        </details>
       )}
     </div>
   );
