@@ -15,11 +15,22 @@ type HistoryItem = {
   reportFree?: string | null;
 };
 
-function extractScore(report?: string | null) {
+function extractSubScores(report?: string | null) {
   if (!report) return null;
-  const match = report.match(/VIRALITY SCORE[\s\S]*?(\d{1,2})/);
-  if (!match) return null;
-  return Math.max(1, Math.min(10, Number(match[1]))) * 10;
+
+  const extract = (label: string) => {
+    const regex = new RegExp(label + "[\\s\\S]*?(\\d{1,3})");
+    const match = report.match(regex);
+    if (!match) return null;
+    return Math.min(100, Math.max(0, Number(match[1])));
+  };
+
+  return {
+    hook: extract("HOOK STRENGTH"),
+    retention: extract("RETENTION POTENTIAL"),
+    emotion: extract("EMOTIONAL IMPACT"),
+    shareability: extract("SHAREABILITY"),
+  };
 }
 
 function extractTags(report?: string | null) {
@@ -31,6 +42,28 @@ function extractTags(report?: string | null) {
     .map((l) => l.replace(/^-/, "").trim())
     .filter(Boolean)
     .slice(0, 3);
+}
+
+function calculateFinalScore(scores: {
+  hook: number | null;
+  retention: number | null;
+  emotion: number | null;
+  shareability: number | null;
+}) {
+  if (
+    scores.hook === null ||
+    scores.retention === null ||
+    scores.emotion === null ||
+    scores.shareability === null
+  )
+    return null;
+
+  return Math.round(
+    scores.hook * 0.3 +
+      scores.retention * 0.3 +
+      scores.emotion * 0.2 +
+      scores.shareability * 0.2,
+  );
 }
 
 function extractSummary(report?: string | null) {
@@ -98,11 +131,12 @@ export default function HistoryPage() {
     summary: string | null;
   })[] = items.map((item, index) => {
     const report = item.reportFull ?? item.reportFree ?? "";
-    const score = extractScore(report);
-
+    const subScores = extractSubScores(report);
+    const score = subScores ? calculateFinalScore(subScores) : null;
     const prev = items[index + 1];
     const prevReport = prev?.reportFull ?? prev?.reportFree ?? "";
-    const prevScore = extractScore(prevReport);
+    const prevSubScores = extractSubScores(prevReport);
+    const prevScore = prevSubScores ? calculateFinalScore(prevSubScores) : null;
 
     const delta =
       score !== null && prevScore !== null ? score - prevScore : null;

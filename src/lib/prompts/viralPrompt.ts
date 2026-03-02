@@ -63,8 +63,28 @@ Write each tag on a new line.
 PREDICTED LONGEVITY
 Estimate how long this content could stay relevant and why.
 
-VIRALITY SCORE
-Give a score from 1 to 10 and a short explanation.
+VIRALITY ANALYSIS
+
+HOOK STRENGTH
+Give a score from 0 to 100.
+Evaluate how strong and attention-grabbing the opening is.
+
+RETENTION POTENTIAL
+Give a score from 0 to 100.
+Evaluate how likely viewers are to keep watching.
+
+EMOTIONAL IMPACT
+Give a score from 0 to 100.
+Evaluate how emotionally engaging the content is.
+
+SHAREABILITY
+Give a score from 0 to 100.
+Evaluate how likely people are to share this content.
+
+FINAL VIRALITY SCORE
+Give a final score from 0 to 100.
+This score must logically reflect the previous four metrics.
+Provide a short explanation (max 2 sentences).
 
 WHAT TO FIX
 Explain what could be improved to increase virality.
