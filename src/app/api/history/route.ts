@@ -29,6 +29,7 @@ export async function GET() {
       durationSec: true,
       reportFull: true,
       reportFree: true,
+      originalName: true,
     },
   });
 

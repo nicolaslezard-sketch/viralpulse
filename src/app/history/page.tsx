@@ -9,6 +9,7 @@ type HistoryItem = {
   id: string;
   createdAt: string;
   durationSec?: number | null;
+  originalName?: string | null;
   reportFull?: string | null;
   reportFree?: string | null;
 };
@@ -208,6 +209,9 @@ export default function HistoryPage() {
           >
             <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm font-medium text-white">
+                  {r.originalName ?? "Untitled analysis"}
+                </p>
                 {/* SCORE + DELTA */}
                 <div className="flex items-center gap-3">
                   {r.score !== null && (

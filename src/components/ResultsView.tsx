@@ -239,10 +239,10 @@ export default function ResultsView({
             <div className="text-sm text-zinc-200 whitespace-pre-wrap">
               {hooks
                 ? isPro
-                  ? firstLine(hooks.content)
-                  : firstLine(hooks.content) +
-                    "\n\n🔒 More hook variations available in Pro."
-                : "No hooks available."}{" "}
+                  ? hooks.content
+                  : takeLines(hooks.content, 1) +
+                    "\n\n🔒 9 more hook variations available in Pro."
+                : "No hooks available."}
             </div>
           </div>
 
@@ -277,8 +277,8 @@ export default function ResultsView({
             <div className="text-sm text-zinc-200 whitespace-pre-wrap">
               {clipIdeas
                 ? isPro
-                  ? firstLine(clipIdeas.content)
-                  : firstLine(clipIdeas.content) +
+                  ? clipIdeas.content
+                  : takeLines(clipIdeas.content, 1) +
                     "\n\n🔒 Full clip breakdown available in Pro."
                 : "No clip ideas available."}
             </div>
