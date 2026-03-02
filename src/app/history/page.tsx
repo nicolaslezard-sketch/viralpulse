@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useUserPlan } from "@/lib/useUserPlan";
 import Link from "next/link";
 import UsageIndicator from "@/components/analysis/UsageIndicator";
+import ScoreChart from "@/components/history/ScoreChart";
 
 type HistoryItem = {
   id: string;
@@ -25,7 +26,6 @@ function extractTags(report?: string | null) {
   if (!report) return [];
   const match = report.match(/PERFORMANCE TAGS([\s\S]*?)\n[A-Z]/);
   if (!match) return [];
-
   return match[1]
     .split("\n")
     .map((l) => l.replace(/^-/, "").trim())
@@ -33,10 +33,27 @@ function extractTags(report?: string | null) {
     .slice(0, 3);
 }
 
+function extractSummary(report?: string | null) {
+  if (!report) return null;
+  const match = report.match(/SUMMARY([\s\S]*?)\n[A-Z]/);
+  if (!match) return null;
+
+  const firstLine = match[1]
+    .split("\n")
+    .map((l) => l.replace(/^-/, "").trim())
+    .filter(Boolean)[0];
+
+  return firstLine ?? null;
+}
+
 export default function HistoryPage() {
   const { plan, isLoading } = useUserPlan();
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  type SortOption = "newest" | "best" | "worst";
+
+  const [sort, setSort] = useState<SortOption>("newest");
 
   useEffect(() => {
     if (plan === "free") return;
@@ -74,7 +91,12 @@ export default function HistoryPage() {
   }
 
   // 🔥 ENRICH DATA (score, delta, tags)
-  const enriched = items.map((item, index) => {
+  const enriched: (HistoryItem & {
+    score: number | null;
+    delta: number | null;
+    tags: string[];
+    summary: string | null;
+  })[] = items.map((item, index) => {
     const report = item.reportFull ?? item.reportFree ?? "";
     const score = extractScore(report);
 
@@ -90,9 +112,23 @@ export default function HistoryPage() {
       score,
       delta,
       tags: extractTags(report),
+      summary: extractSummary(report),
     };
   });
+
   const scored = enriched.filter((r) => r.score !== null);
+  const sorted = [...enriched].sort((a, b) => {
+    if (sort === "best") return (b.score ?? 0) - (a.score ?? 0);
+    if (sort === "worst") return (a.score ?? 0) - (b.score ?? 0);
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+  const chartData = sorted
+    .filter((r) => r.score !== null)
+    .map((r) => ({
+      date: r.createdAt,
+      score: r.score ?? 0,
+    }))
+    .reverse(); // siempre antiguo → nuevo en eje X
 
   const average =
     scored.length > 0
@@ -143,12 +179,24 @@ export default function HistoryPage() {
             usedMinutesThisMonth: 60,
           }}
         />
+        <div className="mt-3 sm:mt-0">
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortOption)}
+            className="rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-white"
+          >
+            <option value="newest">Newest</option>
+            <option value="best">Best score</option>
+            <option value="worst">Lowest score</option>
+          </select>
+        </div>
       </div>
       {average !== null && (
         <div className="mt-8 grid gap-4 md:grid-cols-4">
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
             <div className="text-xs text-zinc-400">Average score</div>
             <div className="mt-1 text-2xl font-bold text-white">{average}</div>
+            {chartData.length >= 2 && <ScoreChart data={chartData} />}
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
@@ -185,6 +233,7 @@ export default function HistoryPage() {
           </div>
         </div>
       )}
+
       {error && (
         <div className="mt-6 rounded-xl border border-red-800/50 bg-red-950/40 px-4 py-3 text-sm text-red-300">
           {error}
@@ -198,7 +247,7 @@ export default function HistoryPage() {
           </p>
         )}
 
-        {enriched.map((r) => (
+        {sorted.map((r) => (
           <Link
             key={r.id}
             href={`/report/${r.id}`}
@@ -212,11 +261,29 @@ export default function HistoryPage() {
                 <p className="text-sm font-medium text-white">
                   {r.originalName ?? "Untitled analysis"}
                 </p>
+                {r.summary && (
+                  <p className="mt-1 text-xs text-zinc-400 line-clamp-2">
+                    {r.summary}
+                  </p>
+                )}
                 {/* SCORE + DELTA */}
                 <div className="flex items-center gap-3">
                   {r.score !== null && (
-                    <span className="text-lg font-bold text-white">
+                    <span
+                      className={`text-lg font-bold ${
+                        r.score !== null && r.score >= 80
+                          ? "text-emerald-400"
+                          : r.score !== null && r.score < 60
+                            ? "text-rose-400"
+                            : "text-white"
+                      }`}
+                    >
                       {r.score}
+                      {r.score !== null && r.score >= 85 && (
+                        <span className="ml-2 text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full">
+                          Viral candidate
+                        </span>
+                      )}
                     </span>
                   )}
 
