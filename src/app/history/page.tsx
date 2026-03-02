@@ -192,46 +192,57 @@ export default function HistoryPage() {
         </div>
       </div>
       {average !== null && (
-        <div className="mt-8 grid gap-4 md:grid-cols-4">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="text-xs text-zinc-400">Average score</div>
-            <div className="mt-1 text-2xl font-bold text-white">{average}</div>
-            {chartData.length >= 2 && <ScoreChart data={chartData} />}
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="text-xs text-zinc-400">Best score</div>
-            <div className="mt-1 text-2xl font-bold text-emerald-400">
-              {best}
+        <>
+          <div className="mt-8 grid gap-4 md:grid-cols-4">
+            {/* Average */}
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <div className="text-xs text-zinc-400">Average score</div>
+              <div className="mt-1 text-2xl font-bold text-white">
+                {average}
+              </div>
             </div>
-          </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="text-xs text-zinc-400">Lowest score</div>
-            <div className="mt-1 text-2xl font-bold text-rose-400">{worst}</div>
-          </div>
+            {/* Best */}
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <div className="text-xs text-zinc-400">Best score</div>
+              <div className="mt-1 text-2xl font-bold text-emerald-400">
+                {best}
+              </div>
+            </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="text-xs text-zinc-400">Trend</div>
-            <div
-              className={`mt-1 text-2xl font-bold ${
-                trend === "up"
-                  ? "text-emerald-400"
+            {/* Lowest */}
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <div className="text-xs text-zinc-400">Lowest score</div>
+              <div className="mt-1 text-2xl font-bold text-rose-400">
+                {worst}
+              </div>
+            </div>
+
+            {/* Trend */}
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <div className="text-xs text-zinc-400">Trend</div>
+              <div
+                className={`mt-1 text-2xl font-bold ${
+                  trend === "up"
+                    ? "text-emerald-400"
+                    : trend === "down"
+                      ? "text-rose-400"
+                      : "text-zinc-300"
+                }`}
+              >
+                {trend === "up"
+                  ? "Improving ↑"
                   : trend === "down"
-                    ? "text-rose-400"
-                    : "text-zinc-300"
-              }`}
-            >
-              {trend === "up"
-                ? "Improving ↑"
-                : trend === "down"
-                  ? "Declining ↓"
-                  : trend === "stable"
-                    ? "Stable"
-                    : "—"}
+                    ? "Declining ↓"
+                    : trend === "stable"
+                      ? "Stable"
+                      : "—"}
+              </div>
             </div>
           </div>
-        </div>
+
+          {chartData.length >= 2 && <ScoreChart data={chartData} />}
+        </>
       )}
 
       {error && (
