@@ -66,8 +66,8 @@ model AnalysisReport {
 
   // output
   transcript  String?  // se guarda siempre (solo visible en Plus/Pro)
-  reportFull  String?  // reporte completo IA
-  reportFree  String?  // versión recortada (FREE)
+  reportFull  Json?  // reporte completo IA
+  reportFree  Json?  // versión recortada (FREE)
 
   createdAt   DateTime @default(now())
 }

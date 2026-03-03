@@ -6,91 +6,28 @@ import Link from "next/link";
 import UsageIndicator from "@/components/analysis/UsageIndicator";
 import ScoreChart from "@/components/history/ScoreChart";
 
+type ReportSection = {
+  title: string;
+  content: string;
+};
+
+type FullReport = Record<string, ReportSection>;
+
 type HistoryItem = {
   id: string;
   createdAt: string;
   durationSec?: number | null;
   originalName?: string | null;
-  reportFull?: string | null;
-  reportFree?: string | null;
+  reportFull?: FullReport | null;
+  reportFree?: FullReport | null;
 };
 
-function extractSubScores(report?: string | null) {
-  if (!report) return null;
-
-  const extract = (label: string) => {
-    const regex = new RegExp(label + "[\\s\\S]*?(\\d{1,3})");
-    const match = report.match(regex);
-    if (!match) return null;
-    return Math.min(100, Math.max(0, Number(match[1])));
-  };
-
-  return {
-    hook: extract("HOOK STRENGTH"),
-    retention: extract("RETENTION POTENTIAL"),
-    emotion: extract("EMOTIONAL IMPACT"),
-    shareability: extract("SHAREABILITY"),
-  };
-}
-
-function extractTags(report?: string | null) {
-  if (!report) return [];
-
-  const match = report.match(/PERFORMANCE TAGS\s*([\s\S]*?)(?=\n[A-Z\s]+\n|$)/);
-
-  if (!match) return [];
-
-  return match[1]
-    .split("\n")
-    .map((l) => l.replace(/^-/, "").trim())
-    .filter(Boolean)
-    .slice(0, 3);
-}
-
-function calculateFinalScore(scores: {
-  hook: number | null;
-  retention: number | null;
-  emotion: number | null;
-  shareability: number | null;
-}) {
-  if (
-    scores.hook === null ||
-    scores.retention === null ||
-    scores.emotion === null ||
-    scores.shareability === null
-  )
-    return null;
-
-  return Math.round(
-    scores.hook * 0.3 +
-      scores.retention * 0.3 +
-      scores.emotion * 0.2 +
-      scores.shareability * 0.2,
-  );
-}
-
-function extractSummary(report?: string | null) {
-  if (!report) return null;
-
-  const match = report.match(/SUMMARY\s*([\s\S]*?)(?=\n[A-Z\s]+\n|$)/);
-
-  if (!match) return null;
-
-  const firstLine = match[1]
-    .split("\n")
-    .map((l) => l.replace(/^-/, "").trim())
-    .filter(Boolean)[0];
-
-  return firstLine ?? null;
-}
-
 export default function HistoryPage() {
-  const { plan, isLoading } = useUserPlan();
+  const { plan } = useUserPlan();
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   type SortOption = "newest" | "best" | "worst";
-
   const [sort, setSort] = useState<SortOption>("newest");
 
   useEffect(() => {
@@ -105,61 +42,46 @@ export default function HistoryPage() {
       .catch((e) => setError(e.message));
   }, [plan]);
 
-  if (isLoading) {
-    return <div className="py-24 text-center text-zinc-400">Loading…</div>;
-  }
-
-  // 🔒 FREE PAYWALL
-  if (plan === "free") {
-    return (
-      <main className="mx-auto max-w-2xl px-6 py-24 text-center text-white">
-        <h1 className="text-2xl font-semibold">Analysis history</h1>
-        <p className="mt-3 text-zinc-400">
-          Upgrade to save and access your past analyses.
-        </p>
-
-        <Link
-          href="/#pricing"
-          className="mt-6 inline-flex rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black hover:bg-zinc-200 transition"
-        >
-          Upgrade to unlock history
-        </Link>
-      </main>
-    );
-  }
-  function extractFinalScore(report?: string | null) {
-    if (!report) return null;
-
-    const match = report.match(/FINAL VIRALITY SCORE[\s\S]*?(\d{1,3})/);
-
-    if (!match) return null;
-
-    return Math.min(100, Math.max(0, Number(match[1])));
-  }
-
   // 🔥 ENRICH DATA (score, delta, tags)
-  const enriched: (HistoryItem & {
-    score: number | null;
-    delta: number | null;
-    tags: string[];
-    summary: string | null;
-  })[] = items.map((item, index) => {
-    const report = item.reportFull ?? item.reportFree ?? "";
-    const score = extractFinalScore(report);
+  const enriched = items.map((item, index) => {
+    const report = item.reportFull ?? item.reportFree ?? null;
+
+    const finalScoreRaw = report?.["FINAL VIRALITY SCORE"]?.content ?? null;
+
+    const score = finalScoreRaw
+      ? Math.min(
+          100,
+          Math.max(0, Number(finalScoreRaw.match(/\d+/)?.[0] ?? null)),
+        )
+      : null;
+
     const prev = items[index + 1];
-    const prevReport = prev?.reportFull ?? prev?.reportFree ?? "";
-    const prevSubScores = extractSubScores(prevReport);
-    const prevScore = prevSubScores ? calculateFinalScore(prevSubScores) : null;
+    const prevReport = prev?.reportFull ?? prev?.reportFree ?? null;
+
+    const prevScoreRaw = prevReport?.["FINAL VIRALITY SCORE"]?.content ?? null;
+
+    const prevScore = prevScoreRaw
+      ? Number(prevScoreRaw.match(/\d+/)?.[0] ?? null)
+      : null;
 
     const delta =
       score !== null && prevScore !== null ? score - prevScore : null;
+
+    const summary =
+      report?.["SUMMARY"]?.content?.split("\n").filter(Boolean)[0] ?? null;
+
+    const tags =
+      report?.["PERFORMANCE TAGS"]?.content
+        ?.split("\n")
+        .filter(Boolean)
+        .slice(0, 3) ?? [];
 
     return {
       ...item,
       score,
       delta,
-      tags: extractTags(report),
-      summary: extractSummary(report),
+      summary,
+      tags,
     };
   });
 
@@ -220,12 +142,14 @@ export default function HistoryPage() {
           </p>
         </div>
 
-        <UsageIndicator
-          usage={{
-            plan,
-            usedMinutesThisMonth: 60,
-          }}
-        />
+        {plan !== "free" && (
+          <UsageIndicator
+            usage={{
+              plan,
+              usedMinutesThisMonth: 60,
+            }}
+          />
+        )}
         <div className="mt-3 sm:mt-0">
           <select
             value={sort}

@@ -54,12 +54,10 @@ export async function GET(
 
   let reportJson: FullReport | null = null;
 
-  if (rawReport) {
-    try {
-      reportJson = JSON.parse(rawReport) as FullReport;
-    } catch {
-      reportJson = null;
-    }
+  if (rawReport && typeof rawReport === "object") {
+    reportJson = rawReport as FullReport;
+  } else {
+    reportJson = null;
   }
 
   return NextResponse.json({

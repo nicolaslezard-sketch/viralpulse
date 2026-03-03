@@ -139,8 +139,8 @@ export async function POST(req: Request) {
         originalName: fileName?.slice(0, 120) ?? null,
         status: "done",
         durationSec,
-        reportFull: JSON.stringify(result.fullText),
-        reportFree: JSON.stringify(result.freeText),
+        reportFull: result.fullText,
+        reportFree: result.freeText,
         transcript,
       },
     });
