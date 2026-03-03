@@ -33,6 +33,7 @@ export async function POST(req: Request) {
     ========================= */
     const body = await req.json().catch(() => null);
     const key = body?.key;
+    const originalNameFromClient = body?.originalName ?? null;
 
     if (!key || typeof key !== "string") {
       return NextResponse.json({ error: "Missing audio key" }, { status: 400 });
@@ -130,13 +131,12 @@ export async function POST(req: Request) {
     /* =========================
        SAVE REPORT
     ========================= */
-    const fileName = key.split("/").pop() ?? null;
 
     const report = await prisma.analysisReport.create({
       data: {
         userId,
         audioKey: key,
-        originalName: fileName?.slice(0, 120) ?? null,
+        originalName: originalNameFromClient?.slice(0, 120) ?? null,
         status: "done",
         durationSec,
         reportFull: result.fullText,

@@ -166,7 +166,10 @@ export default function UploadBox() {
           fetch(apiUrl("/api/analyze"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ key }),
+            body: JSON.stringify({
+              key,
+              originalName: file.name,
+            }),
           }),
         { retries: 2, baseDelayMs: 800 },
       );

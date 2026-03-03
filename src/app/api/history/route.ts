@@ -12,13 +12,13 @@ export async function GET() {
   }
   const userId = session.user.id;
   const plan = await getUserPlan(userId);
-  
+
   // 🔒 FREE no tiene historial
   if (plan === "free") {
     return NextResponse.json({ error: "Upgrade required" }, { status: 403 });
   }
 
-  const reports = await prisma.analysisReport.findMany({
+  const rawReports = await prisma.analysisReport.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
     take: 50,
@@ -31,5 +31,10 @@ export async function GET() {
       originalName: true,
     },
   });
+  const reports = rawReports.map((r) => ({
+    ...r,
+    reportFull: r.reportFull ?? null,
+    reportFree: r.reportFree ?? null,
+  }));
   return NextResponse.json({ reports });
 }

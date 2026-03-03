@@ -46,8 +46,10 @@ export default function HistoryPage() {
   const enriched = items.map((item, index) => {
     const report = item.reportFull ?? item.reportFree ?? null;
 
-    const finalScoreRaw = report?.["FINAL VIRALITY SCORE"]?.content ?? null;
-
+    const finalScoreRaw =
+      report?.["VIRALITY SCORE"]?.content ??
+      report?.["FINAL VIRALITY SCORE"]?.content ??
+      null;
     const score = finalScoreRaw
       ? Math.min(
           100,
