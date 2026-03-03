@@ -130,10 +130,13 @@ export async function POST(req: Request) {
     /* =========================
        SAVE REPORT
     ========================= */
+    const fileName = key.split("/").pop() ?? null;
+
     const report = await prisma.analysisReport.create({
       data: {
         userId,
         audioKey: key,
+        originalName: fileName?.slice(0, 120) ?? null,
         status: "done",
         durationSec,
         reportFull: JSON.stringify(result.fullText),

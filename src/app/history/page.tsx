@@ -71,7 +71,9 @@ function calculateFinalScore(scores: {
 
 function extractSummary(report?: string | null) {
   if (!report) return null;
-  const match = report.match(/SUMMARY([\s\S]*?)\n[A-Z]/);
+
+  const match = report.match(/SUMMARY\s*([\s\S]*?)(?=\n[A-Z\s]+\n|$)/);
+
   if (!match) return null;
 
   const firstLine = match[1]
@@ -125,6 +127,15 @@ export default function HistoryPage() {
       </main>
     );
   }
+  function extractFinalScore(report?: string | null) {
+    if (!report) return null;
+
+    const match = report.match(/FINAL VIRALITY SCORE[\s\S]*?(\d{1,3})/);
+
+    if (!match) return null;
+
+    return Math.min(100, Math.max(0, Number(match[1])));
+  }
 
   // 🔥 ENRICH DATA (score, delta, tags)
   const enriched: (HistoryItem & {
@@ -134,8 +145,7 @@ export default function HistoryPage() {
     summary: string | null;
   })[] = items.map((item, index) => {
     const report = item.reportFull ?? item.reportFree ?? "";
-    const subScores = extractSubScores(report);
-    const score = subScores ? calculateFinalScore(subScores) : null;
+    const score = extractFinalScore(report);
     const prev = items[index + 1];
     const prevReport = prev?.reportFull ?? prev?.reportFree ?? "";
     const prevSubScores = extractSubScores(prevReport);

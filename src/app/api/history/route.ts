@@ -10,10 +10,8 @@ export async function GET() {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
   const userId = session.user.id;
   const plan = await getUserPlan(userId);
-
   // 🔒 FREE no tiene historial
   if (plan === "free") {
     return NextResponse.json({ error: "Upgrade required" }, { status: 403 });
@@ -32,6 +30,5 @@ export async function GET() {
       originalName: true,
     },
   });
-
   return NextResponse.json({ reports });
 }
