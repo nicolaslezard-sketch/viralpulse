@@ -35,8 +35,11 @@ function extractSubScores(report?: string | null) {
 
 function extractTags(report?: string | null) {
   if (!report) return [];
-  const match = report.match(/PERFORMANCE TAGS([\s\S]*?)\n[A-Z]/);
+
+  const match = report.match(/PERFORMANCE TAGS\s*([\s\S]*?)(?=\n[A-Z\s]+\n|$)/);
+
   if (!match) return [];
+
   return match[1]
     .split("\n")
     .map((l) => l.replace(/^-/, "").trim())

@@ -65,26 +65,37 @@ Estimate how long this content could stay relevant and why.
 
 VIRALITY ANALYSIS
 
+SCORING METHODOLOGY (STRICT)
+- Scores must use the full 0–100 range when justified.
+- Avoid clustering scores between 75–90 unless clearly deserved.
+- Avoid round multiples of 10 unless strongly justified.
+- Different transcripts must produce meaningfully different scores.
+- If weaknesses exist, penalize realistically.
+- Most average content should fall between 45–75.
+- Only exceptional content should exceed 85.
+- Scores must include natural numeric variation (e.g., 63, 78, 84 — not only 70, 80, 90).
+
 HOOK STRENGTH
-Give a score from 0 to 100.
-Evaluate how strong and attention-grabbing the opening is.
+Give a score from 0 to 100 (integer).
+Briefly justify in one line.
 
 RETENTION POTENTIAL
-Give a score from 0 to 100.
-Evaluate how likely viewers are to keep watching.
+Give a score from 0 to 100 (integer).
+Briefly justify in one line.
 
 EMOTIONAL IMPACT
-Give a score from 0 to 100.
-Evaluate how emotionally engaging the content is.
+Give a score from 0 to 100 (integer).
+Briefly justify in one line.
 
 SHAREABILITY
-Give a score from 0 to 100.
-Evaluate how likely people are to share this content.
+Give a score from 0 to 100 (integer).
+Briefly justify in one line.
 
 FINAL VIRALITY SCORE
 Give a final score from 0 to 100.
-This score must logically reflect the previous four metrics.
+This score MUST logically reflect the previous four metrics.
 Provide a short explanation (max 2 sentences).
+Do NOT default to 80.
 
 WHAT TO FIX
 Explain what could be improved to increase virality.
