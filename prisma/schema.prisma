@@ -49,27 +49,26 @@ model User {
 
 
 model AnalysisReport {
-  id          String   @id @default(cuid())
-  originalName         String?
-  
-  // relations
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  originalName String?
 
-  // estado
-  status      String   // "processing" | "done" | "error"
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // input
-  audioKey    String
-  durationSec Int
-  wasTrimmed  Boolean  @default(false)
+  status       String   // "processing" | "done" | "error"
 
-  // output
-  transcript  String?  // se guarda siempre (solo visible en Plus/Pro)
-  reportFull  Json?  // reporte completo IA
-  reportFree  Json?  // versión recortada (FREE)
+  audioKey     String
+  durationSec  Int
+  wasTrimmed   Boolean  @default(false)
 
-  createdAt   DateTime @default(now())
+  transcript   String?
+  reportFull   Json?
+  reportFree   Json?
+
+  viralScore   Float?
+  viralMetrics Json?
+
+  createdAt    DateTime @default(now())
 }
 
 /*

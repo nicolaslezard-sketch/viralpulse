@@ -129,8 +129,8 @@ export async function POST(req: Request) {
     const result = await generateReport(transcript);
 
     /* =========================
-       SAVE REPORT
-    ========================= */
+   SAVE REPORT
+========================= */
 
     const report = await prisma.analysisReport.create({
       data: {
@@ -142,6 +142,8 @@ export async function POST(req: Request) {
         reportFull: result.fullText,
         reportFree: result.freeText,
         transcript,
+        viralScore: result.viralScore,
+        viralMetrics: result.viralMetrics ?? undefined,
       },
     });
 

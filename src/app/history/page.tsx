@@ -18,6 +18,7 @@ type HistoryItem = {
   createdAt: string;
   durationSec?: number | null;
   originalName?: string | null;
+  viralScore?: number | null;
   reportFull?: FullReport | null;
   reportFree?: FullReport | null;
 };
@@ -42,29 +43,13 @@ export default function HistoryPage() {
       .catch((e) => setError(e.message));
   }, [plan]);
 
-  // 🔥 ENRICH DATA (score, delta, tags)
   const enriched = items.map((item, index) => {
     const report = item.reportFull ?? item.reportFree ?? null;
 
-    const finalScoreRaw =
-      report?.["VIRALITY SCORE"]?.content ??
-      report?.["FINAL VIRALITY SCORE"]?.content ??
-      null;
-    const score = finalScoreRaw
-      ? Math.min(
-          100,
-          Math.max(0, Number(finalScoreRaw.match(/\d+/)?.[0] ?? null)),
-        )
-      : null;
+    const score = item.viralScore ?? null;
 
     const prev = items[index + 1];
-    const prevReport = prev?.reportFull ?? prev?.reportFree ?? null;
-
-    const prevScoreRaw = prevReport?.["FINAL VIRALITY SCORE"]?.content ?? null;
-
-    const prevScore = prevScoreRaw
-      ? Number(prevScoreRaw.match(/\d+/)?.[0] ?? null)
-      : null;
+    const prevScore = prev?.viralScore ?? null;
 
     const delta =
       score !== null && prevScore !== null ? score - prevScore : null;
@@ -89,30 +74,45 @@ export default function HistoryPage() {
 
   const scored = enriched.filter((r) => r.score !== null);
   const sorted = [...enriched].sort((a, b) => {
-    if (sort === "best") return (b.score ?? 0) - (a.score ?? 0);
-    if (sort === "worst") return (a.score ?? 0) - (b.score ?? 0);
+    if (sort === "best") {
+      if (a.score === null) return 1;
+      if (b.score === null) return -1;
+      return b.score - a.score;
+    }
+
+    if (sort === "worst") {
+      if (a.score === null) return 1;
+      if (b.score === null) return -1;
+      return a.score - b.score;
+    }
+
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
   const chartData = sorted
     .filter((r) => r.score !== null)
     .map((r) => ({
       date: r.createdAt,
-      score: r.score ?? 0,
+      score: r.score as number,
     }))
-    .reverse(); // siempre antiguo → nuevo en eje X
+    .reverse();
 
   const average =
     scored.length > 0
       ? Math.round(
-          scored.reduce((acc, r) => acc + (r.score ?? 0), 0) / scored.length,
+          scored.reduce((acc, r) => acc + (r.score as number), 0) /
+            scored.length,
         )
       : null;
 
   const best =
-    scored.length > 0 ? Math.max(...scored.map((r) => r.score ?? 0)) : null;
+    scored.length > 0
+      ? Math.max(...scored.map((r) => r.score as number))
+      : null;
 
   const worst =
-    scored.length > 0 ? Math.min(...scored.map((r) => r.score ?? 0)) : null;
+    scored.length > 0
+      ? Math.min(...scored.map((r) => r.score as number))
+      : null;
 
   // Trend calculation
   let trend: "up" | "down" | "stable" | null = null;

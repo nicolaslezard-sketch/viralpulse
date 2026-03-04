@@ -165,7 +165,6 @@ export default function HomePage() {
               "5-point content summary",
               "Virality reason",
               "Key moment (early/mid/late)",
-              "Virality score (1–10)",
             ]}
           />
           <FeatureCard

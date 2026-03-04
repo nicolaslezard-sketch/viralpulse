@@ -27,6 +27,7 @@ export async function GET() {
       createdAt: true,
       durationSec: true,
       reportFull: true,
+      viralScore: true,
       reportFree: true,
       originalName: true,
     },

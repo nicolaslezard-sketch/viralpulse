@@ -6,7 +6,7 @@ export const SECTION_META: Record<
     tier: "primary" | "secondary" | "pro";
     freePreviewRatio: number;
     copyActions?: Array<
-    | "copy"
+      | "copy"
       | "copy_titles"
       | "copy_hooks"
       | "copy_hashtags"
@@ -15,7 +15,6 @@ export const SECTION_META: Record<
       | "copy_remix_ideas"
       | "copy_meme_templates"
       | "copy_predicted_longevity"
-      | "copy_virality_score"
       | "copy_what_to_fix"
       | "copy_platform_strategy"
       | "copy_content_angle_variations"
@@ -25,7 +24,7 @@ export const SECTION_META: Record<
       | "copy_summary"
       | "copy_viral_reason"
       | "copy_key_moment"
-      >;
+    >;
   }
 > = {
   SUMMARY: {
@@ -106,13 +105,6 @@ export const SECTION_META: Record<
     tier: "pro",
     freePreviewRatio: 0.3,
     copyActions: ["copy", "copy_predicted_longevity"],
-  },
-  "VIRALITY SCORE": {
-    label: "Virality Score",
-    icon: "⭐",
-    tier: "pro",
-    freePreviewRatio: 0.3,
-    copyActions: ["copy", "copy_virality_score"],
   },
   "WHAT TO FIX": {
     label: "What To Improve",

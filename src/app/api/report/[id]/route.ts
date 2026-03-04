@@ -29,6 +29,7 @@ export async function GET(
       wasTrimmed: true,
       createdAt: true,
       reportFull: true,
+      viralScore: true,
       reportFree: true,
       transcript: true,
     },
@@ -67,6 +68,7 @@ export async function GET(
     wasTrimmed: report.wasTrimmed,
     createdAt: report.createdAt,
     report: reportJson,
+    viralScore: report.viralScore ?? null,
     transcript: isPro ? report.transcript : null,
     isPro,
   });

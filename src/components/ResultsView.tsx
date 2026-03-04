@@ -17,6 +17,14 @@ const PREVIEW_SECTIONS: ReportSectionKey[] = [
 
 type ResultsViewProps = {
   report: FullReport;
+  viralScore?: number | null;
+  viralMetrics?: {
+    hookStrength: number;
+    retentionPotential: number;
+    emotionalImpact: number;
+    shareability: number;
+    finalScore: number;
+  } | null;
   transcript?: string | null;
   isPro: boolean;
   mode?: "preview" | "full";
@@ -41,6 +49,7 @@ function takeLines(text: string, n: number) {
     .map((l) => `- ${l}`)
     .join("\n");
 }
+
 function extractTags(text?: string) {
   if (!text) return [];
   return text
@@ -49,6 +58,7 @@ function extractTags(text?: string) {
     .filter(Boolean)
     .slice(0, 3);
 }
+
 function scoreLabel(score: number) {
   if (score >= 75)
     return { label: "🔥 High Viral Potential", color: "text-emerald-300" };
@@ -65,13 +75,25 @@ function scoreLabel(score: number) {
 
 export default function ResultsView({
   report,
+  viralScore,
+  viralMetrics,
   transcript,
   isPro,
   mode = "preview",
-  reportId,
 }: ResultsViewProps) {
   const isFull = mode === "full";
   const sections = mode === "preview" ? PREVIEW_SECTIONS : REPORT_SECTIONS;
+
+  const score = viralScore ?? 0;
+  const { label: scoreText, color: scoreColor } = scoreLabel(score);
+
+  const summary = report["SUMMARY"];
+  const longevity = report["PREDICTED LONGEVITY"];
+  const hooks = report["HOOKS"];
+  const titles = report["TITLE IDEAS"];
+  const clipIdeas = report["CLIP IDEAS"];
+  const keyMoment = report["KEY MOMENT"];
+  const performanceTags = report["PERFORMANCE TAGS" as ReportSectionKey];
 
   async function handleUpgrade() {
     const res = await fetch("/api/lemon/checkout", {
@@ -98,33 +120,6 @@ export default function ResultsView({
     if (transcript) navigator.clipboard.writeText(transcript);
   }
 
-  // ---------- HERO DATA ----------
-
-  const performanceTags = report["PERFORMANCE TAGS"];
-
-  const scoreSection = report["VIRALITY SCORE"];
-  let score = 80;
-
-  if (scoreSection?.content) {
-    const match = scoreSection.content.match(/(\d{1,2})/);
-    if (match) {
-      const base = Math.max(1, Math.min(10, Number(match[1])));
-      score = base * 10; // Convert 1–10 to 0–100
-    }
-  }
-
-  const { label: scoreText, color: scoreColor } = scoreLabel(score);
-
-  const summary = report["SUMMARY"];
-  const longevity = report["PREDICTED LONGEVITY"];
-
-  const hooks = report["HOOKS"];
-  const titles = report["TITLE IDEAS"];
-  const clipIdeas = report["CLIP IDEAS"];
-  const keyMoment = report["KEY MOMENT"];
-
-  // ---------- RENDER ----------
-
   return (
     <div className="mx-auto max-w-6xl space-y-14 px-6 pb-32 text-white">
       {/* HEADER */}
@@ -134,8 +129,7 @@ export default function ResultsView({
             Content Command Center
           </h1>
           <p className="text-sm text-zinc-400 max-w-2xl">
-            Optimize your content before publishing — faster decisions, stronger
-            hooks, better clips.
+            Optimize your content before publishing.
           </p>
         </div>
 
@@ -171,7 +165,6 @@ export default function ResultsView({
       {/* HERO */}
       <div className="rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-8">
-          {/* LEFT SIDE */}
           <div>
             <div className={`text-6xl font-extrabold ${scoreColor}`}>
               {score}
@@ -180,19 +173,21 @@ export default function ResultsView({
 
             <div className="mt-2 text-lg font-semibold">{scoreText}</div>
 
-            {isPro && summary ? (
-              <div className="mt-4 text-sm text-zinc-300">
-                <span className="font-semibold text-white/90">
-                  Instant read:
-                </span>{" "}
-                {firstLine(summary.content)}
-              </div>
-            ) : (
-              <div className="mt-4 text-sm text-zinc-400">
-                Unlock the reasoning behind this score to see what’s driving
-                performance.
+            {viralMetrics && (
+              <div className="mt-4 flex gap-3 text-xs text-zinc-300">
+                <span>Hook: {viralMetrics.hookStrength}</span>
+                <span>Retention: {viralMetrics.retentionPotential}</span>
+                <span>Emotion: {viralMetrics.emotionalImpact}</span>
+                <span>Shareability: {viralMetrics.shareability}</span>
               </div>
             )}
+
+            {isPro && summary && (
+              <div className="mt-4 text-sm text-zinc-300">
+                <b>Instant read:</b> {firstLine(summary.content)}
+              </div>
+            )}
+
             {isPro && performanceTags && (
               <div className="mt-4 flex flex-wrap gap-2 text-xs">
                 {extractTags(performanceTags.content).map((tag, i) => (
@@ -205,15 +200,8 @@ export default function ResultsView({
                 ))}
               </div>
             )}
-            {!isPro && (
-              <div className="mt-6 rounded-xl border border-indigo-500/20 bg-indigo-500/10 px-4 py-3 text-xs text-indigo-200">
-                Pro reveals what’s boosting or hurting this score — and how to
-                fix it.
-              </div>
-            )}
           </div>
 
-          {/* RIGHT SIDE */}
           {isPro && longevity && (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-zinc-200 max-w-sm">
               <div className="text-xs font-semibold text-white/70">
@@ -224,79 +212,8 @@ export default function ResultsView({
           )}
         </div>
       </div>
-      {!isPro && (
-        <div className="mt-6 rounded-xl border border-indigo-500/20 bg-indigo-500/10 px-4 py-3 text-xs text-indigo-200">
-          Pro reveals what’s boosting or hurting this score — and how to fix it.
-        </div>
-      )}
-      {/* INSTANT UPGRADES */}
-      <div>
-        <h2 className="text-xl font-semibold mb-6">Instant Upgrades</h2>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-            <div className="text-sm font-semibold mb-3">🪝 Stronger Hook</div>
-            <div className="text-sm text-zinc-200 whitespace-pre-wrap">
-              {hooks
-                ? isPro
-                  ? hooks.content
-                  : takeLines(hooks.content, 1) +
-                    "\n\n🔒 9 more hook variations available in Pro."
-                : "No hooks available."}
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-            <div className="flex justify-between items-center mb-3">
-              <div className="text-sm font-semibold">🎯 High-CTR Titles</div>
-              {titles && (
-                <button
-                  onClick={() =>
-                    navigator.clipboard.writeText(takeLines(titles.content, 3))
-                  }
-                  className="text-xs"
-                >
-                  Copy top 3
-                </button>
-              )}
-            </div>
-            <div className="text-sm text-zinc-200 whitespace-pre-wrap">
-              {titles
-                ? isPro
-                  ? takeLines(titles.content, 3)
-                  : takeLines(titles.content, 1) +
-                    "\n\n🔒 Unlock 9 more titles with Pro."
-                : "No titles available."}{" "}
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-            <div className="text-sm font-semibold mb-3">
-              🎬 Strongest Viral Clip
-            </div>
-            <div className="text-sm text-zinc-200 whitespace-pre-wrap">
-              {clipIdeas
-                ? isPro
-                  ? clipIdeas.content
-                  : takeLines(clipIdeas.content, 1) +
-                    "\n\n🔒 Full clip breakdown available in Pro."
-                : "No clip ideas available."}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CLIP STUDIO */}
-      {keyMoment && (
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
-          <h3 className="text-lg font-semibold mb-3">Best Viral Timing</h3>
-          <div className="text-sm text-zinc-200 whitespace-pre-wrap">
-            {firstLine(keyMoment.content)}
-          </div>
-        </div>
-      )}
-
-      {/* STRATEGY (COLLAPSIBLE) */}
+      {/* STRATEGY */}
       <details className="rounded-3xl border border-white/10 bg-white/5 p-8">
         <summary className="cursor-pointer text-lg font-semibold">
           Strategy Insights
@@ -304,17 +221,6 @@ export default function ResultsView({
 
         <div className="mt-6 space-y-6">
           {sections.map((key) => {
-            if (
-              key === "SUMMARY" ||
-              key === "HOOKS" ||
-              key === "TITLE IDEAS" ||
-              key === "CLIP IDEAS" ||
-              key === "KEY MOMENT" ||
-              key === "VIRALITY SCORE" ||
-              key === "PREDICTED LONGEVITY"
-            )
-              return null;
-
             const s = report[key];
             if (!s) return null;
 
@@ -334,7 +240,7 @@ export default function ResultsView({
       {transcript && (
         <details className="rounded-3xl border border-white/10 bg-white/5 p-8">
           <summary className="cursor-pointer text-lg font-semibold">
-            Full Transcript {isPro ? "" : "(Pro)"}
+            Full Transcript
           </summary>
 
           {isPro ? (

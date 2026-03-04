@@ -36,7 +36,7 @@ export default function SectionBlock({
         group relative overflow-hidden
         rounded-3xl
         border border-white/10
-        bg-gradient-to-b from-zinc-900/70 to-zinc-950/90
+        bg-linear-to-b from-zinc-900/70 to-zinc-950/90
         backdrop-blur-xl
         p-8
         transition-all duration-300
@@ -84,7 +84,7 @@ export default function SectionBlock({
               opacity-70
               select-none
               pointer-events-none
-              [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.85),rgba(0,0,0,0.0))]
+              mask-[linear-gradient(to_bottom,rgba(0,0,0,0.85),rgba(0,0,0,0.0))]
             "
           >
             {content.slice(previewText.length)}
@@ -102,7 +102,7 @@ export default function SectionBlock({
         {shouldTrim && (
           <button
             onClick={handleUpgrade}
-            className="rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 hover:brightness-110 transition"
+            className="rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 hover:brightness-110 transition"
           >
             Unlock full report
           </button>
