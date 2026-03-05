@@ -1,65 +1,69 @@
 "use client";
 
-type Point = {
+import {
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Area,
+  AreaChart,
+} from "recharts";
+
+type ChartPoint = {
   date: string;
   score: number;
 };
 
-type Props = {
-  data: Point[];
-};
-
-export default function ScoreChart({ data }: Props) {
-  if (!data.length) return null;
-
-  const width = 600;
-  const height = 200;
-  const padding = 30;
-
-  const scores = data.map((d) => d.score);
-  const max = Math.max(...scores);
-  const min = Math.min(...scores);
-
-  const normalizeY = (value: number) => {
-    if (max === min) return height / 2;
-    return (
-      height - padding - ((value - min) / (max - min)) * (height - padding * 2)
-    );
-  };
-
-  const normalizeX = (index: number) =>
-    padding + (index / (data.length - 1 || 1)) * (width - padding * 2);
-
-  const points = data
-    .map((d, i) => `${normalizeX(i)},${normalizeY(d.score)}`)
-    .join(" ");
-
+export default function ScoreChart({ data }: { data: ChartPoint[] }) {
   return (
-    <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-4">
-      <div className="text-xs text-zinc-400 mb-3">Score evolution</div>
+    <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
+      <h3 className="text-sm text-zinc-400 mb-4">Score evolution</h3>
 
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-48">
-        {/* Línea */}
-        <polyline
-          fill="none"
-          stroke="#6366f1"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          points={points}
-        />
+      <div className="h-65">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data}>
+            <defs>
+              <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+              </linearGradient>
+            </defs>
 
-        {/* Puntos */}
-        {data.map((d, i) => (
-          <circle
-            key={i}
-            cx={normalizeX(i)}
-            cy={normalizeY(d.score)}
-            r="4"
-            fill="#6366f1"
-          />
-        ))}
-      </svg>
+            <XAxis
+              dataKey="date"
+              tick={{ fill: "#9ca3af", fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+            />
+
+            <YAxis
+              domain={[0, 100]}
+              tick={{ fill: "#9ca3af", fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+            />
+
+            <Tooltip
+              contentStyle={{
+                background: "#020617",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "10px",
+              }}
+            />
+
+            <Area
+              type="monotone"
+              dataKey="score"
+              stroke="#818cf8"
+              style={{ filter: "drop-shadow(0 0 6px #6366f1)" }}
+              strokeWidth={3}
+              fill="url(#scoreGradient)"
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

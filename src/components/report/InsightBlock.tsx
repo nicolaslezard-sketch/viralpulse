@@ -12,7 +12,9 @@ type Props = {
 export function InsightBlock({ title, sections, report, isPro }: Props) {
   return (
     <div className="mb-10">
-      <h2 className="text-xl font-bold mb-4">{title}</h2>
+      <h2 className="text-lg font-semibold text-indigo-300 tracking-wide mb-4">
+        {title}
+      </h2>
 
       <div className="grid md:grid-cols-2 gap-4">
         {sections.map((key) => {

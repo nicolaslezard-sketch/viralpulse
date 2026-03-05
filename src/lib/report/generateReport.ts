@@ -4,6 +4,7 @@ import { toFullReport } from "./toFullReport";
 import { buildReportForUser } from "./buildReportForUser";
 import type { FullReport } from "./types";
 import { VIRAL_PROMPT_JSON } from "../prompts/viralPrompt";
+import { generateRewrite } from "./generateRewrite";
 
 export type GenerateReportResult = {
   fullText: FullReport;
@@ -52,6 +53,8 @@ export async function generateReport(
   }
 
   const fullReport = toFullReport(parsed.data);
+  const rewrite = await generateRewrite(transcript);
+  fullReport.rewrite = rewrite ?? undefined;
   const freeReport = buildReportForUser(fullReport, "free");
 
   return {

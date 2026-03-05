@@ -1,46 +1,44 @@
+import { CopyButton } from "@/components/ui/CopyButton";
+
 type Props = {
   title: string;
   content: string;
 };
 
 export function InsightCard({ title, content }: Props) {
+  const lines = content
+    .split("\n")
+    .map((l) =>
+      l
+        .replace(/^[-•]\s*/, "")
+        .replace(/^\d+\.\s*/, "")
+        .trim(),
+    )
+    .filter(Boolean);
+
+  const copyText = lines.join("\n");
+
   return (
     <div className="rounded-xl bg-linear-to-b from-[#0f172a] to-[#020617] p-6 border border-white/5">
-      <h3 className="text-lg font-semibold mb-3">{title}</h3>
-      <p className="text-sm text-white/80 whitespace-pre-line">{content}</p>
-    </div>
-  );
-}
-import { LockedCard } from "./LockedCard";
+      {/* header */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-indigo-300 tracking-wide">
+          {title}
+        </h3>
 
-export function InsightBlock({
-  title,
-  sections,
-  report,
-  isPro,
-}: {
-  title: string;
-  sections: string[];
-  report: any;
-  isPro: boolean;
-}) {
-  return (
-    <div className="mb-10">
-      <h2 className="text-xl font-bold mb-4">{title}</h2>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        {sections.map((key) => {
-          const content = report.sections[key];
-
-          const locked = !isPro && !["SUMMARY", "VIRAL REASON"].includes(key);
-
-          if (locked) {
-            return <LockedCard key={key} title={key} />;
-          }
-
-          return <InsightCard key={key} title={key} content={content} />;
-        })}
+        <CopyButton text={copyText} />
       </div>
+
+      {/* content */}
+      <ul className="space-y-2 text-sm text-white/80">
+        {lines.map((line, i) => (
+          <li key={i} className="flex gap-2">
+            <span className="text-indigo-400 font-semibold">{i + 1}.</span>
+
+            <span>{line}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
