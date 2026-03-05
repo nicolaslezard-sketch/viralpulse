@@ -57,8 +57,8 @@ export default function ResultsView({
   const score = viralScore ?? 0;
   const { label: scoreText, color: scoreColor } = scoreLabel(score);
 
-  const summary = report.sections["SUMMARY"];
-  const longevity = report.sections["PREDICTED LONGEVITY"];
+  const summary = report?.sections?.["SUMMARY"];
+  const longevity = report?.sections?.["PREDICTED LONGEVITY"];
   async function handleUpgrade() {
     const res = await fetch("/api/lemon/checkout", {
       method: "POST",
@@ -70,7 +70,7 @@ export default function ResultsView({
 
   function copyFullReport() {
     const text = REPORT_SECTIONS.map((key) => {
-      const s = report.sections[key];
+      const s = report?.sections?.[key];
       if (!s) return "";
       return `${s.title}\n${s.content}`;
     })

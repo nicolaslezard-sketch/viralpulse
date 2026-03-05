@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import type { FullReport } from "@/lib/report/types";
+import { normalizeReport } from "@/lib/report/normalizeReport";
 
 export const runtime = "nodejs";
 
@@ -55,10 +56,8 @@ export async function GET(
 
   let reportJson: FullReport | null = null;
 
-  if (rawReport && typeof rawReport === "object") {
-    reportJson = rawReport as FullReport;
-  } else {
-    reportJson = null;
+  if (rawReport) {
+    reportJson = normalizeReport(rawReport);
   }
 
   return NextResponse.json({
