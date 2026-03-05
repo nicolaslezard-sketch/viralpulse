@@ -2,10 +2,7 @@
 
 import SectionBlock from "./SectionBlock";
 import type { FullReport } from "@/lib/report/types";
-import {
-  REPORT_SECTIONS,
-  type ReportSectionKey,
-} from "@/lib/report/sectionNames";
+import { REPORT_SECTIONS } from "@/lib/report/sectionNames";
 
 type ResultsViewProps = {
   report: FullReport;
@@ -30,15 +27,6 @@ function firstLine(text: string) {
       .map((l) => l.trim())
       .filter(Boolean)[0] ?? text
   );
-}
-
-function extractTags(text?: string) {
-  if (!text) return [];
-  return text
-    .split("\n")
-    .map((l) => l.replace(/^-/, "").trim())
-    .filter(Boolean)
-    .slice(0, 3);
 }
 
 function scoreLabel(score: number) {
@@ -70,8 +58,6 @@ export default function ResultsView({
 
   const summary = report["SUMMARY"];
   const longevity = report["PREDICTED LONGEVITY"];
-
-  const performanceTags = report["PERFORMANCE TAGS" as ReportSectionKey];
 
   async function handleUpgrade() {
     const res = await fetch("/api/lemon/checkout", {
@@ -163,19 +149,6 @@ export default function ResultsView({
             {isPro && summary && (
               <div className="mt-4 text-sm text-zinc-300">
                 <b>Instant read:</b> {firstLine(summary.content)}
-              </div>
-            )}
-
-            {isPro && performanceTags && (
-              <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                {extractTags(performanceTags.content).map((tag, i) => (
-                  <span
-                    key={i}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-zinc-200"
-                  >
-                    {tag}
-                  </span>
-                ))}
               </div>
             )}
           </div>

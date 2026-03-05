@@ -57,18 +57,11 @@ export default function HistoryPage() {
     const summary =
       report?.["SUMMARY"]?.content?.split("\n").filter(Boolean)[0] ?? null;
 
-    const tags =
-      report?.["PERFORMANCE TAGS"]?.content
-        ?.split("\n")
-        .filter(Boolean)
-        .slice(0, 3) ?? [];
-
     return {
       ...item,
       score,
       delta,
       summary,
-      tags,
     };
   });
 
@@ -288,18 +281,6 @@ export default function HistoryPage() {
                           : "—"}
                     </span>
                   )}
-                </div>
-
-                {/* TAGS */}
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {r.tags?.map((tag: string, i: number) => (
-                    <span
-                      key={i}
-                      className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-zinc-300"
-                    >
-                      {tag}
-                    </span>
-                  ))}
                 </div>
 
                 {/* META */}

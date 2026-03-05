@@ -31,7 +31,6 @@ Return a JSON object with EXACTLY this structure:
     "REACTION SCRIPT": string,
     "MEME TEMPLATES": string,
     "HOOKS": string,
-    "PERFORMANCE TAGS": string,
     "PREDICTED LONGEVITY": string,
     "WHAT TO FIX": string,
     "PLATFORM STRATEGY": string,
@@ -57,7 +56,6 @@ CONTENT RULES
 - SUMMARY must contain exactly 5 concise bullet points inside one string (use "-" as bullet prefix).
 - TITLE IDEAS must contain 10 titles inside one string separated by line breaks.
 - HOOKS must contain 10 hooks separated by line breaks.
-- PERFORMANCE TAGS must contain exactly 3 short tags separated by line breaks.
 - CLIP IDEAS must contain 10 ideas separated by line breaks.
 - CONTENT ANGLE VARIATIONS must contain 5 variations separated by line breaks.
 - HASHTAGS must be a single string block of hashtags separated by spaces.
