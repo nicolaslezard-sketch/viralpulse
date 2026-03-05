@@ -198,10 +198,16 @@ export default function ResultsView({
             report={report}
             isPro={isPro}
           />
-
-          {isPro && report.rewrite && <RewriteBlock rewrite={report.rewrite} />}
         </div>
       </details>
+
+      {/* AI REWRITE */}
+
+      {isPro && report.rewrite && (
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <RewriteBlock rewrite={report.rewrite} />
+        </div>
+      )}
 
       {/* TRANSCRIPT */}
       {transcript && (

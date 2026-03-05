@@ -1,5 +1,5 @@
 type Props = {
-  rewrite?: {
+  rewrite: {
     hookRewrite: string;
     optimizedScript: string;
     titles: string[];
@@ -7,54 +7,73 @@ type Props = {
   };
 };
 
-export function RewriteBlock({ rewrite }: Props) {
-  if (!rewrite) return null;
+function copy(text: string) {
+  navigator.clipboard.writeText(text);
+}
 
+export function RewriteBlock({ rewrite }: Props) {
   return (
-    <div className="mb-12">
-      <h2 className="text-lg font-semibold text-indigo-300 tracking-wide mb-4">
-        ✨ AI Viral Rewrite
-      </h2>
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold">✨ AI Viral Rewrite</h2>
 
       <div className="grid md:grid-cols-2 gap-4">
-        {/* Hook */}
-        <div className="rounded-xl bg-linear-to-b from-[#0f172a] to-[#020617] p-6 border border-white/5">
-          <h3 className="text-sm font-semibold text-white mb-3">
-            Hook Rewrite
-          </h3>
+        {/* HOOK */}
+        <div className="card relative">
+          <button
+            onClick={() => copy(rewrite.hookRewrite)}
+            className="absolute top-3 right-3 text-xs text-zinc-400 hover:text-white"
+          >
+            Copy
+          </button>
 
-          <p className="text-sm text-white/80">{rewrite.hookRewrite}</p>
+          <h3 className="font-semibold mb-2">Hook Rewrite</h3>
+          <p className="text-sm text-zinc-300">{rewrite.hookRewrite}</p>
         </div>
 
-        {/* Thumbnail */}
-        <div className="rounded-xl bg-linear-to-b from-[#0f172a] to-[#020617] p-6 border border-white/5">
-          <h3 className="text-sm font-semibold text-white mb-3">
-            Thumbnail Idea
-          </h3>
+        {/* THUMBNAIL */}
+        <div className="card relative">
+          <button
+            onClick={() => copy(rewrite.thumbnailIdea)}
+            className="absolute top-3 right-3 text-xs text-zinc-400 hover:text-white"
+          >
+            Copy
+          </button>
 
-          <p className="text-sm text-white/80">{rewrite.thumbnailIdea}</p>
+          <h3 className="font-semibold mb-2">Thumbnail Idea</h3>
+          <p className="text-sm text-zinc-300">{rewrite.thumbnailIdea}</p>
         </div>
 
-        {/* Script */}
-        <div className="rounded-xl bg-linear-to-b from-[#0f172a] to-[#020617] p-6 border border-white/5 md:col-span-2">
-          <h3 className="text-sm font-semibold text-white mb-3">
-            Optimized Script
-          </h3>
+        {/* SCRIPT */}
+        <div className="card md:col-span-2 relative">
+          <button
+            onClick={() => copy(rewrite.optimizedScript)}
+            className="absolute top-3 right-3 text-xs text-zinc-400 hover:text-white"
+          >
+            Copy
+          </button>
 
-          <p className="text-sm text-white/80 whitespace-pre-line">
+          <h3 className="font-semibold mb-2">Optimized Script</h3>
+
+          <p className="text-sm text-zinc-300 whitespace-pre-line">
             {rewrite.optimizedScript}
           </p>
         </div>
 
-        {/* Titles */}
-        <div className="rounded-xl bg-linear-to-b from-[#0f172a] to-[#020617] p-6 border border-white/5 md:col-span-2">
-          <h3 className="text-sm font-semibold text-white mb-3">Title Ideas</h3>
+        {/* TITLES */}
+        <div className="card md:col-span-2">
+          <h3 className="font-semibold mb-3">Title Ideas</h3>
 
-          <ul className="space-y-2 text-sm text-white/80">
+          <ul className="space-y-2 text-sm text-zinc-300">
             {rewrite.titles.map((t, i) => (
-              <li key={i} className="flex gap-2">
-                <span className="text-indigo-400 font-semibold">{i + 1}.</span>
+              <li key={i} className="flex justify-between gap-4">
                 <span>{t}</span>
+
+                <button
+                  onClick={() => copy(t)}
+                  className="text-xs text-zinc-400 hover:text-white"
+                >
+                  Copy
+                </button>
               </li>
             ))}
           </ul>

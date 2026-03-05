@@ -61,7 +61,17 @@ export default function ScoreChart({ data }: { data: ChartPoint[] }) {
                 );
               }}
             />
-            <ReferenceLine y={80} stroke="#22c55e" strokeDasharray="4 4" />
+            <ReferenceLine
+              y={80}
+              stroke="#22c55e"
+              strokeDasharray="4 4"
+              label={{
+                value: "Viral threshold",
+                position: "right",
+                fill: "#22c55e",
+                fontSize: 12,
+              }}
+            />
             <Area
               type="monotone"
               dataKey="score"
