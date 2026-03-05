@@ -1,16 +1,29 @@
-import { REPORT_SECTIONS, type ReportSectionKey } from "./sectionNames";
 import type { FullReport } from "./types";
-import type { ViralReportJson } from "./schema";
+import type { ReportSectionKey } from "./sectionNames";
 
-export function toFullReport(payload: ViralReportJson): FullReport {
-  const report = {} as FullReport;
+export function toFullReport(payload: unknown): FullReport {
+  const data = payload as any;
 
-  for (const key of REPORT_SECTIONS) {
+  const report: FullReport = {
+    sections: {},
+    metrics: data.metrics ?? {
+      hookStrength: 0,
+      retentionPotential: 0,
+      emotionalImpact: 0,
+      shareability: 0,
+      finalScore: 0,
+    },
+    rewrite: data.rewrite,
+  };
+
+  const sections = data.sections ?? {};
+
+  for (const key of Object.keys(sections) as ReportSectionKey[]) {
     const content =
-      (payload.sections as Record<string, string>)[key] ?? "No relevant data.";
+      (sections as Record<string, string>)[key] ?? "No relevant data.";
 
-    report[key as ReportSectionKey] = {
-      title: key as ReportSectionKey,
+    report.sections[key] = {
+      title: key,
       content: String(content).trim() || "No relevant data.",
     };
   }

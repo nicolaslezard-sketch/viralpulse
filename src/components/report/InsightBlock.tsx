@@ -2,24 +2,23 @@ import { InsightCard } from "./InsightCard";
 import { LockedCard } from "./LockedCard";
 import type { FullReport } from "@/lib/report/types";
 
-export function InsightBlock({
-  title,
-  sections,
-  report,
-  isPro,
-}: {
+type Props = {
   title: string;
   sections: string[];
   report: FullReport;
   isPro: boolean;
-}) {
+};
+
+export function InsightBlock({ title, sections, report, isPro }: Props) {
   return (
     <div className="mb-10">
       <h2 className="text-xl font-bold mb-4">{title}</h2>
 
       <div className="grid md:grid-cols-2 gap-4">
         {sections.map((key) => {
-          const content = report.sections[key as keyof typeof report.sections];
+          const section = report.sections[key];
+
+          if (!section) return null;
 
           const locked = !isPro && !["SUMMARY", "VIRAL REASON"].includes(key);
 
@@ -30,8 +29,8 @@ export function InsightBlock({
           return (
             <InsightCard
               key={key}
-              title={key.replaceAll("_", " ")}
-              content={content}
+              title={section.title}
+              content={section.content}
             />
           );
         })}

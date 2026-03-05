@@ -1,0 +1,19 @@
+export const SECTION_GROUPS = {
+  core: ["SUMMARY", "VIRAL REASON", "KEY MOMENT", "PREDICTED LONGEVITY"],
+
+  growth: ["HOOKS", "TITLE IDEAS", "CLIP IDEAS", "CONTENT ANGLE VARIATIONS"],
+
+  distribution: [
+    "HASHTAGS",
+    "PLATFORM STRATEGY",
+    "TARGET AUDIENCE FIT",
+    "FORMAT CLASSIFICATION",
+  ],
+
+  advanced: [
+    "REPLICATION FRAMEWORK",
+    "REACTION SCRIPT",
+    "MEME TEMPLATES",
+    "WHAT TO FIX",
+  ],
+} as const;

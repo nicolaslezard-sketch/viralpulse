@@ -7,22 +7,23 @@ function previewText(text: string) {
   const max = Math.floor(text.length * 0.35);
   const length = Math.max(min, max);
 
-  return text.slice(0, length).trim() + "\n\n🔒 Upgrade to unlock the full section.";
+  return (
+    text.slice(0, length).trim() + "\n\n🔒 Upgrade to unlock the full section."
+  );
 }
 
 export function buildReportForUser(
   report: FullReport,
-  plan: "free" | "plus" | "pro"
+  plan: "free" | "plus" | "pro",
 ): FullReport {
   if (plan !== "free") return report;
 
-  // 🔒 usamos el orden REAL de las secciones parseadas
-  const entries = Object.entries(report);
+  const entries = Object.entries(report.sections);
 
-  return Object.fromEntries(
+  const previewSections = Object.fromEntries(
     entries.map(([key, section], index) => {
       if (index < FULL_SECTIONS) {
-        return [key, section]; // completas
+        return [key, section];
       }
 
       return [
@@ -30,9 +31,13 @@ export function buildReportForUser(
         {
           ...section,
           content: previewText(section.content),
-          locked: false, // ⚠️ importante: NO lock duro
         },
       ];
-    })
+    }),
   );
+
+  return {
+    ...report,
+    sections: previewSections,
+  };
 }

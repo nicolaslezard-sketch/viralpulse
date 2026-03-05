@@ -1,7 +1,9 @@
 "use client";
 
-import SectionBlock from "./SectionBlock";
 import type { FullReport } from "@/lib/report/types";
+import { InsightBlock } from "@/components/report/InsightBlock";
+import { RewriteBlock } from "@/components/report/RewriteBlock";
+import { SECTION_GROUPS } from "@/lib/report/sectionGroups";
 import { REPORT_SECTIONS } from "@/lib/report/sectionNames";
 
 type ResultsViewProps = {
@@ -52,13 +54,11 @@ export default function ResultsView({
   mode = "preview",
 }: ResultsViewProps) {
   const isFull = mode === "full";
-  const sections = REPORT_SECTIONS;
   const score = viralScore ?? 0;
   const { label: scoreText, color: scoreColor } = scoreLabel(score);
 
-  const summary = report["SUMMARY"];
-  const longevity = report["PREDICTED LONGEVITY"];
-
+  const summary = report.sections["SUMMARY"];
+  const longevity = report.sections["PREDICTED LONGEVITY"];
   async function handleUpgrade() {
     const res = await fetch("/api/lemon/checkout", {
       method: "POST",
@@ -70,7 +70,7 @@ export default function ResultsView({
 
   function copyFullReport() {
     const text = REPORT_SECTIONS.map((key) => {
-      const s = report[key];
+      const s = report.sections[key];
       if (!s) return "";
       return `${s.title}\n${s.content}`;
     })
@@ -170,20 +170,36 @@ export default function ResultsView({
           Strategy Insights
         </summary>
 
-        <div className="mt-6 space-y-6">
-          {sections.map((key) => {
-            const s = report[key];
-            if (!s) return null;
+        <div className="mt-8 space-y-12">
+          <InsightBlock
+            title="Core Insights"
+            sections={SECTION_GROUPS.core}
+            report={report}
+            isPro={isPro}
+          />
 
-            return (
-              <SectionBlock
-                key={key}
-                title={s.title}
-                content={s.content}
-                isPro={isPro}
-              />
-            );
-          })}
+          <InsightBlock
+            title="Growth Ideas"
+            sections={SECTION_GROUPS.growth}
+            report={report}
+            isPro={isPro}
+          />
+
+          <InsightBlock
+            title="Distribution Strategy"
+            sections={SECTION_GROUPS.distribution}
+            report={report}
+            isPro={isPro}
+          />
+
+          <InsightBlock
+            title="Advanced Strategy"
+            sections={SECTION_GROUPS.advanced}
+            report={report}
+            isPro={isPro}
+          />
+
+          {isPro && report.rewrite && <RewriteBlock rewrite={report.rewrite} />}
         </div>
       </details>
 
