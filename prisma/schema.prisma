@@ -64,6 +64,7 @@ model AnalysisReport {
   transcript   String?
   reportFull   Json?
   reportFree   Json?
+  rewrite      Json?
 
   viralScore   Float?
   viralMetrics Json?

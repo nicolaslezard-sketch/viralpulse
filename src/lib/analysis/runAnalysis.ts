@@ -4,6 +4,7 @@ import { transcribeFromR2 } from "@/lib/analysis/transcribeFromR2";
 import { getUserPlan } from "@/lib/auth/getUserPlan";
 import type { PlanKey } from "@/lib/limits";
 import { limitsByPlan } from "@/lib/limits";
+import { generateRewrite } from "@/lib/report/generateRewrite";
 
 export async function runAnalysis({ reportId }: { reportId: string }) {
   console.log("▶️ runAnalysis start", reportId);
@@ -49,6 +50,21 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
     // 3️⃣ generar reporte IA
     const result = await generateReport(transcript);
     console.log("✅ report generated");
+
+    const rewrite = await generateRewrite(transcript);
+    await prisma.analysisReport.update({
+      where: { id: reportId },
+      data: {
+        status: "done",
+        reportFull: result.fullText,
+        reportFree: result.freeText,
+
+        transcript,
+        durationSec,
+
+        rewrite: rewrite ?? undefined,
+      },
+    });
 
     // 4️⃣ guardar resultado
     await prisma.analysisReport.update({
