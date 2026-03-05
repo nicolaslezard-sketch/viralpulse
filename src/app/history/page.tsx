@@ -32,8 +32,6 @@ export default function HistoryPage() {
   const [sort, setSort] = useState<SortOption>("newest");
 
   useEffect(() => {
-    if (plan === "free") return;
-
     fetch("/api/history")
       .then((r) => {
         if (!r.ok) throw new Error("Failed to load history");
@@ -41,7 +39,7 @@ export default function HistoryPage() {
       })
       .then((d) => setItems(d.reports))
       .catch((e) => setError(e.message));
-  }, [plan]);
+  }, []);
 
   const enriched = items.map((item, index) => {
     const report = item.reportFull ?? item.reportFree ?? null;
@@ -157,7 +155,7 @@ export default function HistoryPage() {
           </select>
         </div>
       </div>
-      {average !== null && (
+      {average !== null && plan !== "free" && (
         <>
           <div className="mt-8 grid gap-4 md:grid-cols-4">
             {/* Average */}
@@ -211,6 +209,25 @@ export default function HistoryPage() {
         </>
       )}
 
+      {plan === "free" && (
+        <div className="mt-8 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-6 text-center">
+          <p className="text-sm text-indigo-200 font-medium">
+            🔒 Unlock performance analytics
+          </p>
+
+          <p className="mt-2 text-xs text-indigo-200/70">
+            View score evolution, trends and performance insights.
+          </p>
+
+          <Link
+            href="/pricing"
+            className="inline-block mt-4 rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
+          >
+            Upgrade to Pro
+          </Link>
+        </div>
+      )}
+
       {error && (
         <div className="mt-6 rounded-xl border border-red-800/50 bg-red-950/40 px-4 py-3 text-sm text-red-300">
           {error}
@@ -242,6 +259,13 @@ export default function HistoryPage() {
                   <p className="mt-1 text-xs text-zinc-400 line-clamp-2">
                     {r.summary}
                   </p>
+                )}
+                {plan === "free" && (
+                  <div className="mt-2 text-xs text-zinc-500 space-y-1">
+                    <div>🔒 Full report</div>
+                    <div>🔒 Strategy insights</div>
+                    <div>🔒 Transcript</div>
+                  </div>
                 )}
                 {/* SCORE + DELTA */}
                 <div className="flex items-center gap-3">
