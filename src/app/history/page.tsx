@@ -5,13 +5,7 @@ import { useUserPlan } from "@/lib/useUserPlan";
 import Link from "next/link";
 import UsageIndicator from "@/components/analysis/UsageIndicator";
 import ScoreChart from "@/components/history/ScoreChart";
-
-type ReportSection = {
-  title: string;
-  content: string;
-};
-
-type FullReport = Record<string, ReportSection>;
+import type { FullReport } from "@/lib/report/types";
 
 type HistoryItem = {
   id: string;
@@ -54,8 +48,13 @@ export default function HistoryPage() {
         ? Number((score - prevScore).toFixed(1))
         : null;
 
+    const summarySection = report?.sections?.["SUMMARY"];
+
     const summary =
-      report?.["SUMMARY"]?.content?.split("\n").filter(Boolean)[0] ?? null;
+      summarySection?.content
+        ?.split("\n")
+        .map((l: string) => l.trim())
+        .filter(Boolean)[0] ?? "";
 
     return {
       ...item,
