@@ -4,8 +4,12 @@ export function normalizeReport(report: any): FullReport | null {
   if (!report) return null;
 
   // ya es formato nuevo
-  if (report.sections) return report as FullReport;
-
+  if (report.sections) {
+    return {
+      ...report,
+      rewrite: report.rewrite ?? undefined,
+    } as FullReport;
+  }
   // formato viejo
   const sections: Record<string, { title: string; content: string }> = {};
 
@@ -29,6 +33,6 @@ export function normalizeReport(report: any): FullReport | null {
       shareability: 0,
       finalScore: 0,
     },
-    rewrite: undefined,
+    rewrite: report.rewrite ?? undefined,
   };
 }

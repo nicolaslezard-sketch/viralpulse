@@ -9,25 +9,11 @@ import {
   AreaChart,
 } from "recharts";
 
-const CustomTooltip = ({ active, payload }: any) => {
-  if (!active || !payload?.length) return null;
-
-  const data = payload[0].payload;
-
-  return (
-    <div className="bg-[#020617] border border-white/10 rounded-lg px-4 py-3 text-sm">
-      <p className="text-white font-medium mb-1">{data.name}</p>
-
-      <p className="text-indigo-400">Score: {data.score}</p>
-
-      <p className="text-zinc-400 text-xs">{data.date}</p>
-    </div>
-  );
-};
 type ChartPoint = {
   date: string;
   score: number;
 };
+import { ReferenceLine } from "recharts";
 
 export default function ScoreChart({ data }: { data: ChartPoint[] }) {
   return (
@@ -59,14 +45,23 @@ export default function ScoreChart({ data }: { data: ChartPoint[] }) {
             />
 
             <Tooltip
-              content={<CustomTooltip />}
-              contentStyle={{
-                background: "#020617",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "10px",
+              content={({ active, payload }) => {
+                if (!active || !payload || !payload.length) return null;
+
+                const d = payload[0].payload;
+
+                return (
+                  <div className="bg-black/90 border border-white/10 rounded-lg px-4 py-3 text-sm">
+                    <div className="font-medium text-white mb-1">{d.name}</div>
+                    <div className="text-indigo-400">Score: {d.score}</div>
+                    <div className="text-zinc-400 text-xs">
+                      {new Date(d.date).toLocaleDateString()}
+                    </div>
+                  </div>
+                );
               }}
             />
-
+            <ReferenceLine y={80} stroke="#22c55e" strokeDasharray="4 4" />
             <Area
               type="monotone"
               dataKey="score"

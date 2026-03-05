@@ -51,7 +51,7 @@ export default function ReportClient({ reportId }: { reportId: string }) {
       </div>
     );
   }
-
+  console.log(data.report);
   const isPaid = plan !== "free";
 
   return (
