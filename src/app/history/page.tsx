@@ -83,8 +83,9 @@ export default function HistoryPage() {
   const chartData = sorted
     .filter((r) => r.score !== null)
     .map((r) => ({
-      date: r.createdAt,
+      date: new Date(r.createdAt).toLocaleDateString(),
       score: r.score as number,
+      name: r.originalName ?? "Untitled",
     }))
     .reverse();
 

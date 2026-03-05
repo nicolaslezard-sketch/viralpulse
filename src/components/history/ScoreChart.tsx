@@ -9,6 +9,21 @@ import {
   AreaChart,
 } from "recharts";
 
+const CustomTooltip = ({ active, payload }: any) => {
+  if (!active || !payload?.length) return null;
+
+  const data = payload[0].payload;
+
+  return (
+    <div className="bg-[#020617] border border-white/10 rounded-lg px-4 py-3 text-sm">
+      <p className="text-white font-medium mb-1">{data.name}</p>
+
+      <p className="text-indigo-400">Score: {data.score}</p>
+
+      <p className="text-zinc-400 text-xs">{data.date}</p>
+    </div>
+  );
+};
 type ChartPoint = {
   date: string;
   score: number;
@@ -44,6 +59,7 @@ export default function ScoreChart({ data }: { data: ChartPoint[] }) {
             />
 
             <Tooltip
+              content={<CustomTooltip />}
               contentStyle={{
                 background: "#020617",
                 border: "1px solid rgba(255,255,255,0.1)",

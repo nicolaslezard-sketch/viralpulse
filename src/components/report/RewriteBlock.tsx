@@ -1,5 +1,5 @@
 type Props = {
-  rewrite: {
+  rewrite?: {
     hookRewrite: string;
     optimizedScript: string;
     titles: string[];
@@ -8,31 +8,54 @@ type Props = {
 };
 
 export function RewriteBlock({ rewrite }: Props) {
+  if (!rewrite) return null;
+
   return (
-    <div className="mb-10">
-      <h2 className="text-xl font-bold mb-4">✨ Viral Rewrite</h2>
+    <div className="mb-12">
+      <h2 className="text-lg font-semibold text-indigo-300 tracking-wide mb-4">
+        ✨ AI Viral Rewrite
+      </h2>
 
       <div className="grid md:grid-cols-2 gap-4">
-        <div className="card">
-          <h3>Hook Rewrite</h3>
-          <p>{rewrite.hookRewrite}</p>
+        {/* Hook */}
+        <div className="rounded-xl bg-linear-to-b from-[#0f172a] to-[#020617] p-6 border border-white/5">
+          <h3 className="text-sm font-semibold text-white mb-3">
+            Hook Rewrite
+          </h3>
+
+          <p className="text-sm text-white/80">{rewrite.hookRewrite}</p>
         </div>
 
-        <div className="card">
-          <h3>Thumbnail Idea</h3>
-          <p>{rewrite.thumbnailIdea}</p>
+        {/* Thumbnail */}
+        <div className="rounded-xl bg-linear-to-b from-[#0f172a] to-[#020617] p-6 border border-white/5">
+          <h3 className="text-sm font-semibold text-white mb-3">
+            Thumbnail Idea
+          </h3>
+
+          <p className="text-sm text-white/80">{rewrite.thumbnailIdea}</p>
         </div>
 
-        <div className="card md:col-span-2">
-          <h3>Optimized Script</h3>
-          <p className="whitespace-pre-line">{rewrite.optimizedScript}</p>
+        {/* Script */}
+        <div className="rounded-xl bg-linear-to-b from-[#0f172a] to-[#020617] p-6 border border-white/5 md:col-span-2">
+          <h3 className="text-sm font-semibold text-white mb-3">
+            Optimized Script
+          </h3>
+
+          <p className="text-sm text-white/80 whitespace-pre-line">
+            {rewrite.optimizedScript}
+          </p>
         </div>
 
-        <div className="card md:col-span-2">
-          <h3>Title Ideas</h3>
-          <ul>
-            {rewrite.titles.map((t) => (
-              <li key={t}>{t}</li>
+        {/* Titles */}
+        <div className="rounded-xl bg-linear-to-b from-[#0f172a] to-[#020617] p-6 border border-white/5 md:col-span-2">
+          <h3 className="text-sm font-semibold text-white mb-3">Title Ideas</h3>
+
+          <ul className="space-y-2 text-sm text-white/80">
+            {rewrite.titles.map((t, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="text-indigo-400 font-semibold">{i + 1}.</span>
+                <span>{t}</span>
+              </li>
             ))}
           </ul>
         </div>
