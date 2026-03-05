@@ -14,9 +14,12 @@ export default function SectionBlock({
 }) {
   const meta = SECTION_META[title];
 
-  const previewRatio = meta?.freePreviewRatio ?? 1;
-  const shouldTrim = !isPro && previewRatio < 1 && title !== "SUMMARY";
+  const FULL_FREE_SECTIONS = ["SUMMARY", "VIRAL REASON", "KEY MOMENT"];
 
+  const previewRatio = meta?.freePreviewRatio ?? 1;
+
+  const shouldTrim =
+    !isPro && previewRatio < 1 && !FULL_FREE_SECTIONS.includes(title);
   const previewText = shouldTrim
     ? content.slice(0, Math.floor(content.length * previewRatio))
     : content;
@@ -81,6 +84,7 @@ export default function SectionBlock({
               leading-relaxed
               text-zinc-400/70
               blur-[3px]
+              brightness-75
               opacity-70
               select-none
               pointer-events-none

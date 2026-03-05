@@ -7,14 +7,6 @@ import {
   type ReportSectionKey,
 } from "@/lib/report/sectionNames";
 
-const PREVIEW_SECTIONS: ReportSectionKey[] = [
-  "SUMMARY",
-  "HOOKS",
-  "TITLE IDEAS",
-  "CLIP IDEAS",
-  "HASHTAGS",
-];
-
 type ResultsViewProps = {
   report: FullReport;
   viralScore?: number | null;
@@ -38,16 +30,6 @@ function firstLine(text: string) {
       .map((l) => l.trim())
       .filter(Boolean)[0] ?? text
   );
-}
-
-function takeLines(text: string, n: number) {
-  return text
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .slice(0, n)
-    .map((l) => `- ${l}`)
-    .join("\n");
 }
 
 function extractTags(text?: string) {
@@ -82,17 +64,13 @@ export default function ResultsView({
   mode = "preview",
 }: ResultsViewProps) {
   const isFull = mode === "full";
-  const sections = mode === "preview" ? PREVIEW_SECTIONS : REPORT_SECTIONS;
-
+  const sections = REPORT_SECTIONS;
   const score = viralScore ?? 0;
   const { label: scoreText, color: scoreColor } = scoreLabel(score);
 
   const summary = report["SUMMARY"];
   const longevity = report["PREDICTED LONGEVITY"];
-  const hooks = report["HOOKS"];
-  const titles = report["TITLE IDEAS"];
-  const clipIdeas = report["CLIP IDEAS"];
-  const keyMoment = report["KEY MOMENT"];
+
   const performanceTags = report["PERFORMANCE TAGS" as ReportSectionKey];
 
   async function handleUpgrade() {
