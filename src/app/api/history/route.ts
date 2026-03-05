@@ -10,13 +10,9 @@ export async function GET() {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
   const userId = session.user.id;
   const plan = await getUserPlan(userId);
-
-  // 🔒 FREE no tiene historial
-  if (plan === "free") {
-    return NextResponse.json({ error: "Upgrade required" }, { status: 403 });
-  }
 
   const rawReports = await prisma.analysisReport.findMany({
     where: { userId },
@@ -26,16 +22,34 @@ export async function GET() {
       id: true,
       createdAt: true,
       durationSec: true,
-      reportFull: true,
       viralScore: true,
+      reportFull: true,
       reportFree: true,
       originalName: true,
     },
   });
-  const reports = rawReports.map((r) => ({
-    ...r,
-    reportFull: r.reportFull ?? null,
-    reportFree: r.reportFree ?? null,
-  }));
+
+  const reports = rawReports.map((r) => {
+    // FREE → solo contenido limitado
+    if (plan === "free") {
+      return {
+        id: r.id,
+        createdAt: r.createdAt,
+        durationSec: r.durationSec,
+        viralScore: r.viralScore,
+        originalName: r.originalName,
+        reportFree: r.reportFree ?? null,
+        reportFull: null,
+      };
+    }
+
+    // PRO → contenido completo
+    return {
+      ...r,
+      reportFull: r.reportFull ?? null,
+      reportFree: r.reportFree ?? null,
+    };
+  });
+
   return NextResponse.json({ reports });
 }
