@@ -29,6 +29,6 @@ export function normalizeReport(report: any): FullReport | null {
       shareability: 0,
       finalScore: 0,
     },
-    rewrite: null,
+    rewrite: undefined,
   };
 }
