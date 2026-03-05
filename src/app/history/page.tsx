@@ -50,7 +50,9 @@ export default function HistoryPage() {
     const prevScore = prev?.viralScore ?? null;
 
     const delta =
-      score !== null && prevScore !== null ? score - prevScore : null;
+      score !== null && prevScore !== null
+        ? Number((score - prevScore).toFixed(1))
+        : null;
 
     const summary =
       report?.["SUMMARY"]?.content?.split("\n").filter(Boolean)[0] ?? null;

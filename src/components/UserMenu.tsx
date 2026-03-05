@@ -66,7 +66,7 @@ export default function UserMenu() {
             absolute right-0 z-50 mt-2 w-64
             rounded-2xl
             border border-white/10
-            bg-black/80 backdrop-blur-xl
+           bg-zinc-950
             shadow-xl
             overflow-hidden
           "
@@ -111,14 +111,6 @@ export default function UserMenu() {
               History
             </Link>
 
-            {plan === "free" && (
-              <Link
-                href="/#pricing"
-                className="mt-2 inline-block text-xs text-indigo-400 hover:text-indigo-300"
-              >
-                Upgrade to Pro →
-              </Link>
-            )}
             <Link
               href="/account"
               className="
