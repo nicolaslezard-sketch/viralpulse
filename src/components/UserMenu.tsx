@@ -98,21 +98,27 @@ export default function UserMenu() {
 
           {/* LINKS */}
           <div className="py-1">
-            {plan !== "free" && (
+            <Link
+              href="/history"
+              className="
+    block px-4 py-2.5 text-sm
+    text-white/80
+    hover:bg-white/5 hover:text-white
+    transition
+  "
+              onClick={() => setOpen(false)}
+            >
+              History
+            </Link>
+
+            {plan === "free" && (
               <Link
-                href="/history"
-                className="
-                  block px-4 py-2.5 text-sm
-                  text-white/80
-                  hover:bg-white/5 hover:text-white
-                  transition
-                "
-                onClick={() => setOpen(false)}
+                href="/#pricing"
+                className="mt-2 inline-block text-xs text-indigo-400 hover:text-indigo-300"
               >
-                History
+                Upgrade to Pro →
               </Link>
             )}
-
             <Link
               href="/account"
               className="
