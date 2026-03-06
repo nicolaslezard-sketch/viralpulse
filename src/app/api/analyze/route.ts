@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
-import { transcribeFromR2 } from "@/lib/analysis/transcribeFromR2";
-import { generateReport } from "@/lib/report/generateReport";
 import { getUserPlan } from "@/lib/auth/getUserPlan";
 import { limitsByPlan } from "@/lib/limits";
 import type { PlanKey } from "@/lib/limits";
@@ -13,6 +12,8 @@ import {
   canUseFreeToday,
   consumeFreeToday,
 } from "@/lib/usage/usage";
+import { runAnalysis } from "@/lib/analysis/runAnalysis";
+import { transcribeFromR2 } from "@/lib/analysis/transcribeFromR2";
 
 export const runtime = "nodejs";
 
@@ -38,6 +39,7 @@ export async function POST(req: Request) {
     const mimeType = body?.mimeType;
     const sourceType = body?.sourceType;
     const originalNameFromClient = body?.originalName ?? null;
+    const fileSize = body?.fileSize ?? null;
 
     if (!key || typeof key !== "string") {
       return NextResponse.json({ error: "Missing media key" }, { status: 400 });
@@ -58,13 +60,14 @@ export async function POST(req: Request) {
     const limits = limitsByPlan[plan];
 
     /* =========================
-       TRANSCRIBE (VIDEO OR AUDIO)
+       PRE-FLIGHT MEDIA CHECK
+       Necesitamos duración real para:
+       - min guard
+       - max per plan
+       - usage minutes
     ========================= */
     const { transcript, durationSec } = await transcribeFromR2(key, mimeType);
 
-    /* =========================
-       MINIMUM AUDIO GUARD
-    ========================= */
     const minSeconds = Number(process.env.MIN_AUDIO_SECONDS ?? 8);
     const minTranscriptChars = Number(process.env.MIN_TRANSCRIPT_CHARS ?? 80);
 
@@ -82,9 +85,6 @@ export async function POST(req: Request) {
       );
     }
 
-    /* =========================
-       PLAN MAX DURATION
-    ========================= */
     if (durationSec > limits.maxSeconds) {
       return NextResponse.json(
         {
@@ -136,35 +136,19 @@ export async function POST(req: Request) {
     }
 
     /* =========================
-       GENERATE REPORT
-    ========================= */
-    const result = await generateReport(transcript);
-
-    /* =========================
-       SAVE REPORT
+       CREATE REPORT FIRST
     ========================= */
     const report = await prisma.analysisReport.create({
       data: {
         userId,
-
         sourceType: sourceType ?? "audio",
         mimeType,
-
+        fileSize: typeof fileSize === "number" ? fileSize : null,
         mediaKey: key,
-
         originalName: originalNameFromClient?.slice(0, 120) ?? null,
-
-        status: "done",
-
-        durationSec,
-
-        reportFull: result.fullText,
-        reportFree: result.freeText,
-        transcript,
-
-        viralScore: result.viralScore,
-        viralMetrics: result.viralMetrics ?? undefined,
+        status: "processing",
       },
+      select: { id: true },
     });
 
     /* =========================
@@ -179,13 +163,26 @@ export async function POST(req: Request) {
       await consumeFreeToday(userId);
     }
 
+    /* =========================
+       RUN ANALYSIS
+       Por ahora sync para dejarlo simple y testeable.
+    ========================= */
+    await prisma.analysisReport.update({
+      where: { id: report.id },
+      data: {
+        transcript,
+        durationSec,
+      },
+    });
+
+    await runAnalysis({ reportId: report.id });
+
     return NextResponse.json({
       id: report.id,
       isPro: plan !== "free",
     });
   } catch (err) {
     console.error("❌ analyze error", err);
-
     return NextResponse.json({ error: "Analysis failed." }, { status: 500 });
   }
 }

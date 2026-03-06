@@ -4,7 +4,6 @@ import { useState, DragEvent } from "react";
 import { uploadToR2 } from "@/lib/uploadToR2";
 import { apiUrl } from "@/lib/clientBaseUrl";
 import { withRetry } from "@/lib/retry";
-import { getAudioDurationSeconds } from "@/lib/audioDuration";
 import { useSession } from "next-auth/react";
 import { useUserPlan } from "@/lib/useUserPlan";
 
@@ -29,19 +28,51 @@ type AnalyzeResult = {
 ========================= */
 
 const ALLOWED_TYPES = [
+  // audio
   "audio/mpeg",
   "audio/wav",
   "audio/mp4",
   "audio/x-m4a",
-  "audio/ogg",
-  "audio/webm",
+
+  // video
+  "video/mp4",
+  "video/quicktime",
+  "video/x-m4v",
 ];
 
-const EXT_OK = [".mp3", ".wav", ".m4a", ".ogg", ".webm"];
+const EXT_OK = [".mp3", ".wav", ".m4a", ".mp4", ".mov", ".m4v"];
 
-const MIN_AUDIO_SECONDS = Number(
+const MIN_MEDIA_SECONDS = Number(
   process.env.NEXT_PUBLIC_MIN_AUDIO_SECONDS ?? 8,
 );
+
+function getSourceType(file: File): "audio" | "video" {
+  if (file.type.startsWith("video/")) return "video";
+  return "audio";
+}
+
+async function getMediaDurationSeconds(file: File): Promise<number | null> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const isVideo = file.type.startsWith("video/");
+    const media = document.createElement(isVideo ? "video" : "audio");
+
+    media.preload = "metadata";
+
+    media.onloadedmetadata = () => {
+      const duration = media.duration;
+      URL.revokeObjectURL(url);
+      resolve(Number.isFinite(duration) ? duration : null);
+    };
+
+    media.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+
+    media.src = url;
+  });
+}
 
 /* =========================
    Component
@@ -60,10 +91,6 @@ export default function UploadBox() {
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalyzeResult | null>(null);
 
-  /* =========================
-     Guards
-  ========================= */
-
   if (sessionStatus === "loading" || planLoading) {
     return (
       <div className="rounded-2xl border border-white/10 bg-black/25 p-6 text-center text-sm text-zinc-400">
@@ -72,20 +99,18 @@ export default function UploadBox() {
     );
   }
 
-  /* =========================
-     Handlers
-  ========================= */
-
   function handleFile(f: File | null) {
     setError(null);
     setLimitReason(null);
+
     if (!f) return;
 
-    const ext = f.name.toLowerCase().slice(f.name.lastIndexOf("."));
+    const lastDot = f.name.lastIndexOf(".");
+    const ext = lastDot >= 0 ? f.name.toLowerCase().slice(lastDot) : "";
 
     if (!ALLOWED_TYPES.includes(f.type) && !EXT_OK.includes(ext)) {
       setError(
-        "Unsupported file format. Please upload MP3, WAV, M4A, OGG or WEBM.",
+        "Unsupported file format. Please upload MP3, WAV, M4A, MP4, MOV or M4V.",
       );
       return;
     }
@@ -107,12 +132,12 @@ export default function UploadBox() {
       return;
     }
 
-    const dur = await getAudioDurationSeconds(file);
-    if (dur !== null && dur < MIN_AUDIO_SECONDS) {
+    const dur = await getMediaDurationSeconds(file);
+    if (dur !== null && dur < MIN_MEDIA_SECONDS) {
       setError(
-        `Audio too short (${Math.round(
+        `Content too short (${Math.round(
           dur,
-        )}s). Please upload at least ${MIN_AUDIO_SECONDS}s.`,
+        )}s). Please upload at least ${MIN_MEDIA_SECONDS}s.`,
       );
       return;
     }
@@ -130,6 +155,8 @@ export default function UploadBox() {
     }, 100);
 
     try {
+      const sourceType = getSourceType(file);
+
       /* 1️⃣ Upload URL */
       const uploadRes = await withRetry(
         () =>
@@ -168,6 +195,9 @@ export default function UploadBox() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               key,
+              mimeType: file.type,
+              sourceType,
+              fileSize: file.size,
               originalName: file.name,
             }),
           }),
@@ -183,10 +213,13 @@ export default function UploadBox() {
         const code = data.code as string | undefined;
 
         if (analyzeRes.status === 422 && code === "AUDIO_TOO_SHORT") {
-          throw new Error((data.message as string) || "Audio too short.");
+          throw new Error((data.message as string) || "Content too short.");
         }
 
-        if (analyzeRes.status === 422 && code === "AUDIO_TOO_LONG") {
+        if (
+          analyzeRes.status === 422 &&
+          (code === "AUDIO_TOO_LONG" || code === "VIDEO_TOO_LONG")
+        ) {
           setLimitReason({
             kind: "audio_too_long",
             plan,
@@ -222,7 +255,6 @@ export default function UploadBox() {
         );
       }
 
-      /* 4️⃣ Success */
       setResult({ id: data.id as string });
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -235,17 +267,12 @@ export default function UploadBox() {
     }
   }
 
-  /* =========================
-     Render
-  ========================= */
-
   return (
     <div className="text-white">
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <PlanBadge plan={plan} />
       </div>
 
-      {/* DROP ZONE */}
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -263,7 +290,7 @@ export default function UploadBox() {
         ].join(" ")}
       >
         <p className="text-base font-semibold text-white/90">
-          Drag & drop your audio
+          Drag & drop your audio or video
         </p>
 
         <label
@@ -276,10 +303,11 @@ export default function UploadBox() {
         <input
           id="fileInput"
           type="file"
-          accept={ALLOWED_TYPES.join(",")}
+          accept="audio/*,video/mp4,video/quicktime,video/x-m4v"
           className="hidden"
           onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
         />
+
         {file && (
           <div className="mt-4 w-full max-w-lg rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-left text-sm">
             <div className="flex items-start justify-between gap-3">
@@ -289,7 +317,7 @@ export default function UploadBox() {
                 </p>
                 <p className="mt-0.5 text-xs text-zinc-400">
                   {(file.size / (1024 * 1024)).toFixed(2)} MB ·{" "}
-                  {file.type || "audio"}
+                  {file.type || "media"}
                 </p>
               </div>
 
@@ -323,43 +351,32 @@ export default function UploadBox() {
         >
           {analyzing ? "Analyzing…" : "Analyze"}
         </button>
+
         <div className="mt-4 text-center text-xs text-zinc-500">
           <p className="leading-relaxed">
-            <span className="text-zinc-400">Recommended:</span> MP3 or M4A ·{" "}
-            <span className="hidden sm:inline">
-              WAV files are much larger and won’t improve results ·{" "}
-            </span>
-            <span className="text-zinc-400">
-              Free: <span className="font-medium text-zinc-300">10 MB</span>
-            </span>{" "}
-            ·{" "}
-            <span className="font-semibold text-white">
-              Plus / Pro: <span className="text-indigo-300">25 MB</span>
-            </span>
+            <span className="text-zinc-400">Supported:</span> MP3, WAV, M4A,
+            MP4, MOV, M4V · <span className="text-zinc-400">Max duration:</span>{" "}
+            <span className="font-medium text-zinc-300">up to 20 min</span>
           </p>
 
-          {/* Mobile-only WAV disclaimer */}
-          <p className="mt-1 sm:hidden">
-            WAV files are much larger and won’t improve results.
+          <p className="mt-1">
+            <span className="text-zinc-400">Recommended:</span> MP3, M4A or MP4
           </p>
         </div>
       </div>
 
-      {/* LOGIN */}
       {showLogin && (
         <div className="mt-6">
           <LoginCard onClose={() => setShowLogin(false)} />
         </div>
       )}
 
-      {/* ANALYZING */}
       {analyzing && (
         <div id="analyzing" className="mt-8">
           <AnalyzingExperience />
         </div>
       )}
 
-      {/* REPORT READY */}
       {result && (
         <div className="mt-8">
           <ReportReady reportId={result.id} isPro={plan !== "free"} />
