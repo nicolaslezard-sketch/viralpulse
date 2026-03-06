@@ -8,19 +8,32 @@ export type RewriteResult = {
   thumbnailIdea: string;
 };
 
-export async function generateRewrite(
-  transcript: string,
-): Promise<RewriteResult | null> {
+export async function generateRewrite({
+  transcript,
+  report,
+}: {
+  transcript: string;
+  report: any;
+}): Promise<RewriteResult | null> {
   const openai = getOpenAIClient();
 
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     response_format: { type: "json_object" },
+    temperature: 0.8,
     messages: [
       { role: "system", content: VIRAL_REWRITE_PROMPT },
-      { role: "user", content: transcript },
+      {
+        role: "user",
+        content: `
+TRANSCRIPT
+${transcript}
+
+ANALYSIS
+${JSON.stringify(report)}
+`,
+      },
     ],
-    temperature: 0.8,
   });
 
   const raw = completion.choices[0]?.message?.content ?? "{}";

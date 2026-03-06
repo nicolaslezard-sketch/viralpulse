@@ -12,7 +12,15 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
   // 0) cargar report
   const report = await prisma.analysisReport.findUnique({
     where: { id: reportId },
-    select: { id: true, userId: true, audioKey: true, status: true },
+    select: {
+      id: true,
+      userId: true,
+      status: true,
+      mediaKey: true,
+      mimeType: true,
+      sourceType: true,
+      originalName: true,
+    },
   });
 
   if (!report) {
@@ -22,7 +30,25 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
 
   // idempotencia
   if (report.status !== "processing") {
-    console.log("⏭ report not in processing state");
+    console.log("⏭️ report not in processing state");
+    return;
+  }
+
+  if (!report.mediaKey) {
+    console.log("❌ mediaKey missing");
+    await prisma.analysisReport.update({
+      where: { id: reportId },
+      data: { status: "error" },
+    });
+    return;
+  }
+
+  if (!report.mimeType) {
+    console.log("❌ mimeType missing");
+    await prisma.analysisReport.update({
+      where: { id: reportId },
+      data: { status: "error" },
+    });
     return;
   }
 
@@ -30,62 +56,71 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
   const limits = limitsByPlan[plan];
 
   try {
-    // 1️⃣ transcribir
-    const { transcript, durationSec } = await transcribeFromR2(report.audioKey);
+    // 1) transcribir
+    const { transcript, durationSec } = await transcribeFromR2(
+      report.mediaKey,
+      report.mimeType,
+    );
+
     console.log("✅ transcription done", durationSec);
 
-    // 2️⃣ límite por plan
+    // 2) límite por plan
     if (durationSec > limits.maxSeconds) {
+      console.log("❌ media too long for plan");
+
       await prisma.analysisReport.update({
         where: { id: reportId },
         data: {
           status: "error",
           durationSec,
+          transcript,
         },
       });
-      console.log("⛔ duration limit exceeded");
+
       return;
     }
 
-    // 3️⃣ generar reporte IA
+    // 3) generar report
+    await prisma.analysisReport.update({
+      where: { id: reportId },
+      data: {
+        status: "analyzing",
+        durationSec,
+        transcript,
+      },
+    });
+
     const result = await generateReport(transcript);
-    console.log("✅ report generated");
 
-    const rewrite = await generateRewrite(transcript);
+    // 4) rewrite
+    const rewrite = await generateRewrite({
+      transcript,
+      report: result.fullText,
+    });
+    // 5) guardar final
     await prisma.analysisReport.update({
       where: { id: reportId },
       data: {
         status: "done",
+        durationSec,
+        transcript,
         reportFull: result.fullText,
         reportFree: result.freeText,
-
-        transcript,
-        durationSec,
-
         rewrite: rewrite ?? undefined,
+        viralScore: result.viralScore,
+        viralMetrics: result.viralMetrics ?? undefined,
       },
     });
 
-    // 4️⃣ guardar resultado
+    console.log("✅ runAnalysis finished", reportId);
+  } catch (error) {
+    console.error("❌ runAnalysis error", error);
+
     await prisma.analysisReport.update({
       where: { id: reportId },
       data: {
-        status: "done",
-        reportFull: result.fullText,
-        reportFree: result.freeText,
-
-        transcript,
-        durationSec,
+        status: "error",
       },
-    });
-
-    console.log("🎉 report saved");
-  } catch (err) {
-    console.error("🔥 runAnalysis failed", err);
-
-    await prisma.analysisReport.update({
-      where: { id: reportId },
-      data: { status: "error" },
     });
   }
 }

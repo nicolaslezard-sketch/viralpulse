@@ -1,54 +1,110 @@
-import { r2 } from "@/lib/r2";
-import { GetObjectCommand } from "@aws-sdk/client-s3";
-import { getOpenAIClient } from "@/lib/openai";
 import fs from "fs";
-import os from "os";
 import path from "path";
+import os from "os";
 import { pipeline } from "stream/promises";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import ffmpeg from "fluent-ffmpeg";
+import OpenAI from "openai";
 
-export async function transcribeFromR2(audioKey: string): Promise<{
-  transcript: string;
-  durationSec: number;
-}> {
-  const obj = await r2.send(
-    new GetObjectCommand({
-      Bucket: process.env.R2_BUCKET!,
-      Key: audioKey,
-    })
-  );
+import { r2 } from "@/lib/r2";
 
-  if (!obj.Body) throw new Error("R2 object has no body");
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
-  const ext = path.extname(audioKey).toLowerCase() || ".mp3";
+function isVideo(mime: string) {
+  return mime.startsWith("video/");
+}
 
-  const tmpPath = path.join(
-    os.tmpdir(),
-    `vp-${Date.now()}-${Math.random()}${ext}`
-  );
+function extractAudio(input: string, output: string) {
+  return new Promise<void>((resolve, reject) => {
+    ffmpeg(input)
+      .noVideo()
+      .audioCodec("libmp3lame")
+      .audioBitrate("64k")
+      .audioChannels(1)
+      .audioFrequency(16000)
+      .save(output)
+      .on("end", () => resolve())
+      .on("error", reject);
+  });
+}
 
-  await pipeline(obj.Body as any, fs.createWriteStream(tmpPath));
+export async function transcribeFromR2(
+  key: string,
+  mimeType: string,
+): Promise<{ transcript: string; durationSec: number }> {
+  const tmpDir = os.tmpdir();
+
+  const mediaPath = path.join(tmpDir, `vp_media_${Date.now()}`);
+  const audioPath = path.join(tmpDir, `vp_audio_${Date.now()}.mp3`);
+
+  let durationSec = 0;
 
   try {
-    const openai = getOpenAIClient();
+    /* =====================
+       DOWNLOAD
+    ===================== */
 
-    const resp: any = await openai.audio.transcriptions.create({
-      file: fs.createReadStream(tmpPath),
-      model: "whisper-1",
-      response_format: "verbose_json",
-      timestamp_granularities: ["segment"],
+    const obj = await r2.send(
+      new GetObjectCommand({
+        Bucket: process.env.R2_BUCKET!,
+        Key: key,
+      }),
+    );
+
+    if (!obj.Body) throw new Error("R2 object empty");
+
+    await pipeline(obj.Body as any, fs.createWriteStream(mediaPath));
+
+    let finalAudio = mediaPath;
+
+    /* =====================
+       VIDEO → AUDIO
+    ===================== */
+
+    if (isVideo(mimeType)) {
+      await extractAudio(mediaPath, audioPath);
+
+      fs.unlinkSync(mediaPath);
+
+      finalAudio = audioPath;
+    }
+
+    /* =====================
+       ESTIMATE DURATION
+    ===================== */
+
+    await new Promise<void>((resolve, reject) => {
+      ffmpeg.ffprobe(finalAudio, (err, data) => {
+        if (err) return reject(err);
+
+        durationSec = Math.round(data.format.duration ?? 0);
+        resolve();
+      });
     });
 
-    const transcript: string = resp?.text ?? "";
-    const segments: Array<{ end?: number }> = resp?.segments ?? [];
-    const durationSec =
-      segments.length > 0
-        ? Math.ceil(segments[segments.length - 1]?.end ?? 0)
-        : 0;
+    /* =====================
+       TRANSCRIPTION
+    ===================== */
 
-    return { transcript, durationSec };
-  } finally {
-    try {
-      fs.unlinkSync(tmpPath);
-    } catch {}
+    const resp = await openai.audio.transcriptions.create({
+      file: fs.createReadStream(finalAudio),
+      model: "gpt-4o-mini-transcribe",
+    });
+
+    fs.unlinkSync(finalAudio);
+
+    return {
+      transcript: resp.text,
+      durationSec,
+    };
+  } catch (err) {
+    console.error("TRANSCRIBE ERROR:", err);
+
+    if (fs.existsSync(mediaPath)) fs.unlinkSync(mediaPath);
+    if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
+
+    throw err;
   }
 }

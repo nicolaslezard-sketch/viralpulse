@@ -47,7 +47,6 @@ model User {
   dailyUsage           DailyUsage[]
 }
 
-
 model AnalysisReport {
   id           String   @id @default(cuid())
   originalName String?
@@ -55,10 +54,18 @@ model AnalysisReport {
   userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  status       String   // "processing" | "done" | "error"
+  status       String
 
-  audioKey     String
-  durationSec  Int
+  /* MEDIA */
+  sourceType   String?   // audio | video
+  mimeType     String?
+  fileSize     Int?
+
+  /* STORAGE */
+  mediaKey     String?   // original upload
+  audioKey     String?
+
+  durationSec  Int?
   wasTrimmed   Boolean  @default(false)
 
   transcript   String?

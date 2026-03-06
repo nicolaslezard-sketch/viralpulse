@@ -22,6 +22,7 @@ export async function POST(req: Request) {
        AUTH
     ========================= */
     const session = await getServerSession(authOptions);
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -32,30 +33,37 @@ export async function POST(req: Request) {
        BODY
     ========================= */
     const body = await req.json().catch(() => null);
+
     const key = body?.key;
+    const mimeType = body?.mimeType;
+    const sourceType = body?.sourceType;
     const originalNameFromClient = body?.originalName ?? null;
 
     if (!key || typeof key !== "string") {
-      return NextResponse.json({ error: "Missing audio key" }, { status: 400 });
+      return NextResponse.json({ error: "Missing media key" }, { status: 400 });
+    }
+
+    if (!mimeType || typeof mimeType !== "string") {
+      return NextResponse.json({ error: "Missing mimeType" }, { status: 400 });
     }
 
     if (!key.startsWith(`uploads/${userId}/`)) {
-      return NextResponse.json({ error: "Invalid audio key" }, { status: 403 });
+      return NextResponse.json({ error: "Invalid media key" }, { status: 403 });
     }
 
     /* =========================
-       PLAN / LIMITS
+       PLAN
     ========================= */
     const plan = (await getUserPlan(userId)) as PlanKey;
     const limits = limitsByPlan[plan];
 
     /* =========================
-       TRANSCRIPTION (SOURCE OF TRUTH)
+       TRANSCRIBE (VIDEO OR AUDIO)
     ========================= */
-    const { transcript, durationSec } = await transcribeFromR2(key);
+    const { transcript, durationSec } = await transcribeFromR2(key, mimeType);
 
     /* =========================
-       MINIMUM / MAX DURATION
+       MINIMUM AUDIO GUARD
     ========================= */
     const minSeconds = Number(process.env.MIN_AUDIO_SECONDS ?? 8);
     const minTranscriptChars = Number(process.env.MIN_TRANSCRIPT_CHARS ?? 80);
@@ -67,20 +75,23 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           code: "AUDIO_TOO_SHORT",
-          message: "Audio too short to generate a useful report.",
+          message: "Content too short to generate a useful report.",
           durationSec,
         },
         { status: 422 },
       );
     }
 
+    /* =========================
+       PLAN MAX DURATION
+    ========================= */
     if (durationSec > limits.maxSeconds) {
       return NextResponse.json(
         {
-          code: "AUDIO_TOO_LONG",
+          code: "VIDEO_TOO_LONG",
           message: `Your plan allows up to ${Math.round(
             limits.maxSeconds / 60,
-          )} minutes per audio.`,
+          )} minutes per video.`,
           durationSec,
         },
         { status: 422 },
@@ -94,12 +105,13 @@ export async function POST(req: Request) {
 
     if (plan === "free") {
       const free = await canUseFreeToday(userId);
+
       if (!free.ok) {
         return NextResponse.json(
           {
             code: "DAILY_LIMIT_REACHED",
             message:
-              "You’ve used your 3 free analyses today. Try again tomorrow or upgrade.",
+              "You’ve used your free analyses today. Try again tomorrow or upgrade.",
           },
           { status: 429 },
         );
@@ -129,19 +141,27 @@ export async function POST(req: Request) {
     const result = await generateReport(transcript);
 
     /* =========================
-   SAVE REPORT
-========================= */
-
+       SAVE REPORT
+    ========================= */
     const report = await prisma.analysisReport.create({
       data: {
         userId,
-        audioKey: key,
+
+        sourceType: sourceType ?? "audio",
+        mimeType,
+
+        mediaKey: key,
+
         originalName: originalNameFromClient?.slice(0, 120) ?? null,
+
         status: "done",
+
         durationSec,
+
         reportFull: result.fullText,
         reportFree: result.freeText,
         transcript,
+
         viralScore: result.viralScore,
         viralMetrics: result.viralMetrics ?? undefined,
       },
@@ -150,7 +170,11 @@ export async function POST(req: Request) {
     /* =========================
        CONSUME USAGE
     ========================= */
-    await consumeMonthlyMinutes({ userId, minutesToConsume });
+    await consumeMonthlyMinutes({
+      userId,
+      minutesToConsume,
+    });
+
     if (plan === "free") {
       await consumeFreeToday(userId);
     }
@@ -161,9 +185,7 @@ export async function POST(req: Request) {
     });
   } catch (err) {
     console.error("❌ analyze error", err);
-    return NextResponse.json(
-      { error: "Analysis failed. Supported audio size is ≤ 25MB." },
-      { status: 500 },
-    );
+
+    return NextResponse.json({ error: "Analysis failed." }, { status: 500 });
   }
 }
