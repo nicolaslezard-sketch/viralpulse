@@ -19,7 +19,17 @@ export default function ScoreChart({ data }: { data: ChartPoint[] }) {
   return (
     <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
       <h3 className="text-sm text-zinc-400 mb-4">Score evolution</h3>
+      <div className="flex items-center gap-4 mb-4 text-xs text-zinc-400">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-0.5 bg-indigo-400"></div>
+          <span>Content score</span>
+        </div>
 
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-0.5 border-t border-dashed border-emerald-400"></div>
+          <span>Viral threshold (80)</span>
+        </div>
+      </div>
       <div className="h-65">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
@@ -61,17 +71,7 @@ export default function ScoreChart({ data }: { data: ChartPoint[] }) {
                 );
               }}
             />
-            <ReferenceLine
-              y={80}
-              stroke="#22c55e"
-              strokeDasharray="4 4"
-              label={{
-                value: "Viral threshold",
-                position: "right",
-                fill: "#22c55e",
-                fontSize: 12,
-              }}
-            />
+            <ReferenceLine y={80} stroke="#22c55e" strokeDasharray="4 4" />
             <Area
               type="monotone"
               dataKey="score"

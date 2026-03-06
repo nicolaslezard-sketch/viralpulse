@@ -59,6 +59,15 @@ export default function ResultsView({
 
   const summary = report?.sections?.["SUMMARY"];
   const longevity = report?.sections?.["PREDICTED LONGEVITY"];
+  const reportForInsights: FullReport = {
+    ...report,
+    sections: Object.fromEntries(
+      Object.entries(report.sections || {}).filter(
+        ([key]) =>
+          key !== "REWRITE" && key !== "AI_REWRITE" && key !== "VIRAL_REWRITE",
+      ),
+    ),
+  };
   async function handleUpgrade() {
     const res = await fetch("/api/lemon/checkout", {
       method: "POST",
@@ -174,28 +183,28 @@ export default function ResultsView({
           <InsightBlock
             title="Core Insights"
             sections={SECTION_GROUPS.core}
-            report={report}
+            report={reportForInsights}
             isPro={isPro}
           />
 
           <InsightBlock
             title="Growth Ideas"
             sections={SECTION_GROUPS.growth}
-            report={report}
+            report={reportForInsights}
             isPro={isPro}
           />
 
           <InsightBlock
             title="Distribution Strategy"
             sections={SECTION_GROUPS.distribution}
-            report={report}
+            report={reportForInsights}
             isPro={isPro}
           />
 
           <InsightBlock
             title="Advanced Strategy"
             sections={SECTION_GROUPS.advanced}
-            report={report}
+            report={reportForInsights}
             isPro={isPro}
           />
         </div>
@@ -204,9 +213,15 @@ export default function ResultsView({
       {/* AI REWRITE */}
 
       {isPro && report.rewrite && (
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
-          <RewriteBlock rewrite={report.rewrite} />
-        </div>
+        <details className="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <summary className="cursor-pointer text-lg font-semibold">
+            ✨ AI Viral Rewrite
+          </summary>
+
+          <div className="mt-6">
+            <RewriteBlock rewrite={report.rewrite} />
+          </div>
+        </details>
       )}
 
       {/* TRANSCRIPT */}
