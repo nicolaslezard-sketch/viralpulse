@@ -18,7 +18,7 @@ export function RewriteBlock({ rewrite }: Props) {
 
       <div className="grid md:grid-cols-2 gap-4">
         {/* HOOK */}
-        <div className="card relative">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 relative">
           <button
             onClick={() => copy(rewrite.hookRewrite)}
             className="absolute top-3 right-3 text-xs text-zinc-400 hover:text-white"
@@ -27,11 +27,12 @@ export function RewriteBlock({ rewrite }: Props) {
           </button>
 
           <h3 className="font-semibold mb-2">Hook Rewrite</h3>
+
           <p className="text-sm text-zinc-300">{rewrite.hookRewrite}</p>
         </div>
 
         {/* THUMBNAIL */}
-        <div className="card relative">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 relative">
           <button
             onClick={() => copy(rewrite.thumbnailIdea)}
             className="absolute top-3 right-3 text-xs text-zinc-400 hover:text-white"
@@ -40,11 +41,12 @@ export function RewriteBlock({ rewrite }: Props) {
           </button>
 
           <h3 className="font-semibold mb-2">Thumbnail Idea</h3>
+
           <p className="text-sm text-zinc-300">{rewrite.thumbnailIdea}</p>
         </div>
 
         {/* SCRIPT */}
-        <div className="card md:col-span-2 relative">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 md:col-span-2 relative">
           <button
             onClick={() => copy(rewrite.optimizedScript)}
             className="absolute top-3 right-3 text-xs text-zinc-400 hover:text-white"
@@ -60,7 +62,7 @@ export function RewriteBlock({ rewrite }: Props) {
         </div>
 
         {/* TITLES */}
-        <div className="card md:col-span-2">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 md:col-span-2">
           <h3 className="font-semibold mb-3">Title Ideas</h3>
 
           <ul className="space-y-2 text-sm text-zinc-300">
