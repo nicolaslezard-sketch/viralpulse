@@ -24,12 +24,22 @@ function isVideoMime(mimeType: string) {
   return mimeType.startsWith("video/");
 }
 
-function assertValidJob(job: unknown): asserts job is AnalysisJob {
-  if (!job || typeof job !== "object") {
+function normalizeJob(rawJob: unknown): AnalysisJob {
+  let parsed: unknown = rawJob;
+
+  if (typeof parsed === "string") {
+    try {
+      parsed = JSON.parse(parsed);
+    } catch {
+      throw new Error("Invalid queue job: body is not valid JSON string");
+    }
+  }
+
+  if (!parsed || typeof parsed !== "object") {
     throw new Error("Invalid queue job: body is not an object");
   }
 
-  const j = job as Record<string, unknown>;
+  const j = parsed as Record<string, unknown>;
 
   if (typeof j.reportId !== "string" || !j.reportId) {
     throw new Error("Invalid queue job: missing reportId");
@@ -50,11 +60,18 @@ function assertValidJob(job: unknown): asserts job is AnalysisJob {
   if (j.sourceType !== "audio" && j.sourceType !== "video") {
     throw new Error("Invalid queue job: missing sourceType");
   }
+
+  return {
+    reportId: j.reportId,
+    userId: j.userId,
+    mediaKey: j.mediaKey,
+    mimeType: j.mimeType,
+    sourceType: j.sourceType,
+  };
 }
 
 export async function processJob(rawJob: unknown) {
-  assertValidJob(rawJob);
-  const job = rawJob;
+  const job = normalizeJob(rawJob);
 
   console.log("Processing job:", job.reportId, job.mediaKey, job.mimeType);
 
