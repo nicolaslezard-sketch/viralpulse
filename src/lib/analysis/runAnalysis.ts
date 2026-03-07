@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { generateReport } from "@/lib/report/generateReport";
-import { transcribeFromR2 } from "@/lib/analysis/transcribeFromR2";
 import { getUserPlan } from "@/lib/auth/getUserPlan";
 import type { PlanKey } from "@/lib/limits";
 import { limitsByPlan } from "@/lib/limits";
@@ -9,7 +8,6 @@ import { generateRewrite } from "@/lib/report/generateRewrite";
 export async function runAnalysis({ reportId }: { reportId: string }) {
   console.log("▶️ runAnalysis start", reportId);
 
-  // 0) cargar report
   const report = await prisma.analysisReport.findUnique({
     where: { id: reportId },
     select: {
@@ -20,6 +18,8 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
       mimeType: true,
       sourceType: true,
       originalName: true,
+      transcript: true,
+      durationSec: true,
     },
   });
 
@@ -28,9 +28,13 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
     return;
   }
 
-  // idempotencia
-  if (report.status !== "processing") {
-    console.log("⏭️ report not in processing state");
+  // compatible con flujo viejo y nuevo
+  if (
+    report.status !== "processing" &&
+    report.status !== "queued" &&
+    report.status !== "analyzing"
+  ) {
+    console.log("⏭️ report not in runnable state");
     return;
   }
 
@@ -56,15 +60,17 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
   const limits = limitsByPlan[plan];
 
   try {
-    // 1) transcribir
-    const { transcript, durationSec } = await transcribeFromR2(
-      report.mediaKey,
-      report.mimeType,
-    );
+    const transcript = report.transcript ?? "";
+    const durationSec = report.durationSec ?? 0;
 
-    console.log("✅ transcription done", durationSec);
+    if (!transcript || !durationSec) {
+      throw new Error(
+        `runAnalysis requires transcript and duration precomputed for report ${report.id}`,
+      );
+    }
 
-    // 2) límite por plan
+    console.log("✅ using precomputed transcript", durationSec);
+
     if (durationSec > limits.maxSeconds) {
       console.log("❌ media too long for plan");
 
@@ -80,7 +86,6 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
       return;
     }
 
-    // 3) generar report
     await prisma.analysisReport.update({
       where: { id: reportId },
       data: {
@@ -92,12 +97,11 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
 
     const result = await generateReport(transcript);
 
-    // 4) rewrite
     const rewrite = await generateRewrite({
       transcript,
       report: result.fullText,
     });
-    // 5) guardar final
+
     await prisma.analysisReport.update({
       where: { id: reportId },
       data: {

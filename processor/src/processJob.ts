@@ -24,7 +24,38 @@ function isVideoMime(mimeType: string) {
   return mimeType.startsWith("video/");
 }
 
-export async function processJob(job: AnalysisJob) {
+function assertValidJob(job: unknown): asserts job is AnalysisJob {
+  if (!job || typeof job !== "object") {
+    throw new Error("Invalid queue job: body is not an object");
+  }
+
+  const j = job as Record<string, unknown>;
+
+  if (typeof j.reportId !== "string" || !j.reportId) {
+    throw new Error("Invalid queue job: missing reportId");
+  }
+
+  if (typeof j.userId !== "string" || !j.userId) {
+    throw new Error("Invalid queue job: missing userId");
+  }
+
+  if (typeof j.mediaKey !== "string" || !j.mediaKey) {
+    throw new Error("Invalid queue job: missing mediaKey");
+  }
+
+  if (typeof j.mimeType !== "string" || !j.mimeType) {
+    throw new Error("Invalid queue job: missing mimeType");
+  }
+
+  if (j.sourceType !== "audio" && j.sourceType !== "video") {
+    throw new Error("Invalid queue job: missing sourceType");
+  }
+}
+
+export async function processJob(rawJob: unknown) {
+  assertValidJob(rawJob);
+  const job = rawJob;
+
   console.log("Processing job:", job.reportId, job.mediaKey, job.mimeType);
 
   const report = await prisma.analysisReport.findUnique({
@@ -58,12 +89,7 @@ export async function processJob(job: AnalysisJob) {
   const mediaPath = path.join(tmpDir, `${baseName}_input`);
   const audioPath = path.join(tmpDir, `${baseName}_audio.mp3`);
 
-  let finalAudioPath = mediaPath;
-
   try {
-    /* =========================
-       1) DOWNLOAD ORIGINAL MEDIA
-    ========================= */
     await prisma.analysisReport.update({
       where: { id: report.id },
       data: { status: "extracting_audio" },
@@ -71,9 +97,8 @@ export async function processJob(job: AnalysisJob) {
 
     await downloadToTmp(report.mediaKey, mediaPath);
 
-    /* =========================
-       2) VIDEO -> AUDIO
-    ========================= */
+    let finalAudioPath = mediaPath;
+
     if (isVideoMime(report.mimeType)) {
       await extractAudio(mediaPath, audioPath);
       finalAudioPath = audioPath;
@@ -83,14 +108,8 @@ export async function processJob(job: AnalysisJob) {
       }
     }
 
-    /* =========================
-       3) DURATION
-    ========================= */
     const durationSec = await getMediaDurationSeconds(finalAudioPath);
 
-    /* =========================
-       4) TRANSCRIBE
-    ========================= */
     await prisma.analysisReport.update({
       where: { id: report.id },
       data: {
@@ -122,9 +141,6 @@ export async function processJob(job: AnalysisJob) {
       );
     }
 
-    /* =========================
-       5) GENERATE REPORT
-    ========================= */
     await prisma.analysisReport.update({
       where: { id: report.id },
       data: {
@@ -136,17 +152,11 @@ export async function processJob(job: AnalysisJob) {
 
     const result = await generateReport(transcript);
 
-    /* =========================
-       6) GENERATE REWRITE
-    ========================= */
     const rewrite = await generateRewrite({
       transcript,
       report: result.fullText,
     });
 
-    /* =========================
-       7) SAVE FINAL
-    ========================= */
     await prisma.analysisReport.update({
       where: { id: report.id },
       data: {
@@ -161,9 +171,6 @@ export async function processJob(job: AnalysisJob) {
       },
     });
 
-    /* =========================
-       8) CLEANUP R2
-    ========================= */
     try {
       await deleteObject(report.mediaKey);
       console.log("Deleted media from R2:", report.mediaKey);
@@ -177,19 +184,12 @@ export async function processJob(job: AnalysisJob) {
 
     await prisma.analysisReport.update({
       where: { id: report.id },
-      data: {
-        status: "error",
-      },
+      data: { status: "error" },
     });
 
     throw err;
   } finally {
-    if (fs.existsSync(mediaPath)) {
-      fs.unlinkSync(mediaPath);
-    }
-
-    if (fs.existsSync(audioPath)) {
-      fs.unlinkSync(audioPath);
-    }
+    if (fs.existsSync(mediaPath)) fs.unlinkSync(mediaPath);
+    if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
   }
 }
