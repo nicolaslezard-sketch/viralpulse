@@ -12,8 +12,8 @@ import {
   canUseFreeToday,
   consumeFreeToday,
 } from "@/lib/usage/usage";
-import { runAnalysis } from "@/lib/analysis/runAnalysis";
 import { transcribeFromR2 } from "@/lib/analysis/transcribeFromR2";
+import { publishAnalysisJob } from "@/lib/queue/publishAnalysisJob";
 
 export const runtime = "nodejs";
 
@@ -49,6 +49,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing mimeType" }, { status: 400 });
     }
 
+    if (sourceType !== "audio" && sourceType !== "video") {
+      return NextResponse.json(
+        { error: "Missing sourceType" },
+        { status: 400 },
+      );
+    }
+
     if (!key.startsWith(`uploads/${userId}/`)) {
       return NextResponse.json({ error: "Invalid media key" }, { status: 403 });
     }
@@ -61,10 +68,8 @@ export async function POST(req: Request) {
 
     /* =========================
        PRE-FLIGHT MEDIA CHECK
-       Necesitamos duración real para:
-       - min guard
-       - max per plan
-       - usage minutes
+       Temporal: todavía usa Vercel para validar duración/transcript.
+       Después esto se mueve al processor.
     ========================= */
     const { transcript, durationSec } = await transcribeFromR2(key, mimeType);
 
@@ -136,17 +141,21 @@ export async function POST(req: Request) {
     }
 
     /* =========================
-       CREATE REPORT FIRST
+       CREATE REPORT
     ========================= */
     const report = await prisma.analysisReport.create({
       data: {
         userId,
-        sourceType: sourceType ?? "audio",
+        sourceType,
         mimeType,
         fileSize: typeof fileSize === "number" ? fileSize : null,
         mediaKey: key,
         originalName: originalNameFromClient?.slice(0, 120) ?? null,
-        status: "processing",
+        status: "queued",
+
+        // temporal: dejamos esto guardado para no perder la validación
+        transcript,
+        durationSec,
       },
       select: { id: true },
     });
@@ -164,22 +173,20 @@ export async function POST(req: Request) {
     }
 
     /* =========================
-       RUN ANALYSIS
-       Por ahora sync para dejarlo simple y testeable.
+       ENQUEUE JOB
     ========================= */
-    await prisma.analysisReport.update({
-      where: { id: report.id },
-      data: {
-        transcript,
-        durationSec,
-      },
+    await publishAnalysisJob({
+      reportId: report.id,
+      userId,
+      mediaKey: key,
+      mimeType,
+      sourceType,
     });
-
-    await runAnalysis({ reportId: report.id });
 
     return NextResponse.json({
       id: report.id,
       isPro: plan !== "free",
+      queued: true,
     });
   } catch (err) {
     console.error("❌ analyze error", err);
