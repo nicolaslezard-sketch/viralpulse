@@ -32,11 +32,7 @@ export async function publishAnalysisJob(input: PublishAnalysisJobInput) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        messages: [
-          {
-            body: input,
-          },
-        ],
+        body: input,
       }),
     },
   );
