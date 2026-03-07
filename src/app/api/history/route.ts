@@ -20,6 +20,7 @@ export async function GET() {
     take: 50,
     select: {
       id: true,
+      status: true,
       createdAt: true,
       durationSec: true,
       viralScore: true,
@@ -30,10 +31,10 @@ export async function GET() {
   });
 
   const reports = rawReports.map((r) => {
-    // FREE → solo contenido limitado
     if (plan === "free") {
       return {
         id: r.id,
+        status: r.status,
         createdAt: r.createdAt,
         durationSec: r.durationSec,
         viralScore: r.viralScore,
@@ -43,7 +44,6 @@ export async function GET() {
       };
     }
 
-    // PRO → contenido completo
     return {
       ...r,
       reportFull: r.reportFull ?? null,

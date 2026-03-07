@@ -31,8 +31,10 @@ export async function GET(
       createdAt: true,
       reportFull: true,
       viralScore: true,
+      viralMetrics: true,
       reportFree: true,
       transcript: true,
+      rewrite: true,
     },
   });
 
@@ -49,15 +51,27 @@ export async function GET(
     select: { plan: true },
   });
 
-  // Plus y Pro desbloquean reporte completo
   const isPro = viewer?.plan !== "free";
-
   const rawReport = isPro ? report.reportFull : report.reportFree;
 
   let reportJson: FullReport | null = null;
 
   if (rawReport) {
-    reportJson = normalizeReport(rawReport);
+    const normalized = normalizeReport(rawReport);
+
+    if (normalized) {
+      const persistedRewrite =
+        report.rewrite &&
+        typeof report.rewrite === "object" &&
+        !Array.isArray(report.rewrite)
+          ? (report.rewrite as FullReport["rewrite"])
+          : undefined;
+
+      reportJson = {
+        ...normalized,
+        rewrite: isPro ? (persistedRewrite ?? normalized.rewrite) : undefined,
+      };
+    }
   }
 
   return NextResponse.json({
@@ -68,6 +82,7 @@ export async function GET(
     createdAt: report.createdAt,
     report: reportJson,
     viralScore: report.viralScore ?? null,
+    viralMetrics: report.viralMetrics ?? null,
     transcript: isPro ? report.transcript : null,
     isPro,
   });
