@@ -113,11 +113,13 @@ export async function processJob(rawJob: unknown) {
     });
 
     await downloadToTmp(report.mediaKey, mediaPath);
+    console.log("Downloaded media:", mediaPath);
 
     let finalAudioPath = mediaPath;
 
     if (isVideoMime(report.mimeType)) {
       await extractAudio(mediaPath, audioPath);
+      console.log("Audio extracted:", audioPath);
       finalAudioPath = audioPath;
 
       if (fs.existsSync(mediaPath)) {
@@ -126,7 +128,7 @@ export async function processJob(rawJob: unknown) {
     }
 
     const durationSec = await getMediaDurationSeconds(finalAudioPath);
-
+    console.log("Duration detected:", durationSec);
     await prisma.analysisReport.update({
       where: { id: report.id },
       data: {
@@ -136,7 +138,7 @@ export async function processJob(rawJob: unknown) {
     });
 
     const transcript = await transcribeFromFile(finalAudioPath);
-
+    console.log("Transcript ready, chars:", transcript.length);
     const minSeconds = Number(process.env.MIN_AUDIO_SECONDS ?? 8);
     const minTranscriptChars = Number(process.env.MIN_TRANSCRIPT_CHARS ?? 80);
 
@@ -168,12 +170,12 @@ export async function processJob(rawJob: unknown) {
     });
 
     const result = await generateReport(transcript);
-
+    console.log("Report generated");
     const rewrite = await generateRewrite({
       transcript,
       report: result.fullText,
     });
-
+    console.log("Rewrite generated");
     await prisma.analysisReport.update({
       where: { id: report.id },
       data: {
