@@ -1,14 +1,4 @@
-import ffmpeg from "fluent-ffmpeg";
-import ffmpegPath from "ffmpeg-static";
-import ffprobe from "ffprobe-static";
-
-if (ffmpegPath) {
-  ffmpeg.setFfmpegPath(ffmpegPath);
-}
-
-if (ffprobe.path) {
-  ffmpeg.setFfprobePath(ffprobe.path);
-}
+import { ffmpeg } from "./ffmpeg";
 
 export function extractAudio(input: string, output: string) {
   return new Promise<void>((resolve, reject) => {

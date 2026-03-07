@@ -1,14 +1,4 @@
-import ffmpeg from "fluent-ffmpeg";
-import ffmpegPath from "ffmpeg-static";
-import ffprobe from "ffprobe-static";
-
-if (ffmpegPath) {
-  ffmpeg.setFfmpegPath(ffmpegPath);
-}
-
-if (ffprobe.path) {
-  ffmpeg.setFfprobePath(ffprobe.path);
-}
+import { ffmpeg } from "./ffmpeg";
 
 export function getMediaDurationSeconds(filePath: string): Promise<number> {
   return new Promise((resolve, reject) => {
