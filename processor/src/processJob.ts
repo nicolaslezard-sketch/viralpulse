@@ -148,7 +148,32 @@ export async function processJob(rawJob: unknown) {
   const tmpDir = os.tmpdir();
   const baseName = `vp_${report.id}_${Date.now()}`;
 
-  const mediaPath = path.join(tmpDir, `${baseName}_input`);
+  function getExtensionFromMimeType(mimeType: string) {
+    switch (mimeType) {
+      case "audio/mpeg":
+        return ".mp3";
+      case "audio/mp4":
+      case "audio/x-m4a":
+      case "audio/m4a":
+        return ".m4a";
+      case "audio/wav":
+      case "audio/x-wav":
+        return ".wav";
+      case "audio/webm":
+        return ".webm";
+      case "video/mp4":
+        return ".mp4";
+      case "video/quicktime":
+        return ".mov";
+      case "video/x-m4v":
+      case "video/m4v":
+        return ".m4v";
+      default:
+        return "";
+    }
+  }
+  const inputExt = getExtensionFromMimeType(report.mimeType);
+  const mediaPath = path.join(tmpDir, `${baseName}_input${inputExt}`);
   const audioPath = path.join(tmpDir, `${baseName}_audio.mp3`);
 
   try {
@@ -203,7 +228,21 @@ export async function processJob(rawJob: unknown) {
     logStep(report.id, "db:update transcribing", updateTranscribingStart);
 
     const transcriptStart = nowMs();
-    const transcript = await transcribeFromFile(finalAudioPath);
+    let transcript: string;
+
+    try {
+      transcript = await transcribeFromFile(finalAudioPath);
+    } catch (err) {
+      if (
+        err instanceof Error &&
+        err.message.toLowerCase().includes("unsupported file format")
+      ) {
+        throw new PermanentJobError(
+          `Unsupported audio format for transcription: ${finalAudioPath}`,
+        );
+      }
+      throw err;
+    }
     logStep(report.id, "transcribeFromFile", transcriptStart);
     console.log(`[${report.id}] Transcript ready, chars: ${transcript.length}`);
 
