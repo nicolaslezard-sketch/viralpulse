@@ -1,15 +1,32 @@
 import "dotenv/config";
 
+console.log("PROCESSOR CWD:", process.cwd());
+console.log("PROCESSOR DATABASE_URL EXISTS:", !!process.env.DATABASE_URL);
+console.log("PROCESSOR OPENAI_API_KEY EXISTS:", !!process.env.OPENAI_API_KEY);
+
 import { pullMessages } from "./pullMessages";
 import { ackMessage } from "./ackMessages";
-import { processJob } from "./processJob";
+import { prisma } from "./lib/prisma";
+import { processJob, PermanentJobError } from "./processJob";
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function shouldAckFailedJob(err: unknown) {
+  return err instanceof PermanentJobError;
+}
+
 async function main() {
   console.log("VP processor started");
+
+  try {
+    await prisma.$connect();
+    console.log("Processor connected to DB");
+  } catch (err) {
+    console.error("Processor DB boot error:", err);
+    process.exit(1);
+  }
 
   while (true) {
     try {
@@ -29,10 +46,16 @@ async function main() {
         } catch (err) {
           console.error("Job failed:", err);
 
-          // ACK igual si el mensaje es inválido, para no quedar en loop infinito
+          const shouldAck = shouldAckFailedJob(err);
+
+          if (!shouldAck) {
+            console.log("Job not acked so it can be retried");
+            continue;
+          }
+
           try {
             await ackMessage(message.lease_id);
-            console.log("Acked invalid/failed job");
+            console.log("Acked permanently invalid job");
           } catch (ackErr) {
             console.error("Ack after failure also failed:", ackErr);
           }

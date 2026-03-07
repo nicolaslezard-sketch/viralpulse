@@ -3,7 +3,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 
-import { prisma } from "../../src/lib/prisma";
+import { prisma } from "./lib/prisma";
 import { deleteObject } from "./deleteObject";
 import { downloadToTmp } from "./downloadToTmp";
 import { extractAudio } from "./extractAudio";
@@ -20,6 +20,13 @@ export type AnalysisJob = {
   sourceType: "audio" | "video";
 };
 
+export class PermanentJobError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PermanentJobError";
+  }
+}
+
 function isVideoMime(mimeType: string) {
   return mimeType.startsWith("video/");
 }
@@ -31,34 +38,36 @@ function normalizeJob(rawJob: unknown): AnalysisJob {
     try {
       parsed = JSON.parse(parsed);
     } catch {
-      throw new Error("Invalid queue job: body is not valid JSON string");
+      throw new PermanentJobError(
+        "Invalid job payload: body is not valid JSON string",
+      );
     }
   }
 
   if (!parsed || typeof parsed !== "object") {
-    throw new Error("Invalid queue job: body is not an object");
+    throw new PermanentJobError("Invalid job payload: body is not an object");
   }
 
   const j = parsed as Record<string, unknown>;
 
   if (typeof j.reportId !== "string" || !j.reportId) {
-    throw new Error("Invalid queue job: missing reportId");
+    throw new PermanentJobError("Invalid job payload: missing reportId");
   }
 
   if (typeof j.userId !== "string" || !j.userId) {
-    throw new Error("Invalid queue job: missing userId");
+    throw new PermanentJobError("Invalid job payload: missing userId");
   }
 
   if (typeof j.mediaKey !== "string" || !j.mediaKey) {
-    throw new Error("Invalid queue job: missing mediaKey");
+    throw new PermanentJobError("Invalid job payload: missing mediaKey");
   }
 
   if (typeof j.mimeType !== "string" || !j.mimeType) {
-    throw new Error("Invalid queue job: missing mimeType");
+    throw new PermanentJobError("Invalid job payload: missing mimeType");
   }
 
   if (j.sourceType !== "audio" && j.sourceType !== "video") {
-    throw new Error("Invalid queue job: missing sourceType");
+    throw new PermanentJobError("Invalid job payload: missing sourceType");
   }
 
   return {
@@ -68,6 +77,10 @@ function normalizeJob(rawJob: unknown): AnalysisJob {
     mimeType: j.mimeType,
     sourceType: j.sourceType,
   };
+}
+
+function isPermanentError(err: unknown) {
+  return err instanceof PermanentJobError;
 }
 
 export async function processJob(rawJob: unknown) {
@@ -88,7 +101,7 @@ export async function processJob(rawJob: unknown) {
   });
 
   if (!report) {
-    throw new Error(`Report not found: ${job.reportId}`);
+    throw new PermanentJobError(`Report not found: ${job.reportId}`);
   }
 
   if (report.status === "done") {
@@ -97,7 +110,9 @@ export async function processJob(rawJob: unknown) {
   }
 
   if (!report.mediaKey || !report.mimeType) {
-    throw new Error(`Missing mediaKey or mimeType for report ${report.id}`);
+    throw new PermanentJobError(
+      `Missing mediaKey or mimeType for report ${report.id}`,
+    );
   }
 
   const tmpDir = os.tmpdir();
@@ -129,6 +144,7 @@ export async function processJob(rawJob: unknown) {
 
     const durationSec = await getMediaDurationSeconds(finalAudioPath);
     console.log("Duration detected:", durationSec);
+
     await prisma.analysisReport.update({
       where: { id: report.id },
       data: {
@@ -139,6 +155,7 @@ export async function processJob(rawJob: unknown) {
 
     const transcript = await transcribeFromFile(finalAudioPath);
     console.log("Transcript ready, chars:", transcript.length);
+
     const minSeconds = Number(process.env.MIN_AUDIO_SECONDS ?? 8);
     const minTranscriptChars = Number(process.env.MIN_TRANSCRIPT_CHARS ?? 80);
 
@@ -155,7 +172,7 @@ export async function processJob(rawJob: unknown) {
         },
       });
 
-      throw new Error(
+      throw new PermanentJobError(
         `Content too short or transcript too small for report ${report.id}`,
       );
     }
@@ -171,11 +188,13 @@ export async function processJob(rawJob: unknown) {
 
     const result = await generateReport(transcript);
     console.log("Report generated");
+
     const rewrite = await generateRewrite({
       transcript,
       report: result.fullText,
     });
     console.log("Rewrite generated");
+
     await prisma.analysisReport.update({
       where: { id: report.id },
       data: {
@@ -201,14 +220,25 @@ export async function processJob(rawJob: unknown) {
   } catch (err) {
     console.error("processJob error:", err);
 
-    await prisma.analysisReport.update({
-      where: { id: report.id },
-      data: { status: "error" },
-    });
+    if (isPermanentError(err)) {
+      try {
+        await prisma.analysisReport.update({
+          where: { id: report.id },
+          data: { status: "error" },
+        });
+      } catch (updateErr) {
+        console.error("Failed to mark report as error:", updateErr);
+      }
+    }
 
     throw err;
   } finally {
-    if (fs.existsSync(mediaPath)) fs.unlinkSync(mediaPath);
-    if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
+    try {
+      if (fs.existsSync(mediaPath)) fs.unlinkSync(mediaPath);
+    } catch {}
+
+    try {
+      if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
+    } catch {}
   }
 }
