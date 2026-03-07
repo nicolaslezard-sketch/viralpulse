@@ -83,10 +83,40 @@ function isPermanentError(err: unknown) {
   return err instanceof PermanentJobError;
 }
 
+function bytesToMb(bytes: number) {
+  return (bytes / 1024 / 1024).toFixed(2);
+}
+
+function fileSizeMb(filePath: string) {
+  try {
+    const stat = fs.statSync(filePath);
+    return `${bytesToMb(stat.size)} MB`;
+  } catch {
+    return "unknown";
+  }
+}
+
+function nowMs() {
+  return Date.now();
+}
+
+function elapsedMs(startMs: number) {
+  return Date.now() - startMs;
+}
+
+function logStep(reportId: string, label: string, startMs: number) {
+  const ms = elapsedMs(startMs);
+  console.log(
+    `[${reportId}] ${label} took ${ms}ms (${(ms / 1000).toFixed(2)}s)`,
+  );
+}
+
 export async function processJob(rawJob: unknown) {
   const job = normalizeJob(rawJob);
 
   console.log("Processing job:", job.reportId, job.mediaKey, job.mimeType);
+
+  const jobStartedAt = nowMs();
 
   const report = await prisma.analysisReport.findUnique({
     where: { id: job.reportId },
@@ -122,29 +152,47 @@ export async function processJob(rawJob: unknown) {
   const audioPath = path.join(tmpDir, `${baseName}_audio.mp3`);
 
   try {
+    const updateExtractingStart = nowMs();
     await prisma.analysisReport.update({
       where: { id: report.id },
       data: { status: "extracting_audio" },
     });
+    logStep(report.id, "db:update extracting_audio", updateExtractingStart);
 
+    const downloadStart = nowMs();
     await downloadToTmp(report.mediaKey, mediaPath);
-    console.log("Downloaded media:", mediaPath);
+    logStep(report.id, "downloadToTmp", downloadStart);
+    console.log(
+      `[${report.id}] Downloaded media: ${mediaPath} (${fileSizeMb(mediaPath)})`,
+    );
 
     let finalAudioPath = mediaPath;
 
     if (isVideoMime(report.mimeType)) {
+      const extractStart = nowMs();
       await extractAudio(mediaPath, audioPath);
-      console.log("Audio extracted:", audioPath);
+      logStep(report.id, "extractAudio", extractStart);
+      console.log(
+        `[${report.id}] Audio extracted: ${audioPath} (${fileSizeMb(audioPath)})`,
+      );
+
       finalAudioPath = audioPath;
 
       if (fs.existsSync(mediaPath)) {
         fs.unlinkSync(mediaPath);
       }
+    } else {
+      console.log(
+        `[${report.id}] Source is audio, skipping extraction (${fileSizeMb(finalAudioPath)})`,
+      );
     }
 
+    const durationStart = nowMs();
     const durationSec = await getMediaDurationSeconds(finalAudioPath);
-    console.log("Duration detected:", durationSec);
+    logStep(report.id, "getMediaDurationSeconds", durationStart);
+    console.log(`[${report.id}] Duration detected: ${durationSec}s`);
 
+    const updateTranscribingStart = nowMs();
     await prisma.analysisReport.update({
       where: { id: report.id },
       data: {
@@ -152,9 +200,12 @@ export async function processJob(rawJob: unknown) {
         durationSec,
       },
     });
+    logStep(report.id, "db:update transcribing", updateTranscribingStart);
 
+    const transcriptStart = nowMs();
     const transcript = await transcribeFromFile(finalAudioPath);
-    console.log("Transcript ready, chars:", transcript.length);
+    logStep(report.id, "transcribeFromFile", transcriptStart);
+    console.log(`[${report.id}] Transcript ready, chars: ${transcript.length}`);
 
     const minSeconds = Number(process.env.MIN_AUDIO_SECONDS ?? 8);
     const minTranscriptChars = Number(process.env.MIN_TRANSCRIPT_CHARS ?? 80);
@@ -163,6 +214,7 @@ export async function processJob(rawJob: unknown) {
       durationSec < minSeconds ||
       transcript.trim().length < minTranscriptChars
     ) {
+      const updateErrorStart = nowMs();
       await prisma.analysisReport.update({
         where: { id: report.id },
         data: {
@@ -171,12 +223,14 @@ export async function processJob(rawJob: unknown) {
           transcript,
         },
       });
+      logStep(report.id, "db:update error (too short)", updateErrorStart);
 
       throw new PermanentJobError(
         `Content too short or transcript too small for report ${report.id}`,
       );
     }
 
+    const updateAnalyzingStart = nowMs();
     await prisma.analysisReport.update({
       where: { id: report.id },
       data: {
@@ -185,16 +239,22 @@ export async function processJob(rawJob: unknown) {
         transcript,
       },
     });
+    logStep(report.id, "db:update analyzing", updateAnalyzingStart);
 
+    const reportStart = nowMs();
     const result = await generateReport(transcript);
-    console.log("Report generated");
+    logStep(report.id, "generateReport", reportStart);
+    console.log(`[${report.id}] Report generated`);
 
+    const rewriteStart = nowMs();
     const rewrite = await generateRewrite({
       transcript,
       report: result.fullText,
     });
-    console.log("Rewrite generated");
+    logStep(report.id, "generateRewrite", rewriteStart);
+    console.log(`[${report.id}] Rewrite generated`);
 
+    const updateDoneStart = nowMs();
     await prisma.analysisReport.update({
       where: { id: report.id },
       data: {
@@ -208,24 +268,32 @@ export async function processJob(rawJob: unknown) {
         rewrite: rewrite ?? undefined,
       },
     });
+    logStep(report.id, "db:update done", updateDoneStart);
 
     try {
+      const deleteStart = nowMs();
       await deleteObject(report.mediaKey);
+      logStep(report.id, "deleteObject", deleteStart);
       console.log("Deleted media from R2:", report.mediaKey);
     } catch (err) {
       console.error("Failed to delete media from R2:", err);
     }
 
-    console.log("Job completed:", report.id);
+    const totalMs = elapsedMs(jobStartedAt);
+    console.log(
+      `[${report.id}] Job completed in ${totalMs}ms (${(totalMs / 1000).toFixed(2)}s)`,
+    );
   } catch (err) {
     console.error("processJob error:", err);
 
     if (isPermanentError(err)) {
       try {
+        const updateErrorStart = nowMs();
         await prisma.analysisReport.update({
           where: { id: report.id },
           data: { status: "error" },
         });
+        logStep(report.id, "db:update error", updateErrorStart);
       } catch (updateErr) {
         console.error("Failed to mark report as error:", updateErr);
       }
