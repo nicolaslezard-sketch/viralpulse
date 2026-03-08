@@ -106,9 +106,14 @@ export default function UploadBox() {
   const limits = limitsByPlan[currentPlan];
   const limitsCopy = getPlanLimitsCopy(currentPlan);
 
-  function handleFile(f: File | null) {
+  function resetStateForNewFile() {
     setError(null);
     setLimitReason(null);
+    setResult(null);
+  }
+
+  function handleFile(f: File | null) {
+    resetStateForNewFile();
 
     if (!f) return;
 
@@ -181,13 +186,6 @@ export default function UploadBox() {
     setLimitReason(null);
     setAnalyzing(true);
     setResult(null);
-
-    setTimeout(() => {
-      document.getElementById("analyzing")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 100);
 
     try {
       const sourceType = getSourceType(file);
@@ -296,122 +294,135 @@ export default function UploadBox() {
     }
   }
 
+  const showInteractiveUpload = !analyzing && !result;
+
   return (
     <div className="text-white">
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <PlanBadge plan={currentPlan} />
       </div>
 
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
-        className={[
-          "group relative flex flex-col items-center justify-center rounded-2xl border p-6 text-center transition sm:p-8 md:p-10",
-          "bg-black/25 backdrop-blur",
-          dragging
-            ? "border-white/25 bg-white/5"
-            : "border-white/10 hover:border-white/20",
-        ].join(" ")}
-      >
-        <p className="text-base font-semibold text-white/90">
-          Drag & drop your audio or video
-        </p>
+      <div className="rounded-2xl border border-white/10 bg-black/25 p-5 sm:p-6 md:p-8">
+        {showInteractiveUpload && (
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={onDrop}
+            className={[
+              "group relative flex flex-col items-center justify-center rounded-2xl border p-6 text-center transition sm:p-8 md:p-10",
+              "bg-black/25 backdrop-blur",
+              dragging
+                ? "border-white/25 bg-white/5"
+                : "border-white/10 hover:border-white/20",
+            ].join(" ")}
+          >
+            <p className="text-lg font-semibold text-white/95">
+              Drag & drop your audio or video
+            </p>
 
-        <label
-          htmlFor="fileInput"
-          className="mt-4 inline-flex cursor-pointer rounded-2xl border border-white/25 bg-black/40 px-5 py-3 text-sm font-semibold transition hover:border-indigo-400/60"
-        >
-          Choose file
-        </label>
+            <p className="mt-2 max-w-md text-sm text-zinc-400">
+              Upload one file to generate score, transcript, rewrite and
+              strategy insights.
+            </p>
 
-        <input
-          id="fileInput"
-          type="file"
-          accept="audio/*,video/mp4,video/quicktime,video/x-m4v"
-          className="hidden"
-          onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
-        />
+            <label
+              htmlFor="fileInput"
+              className="mt-5 inline-flex cursor-pointer rounded-2xl border border-white/25 bg-black/40 px-5 py-3 text-sm font-semibold transition hover:border-indigo-400/60"
+            >
+              Choose file
+            </label>
 
-        {file && (
-          <div className="mt-4 w-full max-w-lg rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-left text-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="truncate font-medium text-white/90">
-                  {file.name}
-                </p>
-                <p className="mt-0.5 text-xs text-zinc-400">
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB ·{" "}
-                  {file.type || "media"}
-                </p>
+            <input
+              id="fileInput"
+              type="file"
+              accept="audio/*,video/mp4,video/quicktime,video/x-m4v"
+              className="hidden"
+              onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+            />
+
+            {file && (
+              <div className="mt-5 w-full max-w-lg rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-left text-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-white/90">
+                      {file.name}
+                    </p>
+                    <p className="mt-0.5 text-xs text-zinc-400">
+                      {(file.size / (1024 * 1024)).toFixed(2)} MB ·{" "}
+                      {file.type || "media"}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setFile(null)}
+                    className="text-xs text-red-400 hover:text-red-300"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
+            )}
 
-              <button
-                onClick={() => setFile(null)}
-                className="text-xs text-red-400 hover:text-red-300"
-              >
-                Remove
-              </button>
+            {limitReason && (
+              <LimitReachedPanel
+                reason={limitReason}
+                onDismiss={() => setLimitReason(null)}
+              />
+            )}
+
+            {error && (
+              <div className="mt-4 w-full max-w-lg rounded-2xl border border-red-800/60 bg-red-950/40 px-4 py-3 text-sm text-red-300">
+                {error}
+              </div>
+            )}
+
+            <button
+              onClick={handleAnalyze}
+              disabled={!file || analyzing}
+              className="mt-5 w-full max-w-lg rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black disabled:bg-white/10 disabled:text-white/40"
+            >
+              Analyze
+            </button>
+
+            <div className="mt-4 text-center text-xs text-zinc-500">
+              <p className="leading-relaxed">
+                <span className="text-zinc-400">Supported:</span> MP3, WAV, M4A,
+                MP4, MOV, M4V ·{" "}
+                <span className="text-zinc-400">Your plan:</span>{" "}
+                <span className="font-medium text-zinc-300">
+                  up to {limitsCopy.maxMinutes} min and {limitsCopy.maxMb} MB
+                </span>
+              </p>
+
+              <p className="mt-1">
+                <span className="text-zinc-400">Recommended:</span> MP3, M4A or
+                MP4
+              </p>
             </div>
           </div>
         )}
 
-        {limitReason && (
-          <LimitReachedPanel
-            reason={limitReason}
-            onDismiss={() => setLimitReason(null)}
-          />
-        )}
-
-        {error && (
-          <div className="mt-4 rounded-2xl border border-red-800/60 bg-red-950/40 px-4 py-3 text-sm text-red-300">
-            {error}
+        {showLogin && !analyzing && !result && (
+          <div className="mt-6">
+            <LoginCard onClose={() => setShowLogin(false)} />
           </div>
         )}
 
-        <button
-          onClick={handleAnalyze}
-          disabled={!file || analyzing}
-          className="mt-5 w-full max-w-lg rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black disabled:bg-white/10 disabled:text-white/40"
-        >
-          {analyzing ? "Analyzing…" : "Analyze"}
-        </button>
+        {analyzing && (
+          <div className="fade-up">
+            <AnalyzingExperience />
+          </div>
+        )}
 
-        <div className="mt-4 text-center text-xs text-zinc-500">
-          <p className="leading-relaxed">
-            <span className="text-zinc-400">Supported:</span> MP3, WAV, M4A,
-            MP4, MOV, M4V · <span className="text-zinc-400">Your plan:</span>{" "}
-            <span className="font-medium text-zinc-300">
-              up to {limitsCopy.maxMinutes} min and {limitsCopy.maxMb} MB
-            </span>
-          </p>
-
-          <p className="mt-1">
-            <span className="text-zinc-400">Recommended:</span> MP3, M4A or MP4
-          </p>
-        </div>
+        {result && (
+          <div className="fade-up">
+            <ReportReady reportId={result.id} isPro={currentPlan !== "free"} />
+          </div>
+        )}
       </div>
-
-      {showLogin && (
-        <div className="mt-6">
-          <LoginCard onClose={() => setShowLogin(false)} />
-        </div>
-      )}
-
-      {analyzing && (
-        <div id="analyzing" className="mt-8">
-          <AnalyzingExperience />
-        </div>
-      )}
-
-      {result && (
-        <div className="mt-8">
-          <ReportReady reportId={result.id} isPro={currentPlan !== "free"} />
-        </div>
-      )}
     </div>
   );
 }

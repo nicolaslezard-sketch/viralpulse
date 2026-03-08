@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type ReportStatus =
@@ -25,51 +26,69 @@ function getStatusCopy(status: ReportStatus) {
       return {
         eyebrow: "Queued",
         title: "Your upload was received",
-        description:
-          "We queued your analysis successfully. Processing will start shortly.",
+        description: "Your file is in queue and processing will begin shortly.",
       };
     case "extracting_audio":
       return {
         eyebrow: "Preparing media",
-        title: "Extracting audio",
+        title: "Preparing your file",
         description:
-          "We’re preparing your media file so the transcript can be generated.",
+          "We’re extracting and preparing the source so the transcript can be generated.",
       };
     case "transcribing":
       return {
         eyebrow: "Transcribing",
-        title: "Creating transcript",
+        title: "Building transcript",
         description:
-          "We’re converting speech to text before running the AI analysis.",
+          "We’re converting speech to text before running the deeper analysis.",
       };
     case "analyzing":
       return {
         eyebrow: "Analyzing",
         title: "Building your report",
         description:
-          "We’re generating viral insights, score and rewrite recommendations.",
+          "We’re generating score, insights, rewrite suggestions and recommendations.",
       };
     case "error":
       return {
         eyebrow: "Error",
-        title: "We could not complete this analysis",
+        title: "This analysis could not be completed",
         description:
-          "Please try again with a file that has clear speech and enough duration.",
+          "Try again with a file that has clear speech, enough duration and a supported format.",
       };
     case "done":
       return {
         eyebrow: "Report ready",
         title: "Your report is ready",
         description:
-          "We’ve finished analyzing your content and generated clear, actionable insights optimized for virality.",
+          "Your score, insights and recommendations are ready to review.",
       };
     default:
       return {
         eyebrow: "Processing",
-        title: "Your report is processing",
+        title: "Your report is still processing",
         description:
-          "We’re still working on it. Open the report page to follow the live status.",
+          "Open the report page to follow the latest status while we finish the analysis.",
       };
+  }
+}
+
+function getStatusProgress(status: ReportStatus) {
+  switch (status) {
+    case "queued":
+      return 14;
+    case "extracting_audio":
+      return 34;
+    case "transcribing":
+      return 62;
+    case "analyzing":
+      return 86;
+    case "done":
+      return 100;
+    case "error":
+      return 100;
+    default:
+      return 24;
   }
 }
 
@@ -126,43 +145,51 @@ export default function ReportReady({
     };
   }, [reportId]);
 
-  const copy = getStatusCopy(status);
-  const isDone = status === "done";
-  const isError = status === "error";
+  const effectiveStatus = loading ? "queued" : status;
+  const copy = getStatusCopy(effectiveStatus);
+  const progress = getStatusProgress(effectiveStatus);
+
+  const isDone = status === "done" && !loading;
+  const isError = status === "error" && !loading;
+
+  const primaryHref = isError ? "/" : `/report/${reportId}`;
+  const primaryLabel = isDone
+    ? "Open report"
+    : isError
+      ? "Try another file"
+      : "View live status";
 
   return (
     <div
-      className="
-        mt-8 sm:mt-12
-        mx-auto w-full max-w-xl
-        rounded-3xl
-        border border-white/10
-        bg-black/60
-        backdrop-blur-xl
-        p-6 sm:p-8 md:p-10
-        text-center
-        text-white
-        shadow-[0_0_80px_rgba(99,102,241,0.12)]
-      "
+      className={[
+        "mx-auto w-full max-w-2xl rounded-3xl border p-6 text-center text-white shadow-[0_0_80px_rgba(99,102,241,0.12)] backdrop-blur-xl sm:p-8 md:p-10",
+        isDone
+          ? "border-emerald-500/20 bg-black/70"
+          : isError
+            ? "border-rose-500/20 bg-black/60"
+            : "border-white/10 bg-black/60",
+      ].join(" ")}
     >
-      <div className="mx-auto mb-4 flex justify-center sm:mb-5">
+      <div className="mx-auto mb-5 flex justify-center">
         <div
-          className={`flex h-11 w-11 items-center justify-center rounded-full sm:h-12 sm:w-12 ${
+          className={[
+            "flex h-16 w-16 items-center justify-center rounded-full",
             isDone
-              ? "bg-emerald-500/15"
+              ? "bg-emerald-500/15 shadow-[0_0_30px_rgba(16,185,129,0.18)]"
               : isError
                 ? "bg-rose-500/15"
-                : "bg-indigo-500/15"
-          }`}
+                : "bg-indigo-500/15",
+          ].join(" ")}
         >
           <span
-            className={`text-xl font-bold sm:text-2xl ${
+            className={[
+              "text-3xl font-bold",
               isDone
                 ? "text-emerald-400"
                 : isError
                   ? "text-rose-400"
-                  : "text-indigo-300"
-            }`}
+                  : "text-indigo-300",
+            ].join(" ")}
           >
             {isDone ? "✓" : isError ? "!" : "…"}
           </span>
@@ -170,62 +197,92 @@ export default function ReportReady({
       </div>
 
       <div
-        className={`mb-2 text-xs font-semibold uppercase tracking-wide ${
+        className={[
+          "mb-2 text-xs font-semibold uppercase tracking-[0.22em]",
           isDone
-            ? "text-emerald-400/80"
+            ? "text-emerald-400/85"
             : isError
-              ? "text-rose-400/80"
-              : "text-indigo-300/80"
-        }`}
+              ? "text-rose-400/85"
+              : "text-indigo-300/80",
+        ].join(" ")}
       >
         {loading ? "Starting" : copy.eyebrow}
       </div>
 
-      <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+      <h2
+        className={[
+          "tracking-tight",
+          isDone
+            ? "text-4xl font-extrabold sm:text-5xl"
+            : "text-2xl font-semibold sm:text-3xl",
+        ].join(" ")}
+      >
         {loading ? "Preparing your analysis" : copy.title}
       </h2>
 
-      <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-zinc-400">
+      <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-zinc-400 sm:text-base">
         {loading
-          ? "We received your file and are starting the background processing flow."
+          ? "We received your file and started the background processing flow."
           : copy.description}
       </p>
 
-      {!isDone && !isError && (
-        <div className="mx-auto mt-6 max-w-md">
+      {!isError && (
+        <div className="mx-auto mt-8 max-w-xl">
           <div className="h-2 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full w-1/2 animate-pulse rounded-full bg-indigo-400" />
+            <div
+              className={[
+                "h-full rounded-full transition-all duration-700",
+                isDone ? "bg-emerald-400" : "bg-indigo-400",
+              ].join(" ")}
+              style={{ width: `${progress}%` }}
+            />
           </div>
+
+          {!isDone && (
+            <p className="mt-3 text-xs text-zinc-500">
+              Most analyses finish in 1–3 minutes. Large files may take longer.
+            </p>
+          )}
         </div>
       )}
 
-      <div className="mt-6 flex justify-center sm:mt-8">
-        <a
-          href={`/report/${reportId}`}
-          className="
-            inline-flex w-full items-center justify-center gap-2
-            sm:w-auto
-            rounded-2xl
-            px-8 py-3
-            text-sm font-semibold text-white
-            transition
-            border border-white/10
-            bg-white/5
-            hover:bg-white/10
-          "
+      {isDone && (
+        <div className="mx-auto mt-6 max-w-xl rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-zinc-300">
+          Includes score, strategy insights, rewrite suggestions and transcript
+          preview.
+        </div>
+      )}
+
+      <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <Link
+          href={primaryHref}
+          className={[
+            "inline-flex w-full items-center justify-center gap-2 rounded-2xl px-8 py-3 text-sm font-semibold transition sm:w-auto",
+            isDone
+              ? "bg-indigo-500 text-white hover:bg-indigo-400"
+              : isError
+                ? "bg-white text-black hover:bg-zinc-200"
+                : "border border-white/10 bg-white/5 text-white hover:bg-white/10",
+          ].join(" ")}
         >
-          {isDone
-            ? "Open report"
-            : isError
-              ? "Open status page"
-              : "View progress"}
+          {primaryLabel}
           <span>→</span>
-        </a>
+        </Link>
+
+        {!isError && (
+          <Link
+            href="/"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/30 px-8 py-3 text-sm font-semibold text-white transition hover:bg-white/5 sm:w-auto"
+          >
+            Analyze another file
+          </Link>
+        )}
       </div>
 
       {isDone && !isPro && (
         <p className="mt-4 text-xs text-zinc-500">
-          Preview available · Upgrade to unlock full access
+          Free preview available · Upgrade to unlock full report, rewrite and
+          transcript.
         </p>
       )}
     </div>
