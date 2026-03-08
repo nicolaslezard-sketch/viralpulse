@@ -96,7 +96,7 @@ export default function UploadBox() {
 
   if (sessionStatus === "loading" || planLoading) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-black/25 p-6 text-center text-sm text-zinc-400">
+      <div className="rounded-2xl border border-white/10 bg-black/25 p-5 text-center text-sm text-zinc-400 sm:p-6">
         Loading…
       </div>
     );
@@ -298,11 +298,11 @@ export default function UploadBox() {
 
   return (
     <div className="text-white">
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-3 flex items-center justify-between">
         <PlanBadge plan={currentPlan} />
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-black/25 p-5 sm:p-6 md:p-8">
+      <div className="rounded-2xl border border-white/10 bg-black/20 p-3 sm:p-4 md:p-5">
         {showInteractiveUpload && (
           <div
             onDragOver={(e) => {
@@ -312,14 +312,14 @@ export default function UploadBox() {
             onDragLeave={() => setDragging(false)}
             onDrop={onDrop}
             className={[
-              "group relative flex flex-col items-center justify-center rounded-2xl border p-6 text-center transition sm:p-8 md:p-10",
-              "bg-black/25 backdrop-blur",
+              "group relative flex flex-col items-center justify-center rounded-2xl border text-center transition",
+              "p-5 sm:p-6 md:p-8",
               dragging
                 ? "border-white/25 bg-white/5"
-                : "border-white/10 hover:border-white/20",
+                : "border-white/10 bg-black/30 hover:border-white/20",
             ].join(" ")}
           >
-            <p className="text-lg font-semibold text-white/95">
+            <p className="text-base font-semibold text-white/95 sm:text-lg">
               Drag & drop your audio or video
             </p>
 
@@ -330,7 +330,7 @@ export default function UploadBox() {
 
             <label
               htmlFor="fileInput"
-              className="mt-5 inline-flex cursor-pointer rounded-2xl border border-white/25 bg-black/40 px-5 py-3 text-sm font-semibold transition hover:border-indigo-400/60"
+              className="mt-4 inline-flex cursor-pointer rounded-2xl border border-white/25 bg-black/40 px-5 py-3 text-sm font-semibold transition hover:border-indigo-400/60"
             >
               Choose file
             </label>
@@ -344,7 +344,7 @@ export default function UploadBox() {
             />
 
             {file && (
-              <div className="mt-5 w-full max-w-lg rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-left text-sm">
+              <div className="mt-4 w-full max-w-lg rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-left text-sm">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate font-medium text-white/90">
@@ -358,7 +358,7 @@ export default function UploadBox() {
 
                   <button
                     onClick={() => setFile(null)}
-                    className="text-xs text-red-400 hover:text-red-300"
+                    className="shrink-0 text-xs text-red-400 hover:text-red-300"
                   >
                     Remove
                   </button>
@@ -382,12 +382,12 @@ export default function UploadBox() {
             <button
               onClick={handleAnalyze}
               disabled={!file || analyzing}
-              className="mt-5 w-full max-w-lg rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black disabled:bg-white/10 disabled:text-white/40"
+              className="mt-4 w-full max-w-lg rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black disabled:bg-white/10 disabled:text-white/40"
             >
               Analyze
             </button>
 
-            <div className="mt-4 text-center text-xs text-zinc-500">
+            <div className="mt-4 text-center text-[11px] text-zinc-500 sm:text-xs">
               <p className="leading-relaxed">
                 <span className="text-zinc-400">Supported:</span> MP3, WAV, M4A,
                 MP4, MOV, M4V ·{" "}
@@ -406,7 +406,7 @@ export default function UploadBox() {
         )}
 
         {showLogin && !analyzing && !result && (
-          <div className="mt-6">
+          <div className="mt-5">
             <LoginCard onClose={() => setShowLogin(false)} />
           </div>
         )}

@@ -162,7 +162,7 @@ export default function ReportReady({
   return (
     <div
       className={[
-        "mx-auto w-full max-w-2xl rounded-3xl border p-6 text-center text-white shadow-[0_0_80px_rgba(99,102,241,0.12)] backdrop-blur-xl sm:p-8 md:p-10",
+        "mx-auto w-full max-w-2xl rounded-3xl border p-5 text-center text-white shadow-[0_0_80px_rgba(99,102,241,0.12)] backdrop-blur-xl sm:p-7 md:p-9",
         isDone
           ? "border-emerald-500/20 bg-black/70"
           : isError
@@ -170,10 +170,10 @@ export default function ReportReady({
             : "border-white/10 bg-black/60",
       ].join(" ")}
     >
-      <div className="mx-auto mb-5 flex justify-center">
+      <div className="mx-auto mb-4 flex justify-center">
         <div
           className={[
-            "flex h-16 w-16 items-center justify-center rounded-full",
+            "flex h-14 w-14 items-center justify-center rounded-full sm:h-16 sm:w-16",
             isDone
               ? "bg-emerald-500/15 shadow-[0_0_30px_rgba(16,185,129,0.18)]"
               : isError
@@ -183,7 +183,7 @@ export default function ReportReady({
         >
           <span
             className={[
-              "text-3xl font-bold",
+              "text-2xl font-bold sm:text-3xl",
               isDone
                 ? "text-emerald-400"
                 : isError
@@ -198,7 +198,7 @@ export default function ReportReady({
 
       <div
         className={[
-          "mb-2 text-xs font-semibold uppercase tracking-[0.22em]",
+          "mb-2 text-[11px] font-semibold uppercase tracking-[0.22em] sm:text-xs",
           isDone
             ? "text-emerald-400/85"
             : isError
@@ -213,7 +213,7 @@ export default function ReportReady({
         className={[
           "tracking-tight",
           isDone
-            ? "text-4xl font-extrabold sm:text-5xl"
+            ? "text-3xl font-extrabold sm:text-4xl md:text-5xl"
             : "text-2xl font-semibold sm:text-3xl",
         ].join(" ")}
       >
@@ -227,7 +227,7 @@ export default function ReportReady({
       </p>
 
       {!isError && (
-        <div className="mx-auto mt-8 max-w-xl">
+        <div className="mx-auto mt-7 max-w-xl">
           <div className="h-2 overflow-hidden rounded-full bg-white/10">
             <div
               className={[
@@ -247,17 +247,17 @@ export default function ReportReady({
       )}
 
       {isDone && (
-        <div className="mx-auto mt-6 max-w-xl rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-zinc-300">
+        <div className="mx-auto mt-5 max-w-xl rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-zinc-300">
           Includes score, strategy insights, rewrite suggestions and transcript
           preview.
         </div>
       )}
 
-      <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+      <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
         <Link
           href={primaryHref}
           className={[
-            "inline-flex w-full items-center justify-center gap-2 rounded-2xl px-8 py-3 text-sm font-semibold transition sm:w-auto",
+            "inline-flex w-full items-center justify-center gap-2 rounded-2xl px-7 py-3 text-sm font-semibold transition sm:w-auto",
             isDone
               ? "bg-indigo-500 text-white hover:bg-indigo-400"
               : isError
@@ -272,7 +272,7 @@ export default function ReportReady({
         {!isError && (
           <Link
             href="/"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/30 px-8 py-3 text-sm font-semibold text-white transition hover:bg-white/5 sm:w-auto"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/30 px-7 py-3 text-sm font-semibold text-white transition hover:bg-white/5 sm:w-auto"
           >
             Analyze another file
           </Link>

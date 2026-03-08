@@ -23,7 +23,6 @@ const PREVIEW_SECTIONS = [
   "Strategy insights",
   "AI rewrite",
   "Transcript preview",
-  "Performance recommendations",
 ];
 
 export default function AnalyzingExperience() {
@@ -55,14 +54,16 @@ export default function AnalyzingExperience() {
   );
 
   return (
-    <div className="mx-auto max-w-xl space-y-8 rounded-3xl border border-white/10 bg-black/25 p-8 fade-up backdrop-blur">
+    <div className="mx-auto max-w-xl space-y-5 rounded-3xl border border-white/10 bg-black/25 p-5 backdrop-blur sm:space-y-6 sm:p-6 md:p-8">
       {/* HEADER */}
       <div className="space-y-2 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500/15">
-          <span className="text-2xl font-bold text-indigo-300">…</span>
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/15 sm:h-14 sm:w-14">
+          <span className="text-xl font-bold text-indigo-300 sm:text-2xl">
+            …
+          </span>
         </div>
 
-        <h2 className="text-2xl font-semibold text-white">
+        <h2 className="text-xl font-semibold text-white sm:text-2xl">
           Analyzing your content
         </h2>
 
@@ -86,9 +87,12 @@ export default function AnalyzingExperience() {
       </div>
 
       {/* STEPS LIST */}
-      <div className="space-y-2 text-sm">
+      <div className="grid gap-2 sm:grid-cols-2">
         {STEPS.map((step, i) => (
-          <div key={i} className="flex items-center gap-2">
+          <div
+            key={i}
+            className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-sm"
+          >
             <span
               className={`h-2 w-2 rounded-full ${
                 i <= currentStepIndex ? "bg-emerald-400" : "bg-zinc-600"
@@ -116,7 +120,7 @@ export default function AnalyzingExperience() {
           Preparing your report
         </p>
 
-        <div className="space-y-2">
+        <div className="grid gap-2 sm:grid-cols-2">
           {PREVIEW_SECTIONS.map((s, i) => (
             <div
               key={i}
