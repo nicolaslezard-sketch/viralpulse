@@ -240,11 +240,22 @@ export default function ResultsView({
               {isPaid ? (
                 <div className="mt-2">{firstLine(longevity.content)}</div>
               ) : (
-                <div className="relative mt-3 overflow-hidden">
-                  <div className="text-zinc-300">
-                    {previewText(firstLine(longevity.content), 90)}
+                <div className="mt-4 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-4">
+                  <div className="text-sm font-semibold text-indigo-200">
+                    🔒 Unlock predicted longevity
                   </div>
-                  <div className="absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-[#2b2d66] to-transparent" />
+
+                  <p className="mt-2 text-xs leading-relaxed text-indigo-100/75">
+                    See how durable this topic is likely to be and whether it
+                    has short-term spike potential or longer shelf life.
+                  </p>
+
+                  <Link
+                    href="/pricing"
+                    className="mt-4 inline-flex rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
+                  >
+                    Upgrade now
+                  </Link>
                 </div>
               )}
             </div>

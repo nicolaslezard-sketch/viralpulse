@@ -6,30 +6,25 @@ const FREE_FULL_SECTION_KEYS = new Set([
   "WHAT TO FIX",
 ]);
 
-function previewText(text: string, opts?: { min?: number; maxRatio?: number }) {
+function previewText(
+  text: string,
+  opts?: { min?: number; maxRatio?: number; maxChars?: number },
+) {
   const raw = (text || "").trim();
   if (!raw) return "🔒 Upgrade to unlock this section.";
 
-  const min = opts?.min ?? 160;
-  const maxRatio = opts?.maxRatio ?? 0.3;
+  const min = opts?.min ?? 120;
+  const maxRatio = opts?.maxRatio ?? 0.24;
+  const maxChars = opts?.maxChars ?? 180;
 
-  const targetLength = Math.max(min, Math.floor(raw.length * maxRatio));
+  const targetLength = Math.min(
+    maxChars,
+    Math.max(min, Math.floor(raw.length * maxRatio)),
+  );
 
-  if (raw.length <= targetLength) {
-    return raw;
-  }
+  const sliced = raw.slice(0, targetLength).trim();
 
-  const sliced = raw.slice(0, targetLength);
-  const lastBreak =
-    Math.max(sliced.lastIndexOf("\n\n"), sliced.lastIndexOf(". ")) ||
-    sliced.length;
-
-  const safe =
-    lastBreak > Math.floor(targetLength * 0.55)
-      ? sliced.slice(0, lastBreak).trim()
-      : sliced.trim();
-
-  return `${safe}\n\n🔒 Upgrade to unlock the full section.`;
+  return `${sliced}…`;
 }
 
 export function buildReportForUser(
@@ -57,22 +52,26 @@ export function buildReportForUser(
   const rewrite = report.rewrite
     ? {
         hookRewrite: previewText(report.rewrite.hookRewrite, {
-          min: 120,
-          maxRatio: 0.45,
+          min: 70,
+          maxRatio: 0.35,
+          maxChars: 120,
         }),
         optimizedScript: previewText(report.rewrite.optimizedScript, {
-          min: 180,
-          maxRatio: 0.22,
+          min: 110,
+          maxRatio: 0.16,
+          maxChars: 220,
         }),
         titles: report.rewrite.titles.slice(0, 2).map((title) =>
           previewText(title, {
-            min: 24,
-            maxRatio: 0.85,
+            min: 20,
+            maxRatio: 0.6,
+            maxChars: 60,
           }),
         ),
         thumbnailIdea: previewText(report.rewrite.thumbnailIdea, {
-          min: 80,
-          maxRatio: 0.45,
+          min: 55,
+          maxRatio: 0.35,
+          maxChars: 110,
         }),
       }
     : undefined;

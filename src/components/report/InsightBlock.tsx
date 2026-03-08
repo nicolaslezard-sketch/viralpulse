@@ -11,15 +11,13 @@ type Props = {
 
 const FREE_OPEN_SECTIONS = new Set(["SUMMARY", "VIRAL REASON", "WHAT TO FIX"]);
 
-function previewLines(text: string, maxLines = 3) {
-  const lines = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  if (lines.length <= maxLines) return lines.join("\n");
-
-  return `${lines.slice(0, maxLines).join("\n")}\n…`;
+function lockedPreviewText(text: string, maxChars = 110) {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (!clean) return "Preview locked.";
+  if (clean.length <= maxChars) {
+    return `${clean.slice(0, Math.max(36, Math.floor(clean.length * 0.7))).trim()}…`;
+  }
+  return `${clean.slice(0, maxChars).trim()}…`;
 }
 
 function PreviewLockedCard({
@@ -29,18 +27,18 @@ function PreviewLockedCard({
   title: string;
   content: string;
 }) {
-  const preview = previewLines(content, 3);
+  const preview = lockedPreviewText(content, 110);
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#020617] p-6">
       <h3 className="mb-3 text-sm font-semibold text-indigo-300">{title}</h3>
 
-      <div className="relative min-h-47.5">
-        <div className="whitespace-pre-line pr-1 text-sm leading-relaxed text-zinc-200">
+      <div className="relative min-h-[210px]">
+        <div className="max-w-full pr-1 text-sm leading-relaxed text-zinc-200 opacity-90 blur-[1.5px] select-none">
           {preview}
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-[#020617] via-[#020617]/95 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-36 bg-linear-to-t from-[#020617] via-[#020617]/96 to-transparent" />
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3 px-4 pb-4 text-center">
           <div className="text-sm font-semibold text-white">
