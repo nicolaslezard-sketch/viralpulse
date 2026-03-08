@@ -419,7 +419,10 @@ export default function UploadBox() {
 
         {result && (
           <div className="fade-up">
-            <ReportReady reportId={result.id} isPro={currentPlan !== "free"} />
+            <ReportReady
+              reportId={result.id}
+              isPaid={currentPlan !== "free"}
+            />{" "}
           </div>
         )}
       </div>

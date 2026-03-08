@@ -12,42 +12,39 @@ export default async function ReportPage({ params }: PageProps) {
     {
       cache: "no-store",
       credentials: "include",
-    }
+    },
   );
 
   if (!res.ok) return notFound();
 
   const data = await res.json();
+  const isPaid = data.isPaid ?? true;
 
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto max-w-5xl px-6 py-16">
-        {/* ================= REPORT ================= */}
         <ResultsView
           report={data.report}
           transcript={data.transcript}
-          isPro={data.isPro}
+          transcriptPreview={data.transcriptPreview ?? data.transcript}
+          isPaid={isPaid}
           mode="full"
           reportId={data.id}
         />
 
-        {/* ================= FINAL CTA (FREE ONLY) ================= */}
-        {!data.isPro && (
+        {!isPaid && (
           <div className="mt-20 rounded-3xl border border-white/10 bg-zinc-950 p-10 text-center">
             <h3 className="text-2xl font-bold">
               Unlock the full viral analysis
             </h3>
 
             <p className="mx-auto mt-4 max-w-xl text-sm text-zinc-400">
-              Get access to all 18 insights, full transcript, advanced hooks,
-              remix strategies and long-form analysis.
+              Get access to all insights, full transcript, stronger rewrites,
+              deeper strategy and performance analytics.
             </p>
 
             <div className="mt-8 flex justify-center">
-              <UpgradeButton
-                plan="pro"
-                label="Unlock full report"
-              />
+              <UpgradeButton plan="plus" label="Unlock full report" />
             </div>
           </div>
         )}

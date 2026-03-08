@@ -94,10 +94,10 @@ function getStatusProgress(status: ReportStatus) {
 
 export default function ReportReady({
   reportId,
-  isPro,
+  isPaid = false,
 }: {
   reportId: string;
-  isPro: boolean;
+  isPaid?: boolean;
 }) {
   const [status, setStatus] = useState<ReportStatus>("queued");
   const [loading, setLoading] = useState(true);
@@ -279,7 +279,7 @@ export default function ReportReady({
         )}
       </div>
 
-      {isDone && !isPro && (
+      {isDone && !isPaid && (
         <p className="mt-4 text-xs text-zinc-500">
           Free preview available · Upgrade to unlock full report, rewrite and
           transcript.
