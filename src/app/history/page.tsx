@@ -27,7 +27,7 @@ type HistoryItem = {
   reportFree?: FullReport | null;
 };
 
-type SortOption = "newest" | "best" | "worst";
+type SortOption = "latest" | "best" | "worst";
 type RangeOption = "30d" | "90d" | "all";
 
 function getStatusLabel(status: ReportStatus) {
@@ -74,7 +74,7 @@ export default function HistoryPage() {
   const { plan } = useUserPlan();
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortOption>("newest");
+  const [sort, setSort] = useState<SortOption>("latest");
   const [range, setRange] = useState<RangeOption>("30d");
 
   useEffect(() => {
@@ -116,6 +116,7 @@ export default function HistoryPage() {
   const scoredWithDelta = useMemo(() => {
     return doneChronological.map((r, index, arr) => {
       const prev = index > 0 ? arr[index - 1] : null;
+
       const delta =
         prev && prev.score !== null && r.score !== null
           ? Number((r.score - prev.score).toFixed(1))
@@ -235,28 +236,6 @@ export default function HistoryPage() {
             }}
           />
         )}
-
-        <div className="mt-3 flex flex-wrap gap-3 sm:mt-0">
-          <select
-            value={range}
-            onChange={(e) => setRange(e.target.value as RangeOption)}
-            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
-          >
-            <option value="30d">Last 30 days</option>
-            <option value="90d">Last 90 days</option>
-            <option value="all">All time</option>
-          </select>
-
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortOption)}
-            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
-          >
-            <option value="newest">Newest</option>
-            <option value="best">Best score</option>
-            <option value="worst">Lowest score</option>
-          </select>
-        </div>
       </div>
 
       {average !== null && plan !== "free" && (
@@ -312,6 +291,18 @@ export default function HistoryPage() {
             </div>
           </div>
 
+          <div className="mt-8 flex justify-end">
+            <select
+              value={range}
+              onChange={(e) => setRange(e.target.value as RangeOption)}
+              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+            >
+              <option value="30d">Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+              <option value="all">All time</option>
+            </select>
+          </div>
+
           {chartData.length >= 2 && <ScoreChart data={chartData} />}
         </>
       )}
@@ -341,6 +332,25 @@ export default function HistoryPage() {
           {error}
         </div>
       )}
+
+      <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold">Analysis history</h2>
+          <p className="mt-1 text-sm text-zinc-400">
+            Sort your reports independently from the chart above.
+          </p>
+        </div>
+
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as SortOption)}
+          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+        >
+          <option value="latest">Latest</option>
+          <option value="best">Best score</option>
+          <option value="worst">Lowest score</option>
+        </select>
+      </div>
 
       <div className="mt-8 space-y-4">
         {enrichedWithDelta.length === 0 && (

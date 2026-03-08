@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import {
   XAxis,
   YAxis,
@@ -33,11 +32,13 @@ function getTickInterval(length: number) {
   return 6;
 }
 
+function openReport(id?: string) {
+  if (!id) return;
+  window.location.href = `/report/${id}`;
+}
+
 export default function ScoreChart({ data }: { data: ChartPoint[] }) {
-  const tickInterval = useMemo(
-    () => getTickInterval(data.length),
-    [data.length],
-  );
+  const tickInterval = getTickInterval(data.length);
 
   return (
     <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
@@ -45,7 +46,8 @@ export default function ScoreChart({ data }: { data: ChartPoint[] }) {
         <div>
           <h3 className="text-sm text-zinc-300">Score evolution</h3>
           <p className="mt-1 text-xs text-zinc-500">
-            Click any point to open that analysis.
+            Showing completed analyses from oldest to newest. Click any point to
+            open that report.
           </p>
         </div>
 
@@ -66,22 +68,7 @@ export default function ScoreChart({ data }: { data: ChartPoint[] }) {
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={data}
-            margin={{ top: 10, right: 12, left: -12, bottom: 0 }}
-            onClick={(state) => {
-              const payload = (
-                state as
-                  | {
-                      activePayload?: Array<{ payload?: ChartPoint }>;
-                    }
-                  | undefined
-              )?.activePayload;
-
-              const point = payload?.[0]?.payload;
-
-              if (point?.id) {
-                window.location.href = `/report/${point.id}`;
-              }
-            }}
+            margin={{ top: 16, right: 12, left: -12, bottom: 0 }}
           >
             <defs>
               <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
@@ -124,7 +111,7 @@ export default function ScoreChart({ data }: { data: ChartPoint[] }) {
                       {d.dateLabel}
                     </div>
                     <div className="mt-2 text-xs font-medium text-emerald-400">
-                      Open report →
+                      Click point to open →
                     </div>
                   </div>
                 );
@@ -140,19 +127,69 @@ export default function ScoreChart({ data }: { data: ChartPoint[] }) {
               strokeWidth={3}
               fill="url(#scoreGradient)"
               style={{ filter: "drop-shadow(0 0 6px #6366f1)" }}
-              dot={{
-                r: 4,
-                strokeWidth: 2,
-                stroke: "#a5b4fc",
-                fill: "#6366f1",
-                cursor: "pointer",
+              dot={(props) => {
+                const { cx, cy, index, payload } = props as {
+                  cx?: number;
+                  cy?: number;
+                  index?: number;
+                  payload?: ChartPoint;
+                };
+
+                if (cx == null || cy == null || !payload) return null;
+
+                const isLast = index === data.length - 1;
+
+                return (
+                  <g
+                    onClick={() => openReport(payload.id)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <circle
+                      cx={cx}
+                      cy={cy}
+                      r={isLast ? 6 : 4}
+                      stroke={isLast ? "#ffffff" : "#a5b4fc"}
+                      strokeWidth={2}
+                      fill={isLast ? "#818cf8" : "#6366f1"}
+                    />
+                    {isLast && (
+                      <text
+                        x={cx}
+                        y={cy - 14}
+                        textAnchor="middle"
+                        fontSize="10"
+                        fill="#c7d2fe"
+                      >
+                        Latest
+                      </text>
+                    )}
+                  </g>
+                );
               }}
-              activeDot={{
-                r: 7,
-                strokeWidth: 2,
-                stroke: "#fff",
-                fill: "#818cf8",
-                cursor: "pointer",
+              activeDot={(props) => {
+                const { cx, cy, payload } = props as {
+                  cx?: number;
+                  cy?: number;
+                  payload?: ChartPoint;
+                };
+
+                if (cx == null || cy == null || !payload) return null;
+
+                return (
+                  <g
+                    onClick={() => openReport(payload.id)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <circle
+                      cx={cx}
+                      cy={cy}
+                      r={7}
+                      stroke="#ffffff"
+                      strokeWidth={2}
+                      fill="#818cf8"
+                    />
+                  </g>
+                );
               }}
             />
           </AreaChart>
