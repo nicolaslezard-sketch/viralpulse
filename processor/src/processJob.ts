@@ -11,6 +11,7 @@ import { transcribeFromFile } from "./transcribeFromFile";
 import { getMediaDurationSeconds } from "./getMediaDurationSeconds";
 import { generateReport } from "../../src/lib/report/generateReport";
 import { generateRewrite } from "../../src/lib/report/generateRewrite";
+import { buildReportForUser } from "../../src/lib/report/buildReportForUser";
 
 export type AnalysisJob = {
   reportId: string;
@@ -172,6 +173,7 @@ export async function processJob(rawJob: unknown) {
         return "";
     }
   }
+
   const inputExt = getExtensionFromMimeType(report.mimeType);
   const mediaPath = path.join(tmpDir, `${baseName}_input${inputExt}`);
   const audioPath = path.join(tmpDir, `${baseName}_audio.mp3`);
@@ -243,6 +245,7 @@ export async function processJob(rawJob: unknown) {
       }
       throw err;
     }
+
     logStep(report.id, "transcribeFromFile", transcriptStart);
     console.log(`[${report.id}] Transcript ready, chars: ${transcript.length}`);
 
@@ -293,6 +296,13 @@ export async function processJob(rawJob: unknown) {
     logStep(report.id, "generateRewrite", rewriteStart);
     console.log(`[${report.id}] Rewrite generated`);
 
+    const reportFull = {
+      ...result.fullText,
+      rewrite: rewrite ?? undefined,
+    };
+
+    const reportFree = buildReportForUser(reportFull, "free");
+
     const updateDoneStart = nowMs();
     await prisma.analysisReport.update({
       where: { id: report.id },
@@ -300,8 +310,8 @@ export async function processJob(rawJob: unknown) {
         status: "done",
         durationSec,
         transcript,
-        reportFull: result.fullText,
-        reportFree: result.freeText,
+        reportFull,
+        reportFree,
         viralScore: result.viralScore,
         viralMetrics: result.viralMetrics ?? undefined,
         rewrite: rewrite ?? undefined,

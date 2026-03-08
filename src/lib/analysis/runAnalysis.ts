@@ -4,6 +4,7 @@ import { getUserPlan } from "@/lib/auth/getUserPlan";
 import type { PlanKey } from "@/lib/limits";
 import { limitsByPlan } from "@/lib/limits";
 import { generateRewrite } from "@/lib/report/generateRewrite";
+import { buildReportForUser } from "@/lib/report/buildReportForUser";
 
 export async function runAnalysis({ reportId }: { reportId: string }) {
   console.log("▶️ runAnalysis start", reportId);
@@ -28,7 +29,6 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
     return;
   }
 
-  // compatible con flujo viejo y nuevo
   if (
     report.status !== "processing" &&
     report.status !== "queued" &&
@@ -102,14 +102,21 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
       report: result.fullText,
     });
 
+    const reportFull = {
+      ...result.fullText,
+      rewrite: rewrite ?? undefined,
+    };
+
+    const reportFree = buildReportForUser(reportFull, "free");
+
     await prisma.analysisReport.update({
       where: { id: reportId },
       data: {
         status: "done",
         durationSec,
         transcript,
-        reportFull: result.fullText,
-        reportFree: result.freeText,
+        reportFull,
+        reportFree,
         rewrite: rewrite ?? undefined,
         viralScore: result.viralScore,
         viralMetrics: result.viralMetrics ?? undefined,
