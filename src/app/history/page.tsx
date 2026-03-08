@@ -220,7 +220,7 @@ export default function HistoryPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-20 text-white">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-semibold">Performance Timeline</h1>
           <p className="mt-1 text-sm text-zinc-400">
@@ -228,14 +228,23 @@ export default function HistoryPage() {
           </p>
         </div>
 
-        {plan !== "free" && (
-          <UsageIndicator
-            usage={{
-              plan,
-              usedMinutesThisMonth: 60,
-            }}
-          />
-        )}
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/"
+            className="inline-flex rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+          >
+            ← Back to home
+          </Link>
+
+          {plan !== "free" && (
+            <UsageIndicator
+              usage={{
+                plan,
+                usedMinutesThisMonth: 60,
+              }}
+            />
+          )}
+        </div>
       </div>
 
       {average !== null && plan !== "free" && (
