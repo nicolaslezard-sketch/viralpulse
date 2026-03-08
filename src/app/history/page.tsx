@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUserPlan } from "@/lib/useUserPlan";
 import type { FullReport } from "@/lib/report/types";
 import ScoreChart from "@/components/history/ScoreChart";
@@ -27,6 +27,9 @@ type HistoryItem = {
   reportFree?: FullReport | null;
 };
 
+type SortOption = "newest" | "best" | "worst";
+type RangeOption = "30d" | "90d" | "all";
+
 function getStatusLabel(status: ReportStatus) {
   switch (status) {
     case "queued":
@@ -46,13 +49,33 @@ function getStatusLabel(status: ReportStatus) {
   }
 }
 
+function getSummary(report: FullReport | null) {
+  const summarySection = report?.sections?.["SUMMARY"];
+  return (
+    summarySection?.content
+      ?.split("\n")
+      .map((l: string) => l.trim())
+      .filter(Boolean)[0] ?? ""
+  );
+}
+
+function isWithinRange(dateIso: string, range: RangeOption) {
+  if (range === "all") return true;
+
+  const now = Date.now();
+  const createdAt = new Date(dateIso).getTime();
+  const diffMs = now - createdAt;
+
+  const days = range === "30d" ? 30 : 90;
+  return diffMs <= days * 24 * 60 * 60 * 1000;
+}
+
 export default function HistoryPage() {
   const { plan } = useUserPlan();
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  type SortOption = "newest" | "best" | "worst";
   const [sort, setSort] = useState<SortOption>("newest");
+  const [range, setRange] = useState<RangeOption>("30d");
 
   useEffect(() => {
     fetch("/api/history")
@@ -64,91 +87,128 @@ export default function HistoryPage() {
       .catch((e) => setError(e.message));
   }, []);
 
-  const enriched = items.map((item, index) => {
-    const report = item.reportFull ?? item.reportFree ?? null;
-    const score = item.status === "done" ? (item.viralScore ?? null) : null;
+  const enriched = useMemo(() => {
+    return items.map((item) => {
+      const report = item.reportFull ?? item.reportFree ?? null;
+      const score = item.status === "done" ? (item.viralScore ?? null) : null;
 
-    const prev = items[index + 1];
-    const prevScore =
-      prev?.status === "done" ? (prev?.viralScore ?? null) : null;
+      return {
+        ...item,
+        score,
+        summary: getSummary(report),
+      };
+    });
+  }, [items]);
 
-    const delta =
-      score !== null && prevScore !== null
-        ? Number((score - prevScore).toFixed(1))
-        : null;
+  const doneChronological = useMemo(() => {
+    return [...enriched]
+      .filter((r) => r.status === "done" && r.score !== null)
+      .sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+  }, [enriched]);
 
-    const summarySection = report?.sections?.["SUMMARY"];
+  const doneChronologicalInRange = useMemo(() => {
+    return doneChronological.filter((r) => isWithinRange(r.createdAt, range));
+  }, [doneChronological, range]);
 
-    const summary =
-      summarySection?.content
-        ?.split("\n")
-        .map((l: string) => l.trim())
-        .filter(Boolean)[0] ?? "";
+  const scoredWithDelta = useMemo(() => {
+    return doneChronological.map((r, index, arr) => {
+      const prev = index > 0 ? arr[index - 1] : null;
+      const delta =
+        prev && prev.score !== null && r.score !== null
+          ? Number((r.score - prev.score).toFixed(1))
+          : null;
 
-    return {
-      ...item,
-      score,
-      delta,
-      summary,
-    };
-  });
+      return {
+        ...r,
+        delta,
+      };
+    });
+  }, [doneChronological]);
 
-  const scored = enriched.filter((r) => r.score !== null);
+  const deltaMap = useMemo(() => {
+    return new Map(scoredWithDelta.map((r) => [r.id, r.delta]));
+  }, [scoredWithDelta]);
 
-  const sorted = [...enriched].sort((a, b) => {
+  const enrichedWithDelta = useMemo(() => {
+    return enriched.map((r) => ({
+      ...r,
+      delta: deltaMap.get(r.id) ?? null,
+    }));
+  }, [enriched, deltaMap]);
+
+  const sorted = useMemo(() => {
+    const copy = [...enrichedWithDelta];
+
     if (sort === "best") {
-      if (a.score === null) return 1;
-      if (b.score === null) return -1;
-      return b.score - a.score;
+      copy.sort((a, b) => {
+        if (a.score === null) return 1;
+        if (b.score === null) return -1;
+        return b.score - a.score;
+      });
+      return copy;
     }
 
     if (sort === "worst") {
-      if (a.score === null) return 1;
-      if (b.score === null) return -1;
-      return a.score - b.score;
+      copy.sort((a, b) => {
+        if (a.score === null) return 1;
+        if (b.score === null) return -1;
+        return a.score - b.score;
+      });
+      return copy;
     }
 
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+    copy.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+    return copy;
+  }, [enrichedWithDelta, sort]);
 
-  const chartData = sorted
-    .filter((r) => r.score !== null)
-    .map((r) => ({
-      date: new Date(r.createdAt).toLocaleDateString(),
+  const chartData = useMemo(() => {
+    return doneChronologicalInRange.map((r) => ({
+      id: r.id,
+      createdAt: r.createdAt,
+      dateLabel: new Date(r.createdAt).toLocaleString(),
+      shortDateLabel: new Date(r.createdAt).toLocaleDateString(),
       score: r.score as number,
       name: r.originalName ?? "Untitled",
-    }))
-    .reverse();
+    }));
+  }, [doneChronologicalInRange]);
+
+  const trackedCount = doneChronologicalInRange.length;
 
   const average =
-    scored.length > 0
+    doneChronologicalInRange.length > 0
       ? Math.round(
-          scored.reduce((acc, r) => acc + (r.score as number), 0) /
-            scored.length,
+          doneChronologicalInRange.reduce(
+            (acc, r) => acc + (r.score as number),
+            0,
+          ) / doneChronologicalInRange.length,
         )
       : null;
 
   const best =
-    scored.length > 0
-      ? Math.max(...scored.map((r) => r.score as number))
+    doneChronologicalInRange.length > 0
+      ? Math.max(...doneChronologicalInRange.map((r) => r.score as number))
       : null;
 
   const worst =
-    scored.length > 0
-      ? Math.min(...scored.map((r) => r.score as number))
+    doneChronologicalInRange.length > 0
+      ? Math.min(...doneChronologicalInRange.map((r) => r.score as number))
       : null;
 
   let trend: "up" | "down" | "stable" | null = null;
 
-  if (scored.length >= 4) {
-    const mid = Math.floor(scored.length / 2);
-
-    const firstHalf = scored.slice(mid);
-    const secondHalf = scored.slice(0, mid);
+  if (doneChronologicalInRange.length >= 4) {
+    const mid = Math.floor(doneChronologicalInRange.length / 2);
+    const firstHalf = doneChronologicalInRange.slice(0, mid);
+    const secondHalf = doneChronologicalInRange.slice(mid);
 
     const avg1 =
       firstHalf.reduce((a, r) => a + (r.score ?? 0), 0) / firstHalf.length;
-
     const avg2 =
       secondHalf.reduce((a, r) => a + (r.score ?? 0), 0) / secondHalf.length;
 
@@ -176,11 +236,21 @@ export default function HistoryPage() {
           />
         )}
 
-        <div className="mt-3 sm:mt-0">
+        <div className="mt-3 flex flex-wrap gap-3 sm:mt-0">
+          <select
+            value={range}
+            onChange={(e) => setRange(e.target.value as RangeOption)}
+            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+          >
+            <option value="30d">Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="all">All time</option>
+          </select>
+
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortOption)}
-            className="rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-white"
+            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
           >
             <option value="newest">Newest</option>
             <option value="best">Best score</option>
@@ -191,7 +261,14 @@ export default function HistoryPage() {
 
       {average !== null && plan !== "free" && (
         <>
-          <div className="mt-8 grid gap-4 md:grid-cols-4">
+          <div className="mt-8 grid gap-4 md:grid-cols-5">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <div className="text-xs text-zinc-400">Tracked analyses</div>
+              <div className="mt-1 text-2xl font-bold text-white">
+                {trackedCount}
+              </div>
+            </div>
+
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <div className="text-xs text-zinc-400">Average score</div>
               <div className="mt-1 text-2xl font-bold text-white">
@@ -252,7 +329,7 @@ export default function HistoryPage() {
 
           <Link
             href="/pricing"
-            className="inline-block mt-4 rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
+            className="mt-4 inline-block rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
           >
             Upgrade to Pro
           </Link>
@@ -266,9 +343,9 @@ export default function HistoryPage() {
       )}
 
       <div className="mt-8 space-y-4">
-        {enriched.length === 0 && (
+        {enrichedWithDelta.length === 0 && (
           <p className="text-sm text-zinc-500">
-            No analyses yet. Upload your first audio to get started.
+            No analyses yet. Upload your first file to get started.
           </p>
         )}
 
@@ -281,7 +358,7 @@ export default function HistoryPage() {
               href={`/report/${r.id}`}
               className="
                 block rounded-2xl border border-white/10 bg-black/40 p-5
-                hover:border-indigo-400/40 hover:bg-black/50 transition
+                transition hover:border-indigo-400/40 hover:bg-black/50
               "
             >
               <div className="flex items-center justify-between gap-6">
@@ -292,14 +369,14 @@ export default function HistoryPage() {
                     </p>
 
                     <span
-                      className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold border-white/10 bg-white/5 ${statusUi.tone}`}
+                      className={`rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold ${statusUi.tone}`}
                     >
                       {statusUi.text.replace(" →", "")}
                     </span>
                   </div>
 
                   {r.summary && r.status === "done" && (
-                    <p className="mt-1 text-xs text-zinc-400 line-clamp-2">
+                    <p className="mt-1 line-clamp-2 text-xs text-zinc-400">
                       {r.summary}
                     </p>
                   )}
@@ -327,7 +404,7 @@ export default function HistoryPage() {
                       >
                         {r.score}
                         {r.score >= 85 && (
-                          <span className="ml-2 text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full">
+                          <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-300">
                             Viral candidate
                           </span>
                         )}

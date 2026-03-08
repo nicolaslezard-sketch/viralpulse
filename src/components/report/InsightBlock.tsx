@@ -33,12 +33,12 @@ function PreviewLockedCard({
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#020617] p-6">
       <h3 className="mb-3 text-sm font-semibold text-indigo-300">{title}</h3>
 
-      <div className="relative min-h-[190px]">
+      <div className="relative min-h-47.5">
         <div className="whitespace-pre-line pr-1 text-sm leading-relaxed text-zinc-200">
           {preview}
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#020617] via-[#020617]/95 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-[#020617] via-[#020617]/95 to-transparent" />
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3 px-4 pb-4 text-center">
           <div className="text-sm font-semibold text-white">

@@ -9,10 +9,10 @@ export default function HomePage() {
       {/* Background */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-[#05060a]" />
-        <div className="absolute -top-40 left-1/2 h-[32rem] w-[56rem] -translate-x-1/2 rounded-full bg-indigo-600/20 blur-[120px]" />
-        <div className="absolute right-[-6rem] top-40 h-[28rem] w-[28rem] rounded-full bg-violet-600/15 blur-[120px]" />
-        <div className="absolute bottom-[-12rem] left-[-6rem] h-[34rem] w-[34rem] rounded-full bg-sky-500/10 blur-[130px]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/30" />
+        <div className="absolute -top-40 left-1/2 h-128 w-4xl -translate-x-1/2 rounded-full bg-indigo-600/20 blur-[120px]" />
+        <div className="absolute -right-24 top-40 h-112 w-md rounded-full bg-violet-600/15 blur-[120px]" />
+        <div className="absolute -bottom-48 -left-24 h-136 w-136 rounded-full bg-sky-500/10 blur-[130px]" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/0 via-black/0 to-black/30" />
       </div>
 
       <Header />
@@ -26,7 +26,7 @@ export default function HomePage() {
 
         <h1 className="mt-6 text-5xl font-extrabold tracking-tight md:text-6xl">
           Turn one upload into a{" "}
-          <span className="block bg-gradient-to-r from-indigo-300 to-violet-300 bg-clip-text text-transparent">
+          <span className="block bg-linear-to-r from-indigo-300 to-violet-300 bg-clip-text text-transparent">
             viral playbook
           </span>
         </h1>
