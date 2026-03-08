@@ -59,7 +59,7 @@ export default function UpgradeButton({
         disabled={loading}
         className={`${base} ${styles}`}
       >
-        {loading ? "Redirecting…" : label}
+        {loading ? "Opening secure checkout…" : label}{" "}
       </button>
 
       {error ? <p className="mt-2 text-xs text-red-400">{error}</p> : null}

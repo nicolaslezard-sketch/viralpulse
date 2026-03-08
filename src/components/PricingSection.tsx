@@ -10,6 +10,7 @@ type PlanCardProps = {
   highlight?: boolean;
   badge?: string;
   light?: boolean;
+  promo?: string;
   children: React.ReactNode;
 };
 
@@ -20,6 +21,7 @@ function PlanCard({
   highlight,
   badge,
   light,
+  promo,
   children,
 }: PlanCardProps) {
   return (
@@ -27,7 +29,7 @@ function PlanCard({
       className={[
         "relative rounded-2xl p-8 backdrop-blur",
         light
-          ? "bg-white text-black border border-white"
+          ? "border border-white bg-white text-black"
           : highlight
             ? "border border-indigo-500/40 bg-indigo-500/10"
             : "border border-white/10 bg-black/30 text-white",
@@ -40,11 +42,25 @@ function PlanCard({
       )}
 
       <h3 className="text-xl font-semibold">{title}</h3>
+
       <p className={light ? "mt-2 text-zinc-600" : "mt-2 text-zinc-400"}>
         {subtitle}
       </p>
 
       <div className="mt-6 text-3xl font-semibold">{price}</div>
+
+      {promo && (
+        <div
+          className={[
+            "mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold",
+            light
+              ? "bg-black/5 text-zinc-700"
+              : "bg-indigo-500/20 text-indigo-200",
+          ].join(" ")}
+        >
+          {promo}
+        </div>
+      )}
 
       <ul
         className={[
@@ -61,26 +77,35 @@ function PlanCard({
 export default function PricingSection() {
   return (
     <section id="pricing" className="mx-auto max-w-6xl px-6 py-24 text-white">
-      {/* HERO */}
       <div className="mb-16 text-center">
         <h2 className="text-4xl font-semibold">
           Simple pricing for serious creators
         </h2>
-        <p className="mt-4 mx-auto max-w-2xl text-zinc-400">
-          Start free. Upgrade only when you need higher limits and full
-          insights.
+
+        <p className="mx-auto mt-4 max-w-2xl text-zinc-400">
+          Start free, then unlock deeper strategy, rewrite, transcript and
+          analytics when you’re ready to optimize seriously.
         </p>
       </div>
 
-      {/* PLANS */}
       <div className="grid gap-8 md:grid-cols-3">
-        {/* FREE */}
-        <PlanCard title="Free" subtitle="Try the workflow risk-free" price="$0">
-          <li>✔ 3 analysis per day</li>
-          <li>✔ Up to 5 minutes per audio</li>
-          <li>✔ Preview viral insights</li>
-          <li className="text-zinc-500">✖ No transcript</li>
-          <li className="text-zinc-500">✖ No analysis history</li>
+        <PlanCard
+          title="Free"
+          subtitle="Try the workflow before you upgrade"
+          price="$0"
+        >
+          <li>✔ 3 analyses per day</li>
+          <li>✔ Audio + video upload</li>
+          <li>✔ Up to 5 min per file</li>
+          <li>✔ Up to 80 MB per file</li>
+          <li>✔ Viral score included</li>
+          <li>✔ Preview strategy insights</li>
+          <li>✔ Preview AI rewrite</li>
+          <li>✔ Preview transcript</li>
+          <li className="text-zinc-500">✖ Full report locked</li>
+          <li className="text-zinc-500">✖ Full AI rewrite locked</li>
+          <li className="text-zinc-500">✖ Full transcript locked</li>
+          <li className="text-zinc-500">✖ Performance analytics locked</li>
 
           <Link
             href="/"
@@ -94,24 +119,33 @@ export default function PricingSection() {
           </p>
         </PlanCard>
 
-        {/* PLUS */}
         <PlanCard
           title="Plus"
-          subtitle="For consistent weekly creators"
-          price="$9.99 / month"
+          subtitle="For creators who publish every week"
+          price="$14.99 / month"
+          promo="50% off your first month"
           highlight
           badge="Most popular"
         >
-          <li>✔ Full viral report (all sections)</li>
-          <li>✔ Transcript included</li>
-          <li>✔ Copy full report</li>
+          <li>✔ Full viral report</li>
+          <li>✔ Full strategy insights</li>
+          <li>✔ Full AI rewrite</li>
+          <li>✔ Full transcript</li>
           <li>✔ Analysis history</li>
+          <li>✔ Audio + video upload</li>
           <li className="pt-2">
             🧾 Up to <span className="font-medium">120 minutes / month</span>
           </li>
           <li>
-            🧾 Up to <span className="font-medium">10 min per audio</span>
+            🧾 Up to <span className="font-medium">10 min per file</span>
           </li>
+          <li>
+            🧾 Up to <span className="font-medium">200 MB per file</span>
+          </li>
+          <li className="text-zinc-500">
+            ✖ Performance analytics not included
+          </li>
+          <li className="text-zinc-500">✖ Priority processing not included</li>
 
           <UpgradeButton plan="plus" label="Upgrade to Plus" className="mt-6" />
 
@@ -120,21 +154,26 @@ export default function PricingSection() {
           </p>
         </PlanCard>
 
-        {/* PRO */}
         <PlanCard
           title="Pro"
-          subtitle="For daily creators & long-form content"
-          price="$19.99 / month"
+          subtitle="For daily creators and heavier content workflows"
+          price="$29.99 / month"
           light
         >
           <li>✔ Everything in Plus</li>
+          <li>✔ Performance analytics</li>
+          <li>✔ Score timeline and trends</li>
           <li>✔ Priority processing</li>
           <li>✔ Faster turnaround</li>
+          <li>✔ Audio + video upload</li>
           <li className="pt-2">
             🧾 Up to <span className="font-medium">400 minutes / month</span>
           </li>
           <li>
-            🧾 Up to <span className="font-medium">20 min per audio</span>
+            🧾 Up to <span className="font-medium">20 min per file</span>
+          </li>
+          <li>
+            🧾 Up to <span className="font-medium">200 MB per file</span>
           </li>
 
           <UpgradeButton
@@ -150,7 +189,6 @@ export default function PricingSection() {
         </PlanCard>
       </div>
 
-      {/* FOOTNOTE */}
       <p className="mt-14 text-center text-xs text-zinc-500">
         Payments are securely handled by Lemon. You’re only charged if you
         upgrade.

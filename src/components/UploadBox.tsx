@@ -6,6 +6,7 @@ import { apiUrl } from "@/lib/clientBaseUrl";
 import { withRetry } from "@/lib/retry";
 import { useSession } from "next-auth/react";
 import { useUserPlan } from "@/lib/useUserPlan";
+import { limitsByPlan } from "@/lib/limits";
 
 import LoginCard from "./LoginCard";
 import AnalyzingExperience from "./AnalyzingExperience";
@@ -15,26 +16,15 @@ import LimitReachedPanel, {
   type LimitReason,
 } from "@/components/analysis/LimitReachedPanel";
 
-/* =========================
-   Types
-========================= */
-
 type AnalyzeResult = {
   id: string;
 };
 
-/* =========================
-   Constants
-========================= */
-
 const ALLOWED_TYPES = [
-  // audio
   "audio/mpeg",
   "audio/wav",
   "audio/mp4",
   "audio/x-m4a",
-
-  // video
   "video/mp4",
   "video/quicktime",
   "video/x-m4v",
@@ -47,8 +37,25 @@ const MIN_MEDIA_SECONDS = Number(
 );
 
 function getSourceType(file: File): "audio" | "video" {
-  if (file.type.startsWith("video/")) return "video";
-  return "audio";
+  return file.type.startsWith("video/") ? "video" : "audio";
+}
+
+function bytesToMb(bytes: number) {
+  return Math.round(bytes / (1024 * 1024));
+}
+
+function getPlanLabel(plan: "free" | "plus" | "pro") {
+  if (plan === "free") return "Free";
+  if (plan === "plus") return "Plus";
+  return "Pro";
+}
+
+function getPlanLimitsCopy(plan: "free" | "plus" | "pro") {
+  const limits = limitsByPlan[plan];
+  return {
+    maxMinutes: Math.round(limits.maxSeconds / 60),
+    maxMb: bytesToMb(limits.maxBytes),
+  };
 }
 
 async function getMediaDurationSeconds(file: File): Promise<number | null> {
@@ -74,10 +81,6 @@ async function getMediaDurationSeconds(file: File): Promise<number | null> {
   });
 }
 
-/* =========================
-   Component
-========================= */
-
 export default function UploadBox() {
   const { data: session, status: sessionStatus } = useSession();
   const { plan, isLoading: planLoading } = useUserPlan();
@@ -99,6 +102,10 @@ export default function UploadBox() {
     );
   }
 
+  const currentPlan = plan as "free" | "plus" | "pro";
+  const limits = limitsByPlan[currentPlan];
+  const limitsCopy = getPlanLimitsCopy(currentPlan);
+
   function handleFile(f: File | null) {
     setError(null);
     setLimitReason(null);
@@ -111,6 +118,15 @@ export default function UploadBox() {
     if (!ALLOWED_TYPES.includes(f.type) && !EXT_OK.includes(ext)) {
       setError(
         "Unsupported file format. Please upload MP3, WAV, M4A, MP4, MOV or M4V.",
+      );
+      return;
+    }
+
+    if (f.size > limits.maxBytes) {
+      setError(
+        `${getPlanLabel(currentPlan)} supports files up to ${
+          limitsCopy.maxMb
+        } MB. Upgrade to upload larger files.`,
       );
       return;
     }
@@ -132,13 +148,32 @@ export default function UploadBox() {
       return;
     }
 
+    if (file.size > limits.maxBytes) {
+      setError(
+        `${getPlanLabel(currentPlan)} supports files up to ${
+          limitsCopy.maxMb
+        } MB. Upgrade to upload larger files.`,
+      );
+      return;
+    }
+
     const dur = await getMediaDurationSeconds(file);
+
     if (dur !== null && dur < MIN_MEDIA_SECONDS) {
       setError(
         `Content too short (${Math.round(
           dur,
         )}s). Please upload at least ${MIN_MEDIA_SECONDS}s.`,
       );
+      return;
+    }
+
+    if (dur !== null && dur > limits.maxSeconds) {
+      setLimitReason({
+        kind: "audio_too_long",
+        plan: currentPlan,
+        durationSec: Math.round(dur),
+      });
       return;
     }
 
@@ -157,7 +192,6 @@ export default function UploadBox() {
     try {
       const sourceType = getSourceType(file);
 
-      /* 1️⃣ Upload URL */
       const uploadRes = await withRetry(
         () =>
           fetch(apiUrl("/api/upload-url"), {
@@ -184,10 +218,8 @@ export default function UploadBox() {
         key: string;
       };
 
-      /* 2️⃣ Upload to R2 */
       await uploadToR2(uploadUrl, file);
 
-      /* 3️⃣ Analyze */
       const analyzeRes = await withRetry(
         () =>
           fetch(apiUrl("/api/analyze"), {
@@ -222,7 +254,7 @@ export default function UploadBox() {
         ) {
           setLimitReason({
             kind: "audio_too_long",
-            plan,
+            plan: currentPlan,
             durationSec:
               typeof data.durationSec === "number"
                 ? data.durationSec
@@ -232,14 +264,14 @@ export default function UploadBox() {
         }
 
         if (analyzeRes.status === 429 && code === "DAILY_LIMIT_REACHED") {
-          setLimitReason({ kind: "daily_limit_reached", plan });
+          setLimitReason({ kind: "daily_limit_reached", plan: currentPlan });
           return;
         }
 
         if (analyzeRes.status === 429 && code === "MONTHLY_LIMIT_REACHED") {
           setLimitReason({
             kind: "monthly_limit_reached",
-            plan,
+            plan: currentPlan,
             remainingMinutes:
               typeof data.remainingMinutes === "number"
                 ? data.remainingMinutes
@@ -257,11 +289,8 @@ export default function UploadBox() {
 
       setResult({ id: data.id as string });
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Something went wrong");
-      }
+      if (err instanceof Error) setError(err.message);
+      else setError("Something went wrong");
     } finally {
       setAnalyzing(false);
     }
@@ -270,7 +299,7 @@ export default function UploadBox() {
   return (
     <div className="text-white">
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <PlanBadge plan={plan} />
+        <PlanBadge plan={currentPlan} />
       </div>
 
       <div
@@ -281,8 +310,7 @@ export default function UploadBox() {
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         className={[
-          "group relative flex flex-col items-center justify-center",
-          "rounded-2xl border p-6 sm:p-8 md:p-10 text-center transition",
+          "group relative flex flex-col items-center justify-center rounded-2xl border p-6 text-center transition sm:p-8 md:p-10",
           "bg-black/25 backdrop-blur",
           dragging
             ? "border-white/25 bg-white/5"
@@ -355,8 +383,10 @@ export default function UploadBox() {
         <div className="mt-4 text-center text-xs text-zinc-500">
           <p className="leading-relaxed">
             <span className="text-zinc-400">Supported:</span> MP3, WAV, M4A,
-            MP4, MOV, M4V · <span className="text-zinc-400">Max duration:</span>{" "}
-            <span className="font-medium text-zinc-300">up to 20 min</span>
+            MP4, MOV, M4V · <span className="text-zinc-400">Your plan:</span>{" "}
+            <span className="font-medium text-zinc-300">
+              up to {limitsCopy.maxMinutes} min and {limitsCopy.maxMb} MB
+            </span>
           </p>
 
           <p className="mt-1">
@@ -379,7 +409,7 @@ export default function UploadBox() {
 
       {result && (
         <div className="mt-8">
-          <ReportReady reportId={result.id} isPro={plan !== "free"} />
+          <ReportReady reportId={result.id} isPro={currentPlan !== "free"} />
         </div>
       )}
     </div>

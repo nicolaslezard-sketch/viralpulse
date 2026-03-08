@@ -4,11 +4,11 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: {
-    default: "ViralPulse – AI Audio Virality Analysis for Creators",
+    default: "ViralPulse – AI Video & Audio Analysis for Creators",
     template: "%s | ViralPulse",
   },
   description:
-    "ViralPulse is an AI-powered platform that analyzes audio to find viral moments, hooks and clip ideas for TikTok, Reels and YouTube Shorts.",
+    "ViralPulse analyzes video and audio to score viral potential, generate strategy insights, build transcripts and create AI rewrites for TikTok, Reels and YouTube Shorts.",
 };
 
 export default function RootLayout({

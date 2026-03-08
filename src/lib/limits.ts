@@ -17,40 +17,34 @@ export type PlanLimits = {
 
 export const limitsByPlan = {
   free: {
-    // UX: 5 minutos máx (1 audio por día)
+    // Free: video/audio realista para probar el producto
     maxSeconds: 5 * 60,
 
-    // Firewall real: evita audios largos comprimidos
-    maxBytes: 10 * 1024 * 1024, // 🔒 10 MB
+    // 80 MB: suficiente para mobile video razonable sin regalar archivos absurdos
+    maxBytes: 80 * 1024 * 1024,
 
-    // Signed URL corta
     ttl: 300, // 5 min
-
-    // Whisper no se ejecuta si excede
     behavior: "block",
   },
 
   plus: {
-    // UX: hasta 10 min
+    // Plus: creators semanales
     maxSeconds: 10 * 60,
 
-    // Suficiente para MP3 / M4A normales
-    maxBytes: 80 * 1024 * 1024, // 80 MB
+    // Permitimos hasta 200 MB para no romper la promesa de video upload
+    maxBytes: 200 * 1024 * 1024,
 
     ttl: 600, // 10 min
-
     behavior: "block",
   },
 
   pro: {
-    // UX: hasta 20 min
+    // Pro: daily creators / long-form workflows
     maxSeconds: 20 * 60,
 
-    // Audios largos, alta calidad
-    maxBytes: 200 * 1024 * 1024, // 200 MB
+    maxBytes: 200 * 1024 * 1024,
 
     ttl: 600, // 10 min
-
     behavior: "block",
   },
 } satisfies Record<PlanKey, PlanLimits>;

@@ -92,6 +92,15 @@ export default function UserMenu() {
             <div className="mt-1 text-xs text-zinc-500">
               Access is based on your plan.
             </div>
+            {!isLoading && plan === "free" && (
+              <Link
+                href="/#pricing"
+                className="mt-3 block rounded-xl bg-indigo-500 px-3 py-2 text-center text-xs font-semibold text-white transition hover:bg-indigo-400"
+                onClick={() => setOpen(false)}
+              >
+                Unlock full report
+              </Link>
+            )}
           </div>
 
           <div className="h-px bg-white/10" />
@@ -134,7 +143,7 @@ export default function UserMenu() {
               "
               onClick={() => setOpen(false)}
             >
-              See pricing
+              Compare plans
             </Link>
 
             <button
