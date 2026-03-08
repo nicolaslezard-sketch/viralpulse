@@ -6,7 +6,6 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <main className="min-h-screen text-white">
-      {/* Background */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-[#05060a]" />
         <div className="absolute -top-40 left-1/2 h-128 w-4xl -translate-x-1/2 rounded-full bg-indigo-600/20 blur-[120px]" />
@@ -17,7 +16,6 @@ export default function HomePage() {
 
       <Header />
 
-      {/* MINI HERO */}
       <section className="mx-auto max-w-6xl px-6 pb-8 pt-16 text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-1 text-xs text-zinc-300 backdrop-blur">
           <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
@@ -25,22 +23,20 @@ export default function HomePage() {
         </div>
 
         <h1 className="mt-6 text-5xl font-extrabold tracking-tight md:text-6xl">
-          Turn one upload into a{" "}
+          Know if your content works{" "}
           <span className="block bg-linear-to-r from-indigo-300 to-violet-300 bg-clip-text text-transparent">
-            viral playbook
+            before you publish it
           </span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-3xl text-lg text-zinc-400">
-          Upload a video or audio file and get your score, transcript, rewrite
-          and publishing strategy in minutes.
+          Upload a video or audio file and get score, transcript, rewrite and
+          publishing strategy in minutes.
         </p>
       </section>
 
-      {/* ANALYSIS CONSOLE = REAL HERO */}
       <section id="analyze" className="mx-auto max-w-6xl px-6 pb-18">
         <div className="rounded-[28px] border border-white/10 bg-black/35 backdrop-blur-xl">
-          {/* Top bar */}
           <div className="flex flex-col gap-3 border-b border-white/10 px-6 py-5 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
@@ -51,16 +47,14 @@ export default function HomePage() {
               <div className="text-lg font-semibold">Analysis Console</div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <Pill>Free · 5 min / 80 MB</Pill>
-              <Pill>Plus · 10 min · 120 min / month</Pill>
-              <Pill glow>Pro · 20 min · 400 min / month</Pill>
+            <div className="flex flex-wrap items-center gap-3">
+              <Pill tone="free">Free · 5 min / 80 MB</Pill>
+              <Pill tone="plus">Plus · 10 min · 120 min / month</Pill>
+              <Pill tone="pro">Pro · 20 min · 400 min / month</Pill>
             </div>
           </div>
 
-          {/* Body */}
           <div className="grid grid-cols-1 gap-6 p-6 lg:grid-cols-[0.95fr_1.05fr]">
-            {/* Left panel */}
             <div className="rounded-3xl border border-white/10 bg-black/25 p-8 md:p-10">
               <div className="inline-flex items-center rounded-full border border-indigo-400/20 bg-indigo-500/10 px-3 py-1 text-xs text-indigo-300">
                 Upload once. Optimize before you post.
@@ -71,9 +65,9 @@ export default function HomePage() {
               </h2>
 
               <p className="mt-4 max-w-xl text-base leading-relaxed text-zinc-400">
-                ViralPulse analyzes your video or audio, scores its viral
-                potential, builds a transcript, generates rewrite suggestions
-                and shows what to improve before you publish.
+                ViralPulse analyzes your video or audio, scores viral potential,
+                builds a transcript, generates rewrite suggestions and shows
+                what to improve before you publish.
               </p>
 
               <ul className="mt-8 space-y-4">
@@ -108,15 +102,13 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right panel */}
-            <div className="rounded-3xl border border-white/10 bg-black/25 p-5 md:p-6">
+            <div className="rounded-3xl border border-indigo-400/20 bg-white/[0.04] p-5 shadow-[0_0_0_1px_rgba(99,102,241,0.08),0_30px_80px_-40px_rgba(99,102,241,0.5)] md:p-6">
               <UploadBox />
             </div>
           </div>
         </div>
       </section>
 
-      {/* WHAT HAPPENS NEXT */}
       <section className="mx-auto max-w-6xl px-6 pb-16 text-center">
         <h2 className="text-3xl font-semibold">What happens after upload</h2>
         <p className="mt-3 text-zinc-400">
@@ -144,7 +136,108 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FEATURES */}
+      <section className="mx-auto max-w-6xl px-6 pb-20">
+        <div className="rounded-[28px] border border-white/10 bg-black/30 p-6 backdrop-blur-xl md:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center rounded-full border border-indigo-400/20 bg-indigo-500/10 px-3 py-1 text-xs text-indigo-300">
+                Pro feature
+              </div>
+
+              <h2 className="mt-4 text-3xl font-semibold">
+                Performance Timeline
+              </h2>
+
+              <p className="mt-3 text-zinc-400">
+                Track score evolution across analyses, spot trends over time and
+                see whether your content is actually improving.
+              </p>
+            </div>
+
+            <Link
+              href="/history"
+              className="inline-flex items-center justify-center rounded-2xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400"
+            >
+              Open performance timeline
+            </Link>
+          </div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-4">
+            <MiniStat title="Tracked analyses" value="17" />
+            <MiniStat title="Average score" value="79" />
+            <MiniStat
+              title="Best score"
+              value="83.4"
+              accent="text-emerald-400"
+            />
+            <MiniStat title="Trend" value="Stable" />
+          </div>
+
+          <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-5">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <div className="text-sm font-medium text-zinc-300">
+                  Score evolution
+                </div>
+                <div className="mt-1 text-xs text-zinc-500">
+                  Completed analyses shown from oldest to newest.
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 text-xs text-zinc-400">
+                <div className="flex items-center gap-2">
+                  <div className="h-0.5 w-3 bg-indigo-400" />
+                  <span>Content score</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="h-0.5 w-3 border-t border-dashed border-emerald-400" />
+                  <span>Threshold (80)</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative h-56 overflow-hidden rounded-2xl border border-white/10 bg-linear-to-b from-indigo-500/10 to-transparent">
+              <div className="absolute inset-x-0 top-[36%] border-t border-dashed border-emerald-400/60" />
+
+              <div className="absolute inset-x-6 bottom-6 top-8 flex items-end justify-between">
+                {[76, 74, 79, 81, 75, 82, 83, 81, 83, 79, 76, 74, 76, 78].map(
+                  (score, i, arr) => {
+                    const height = `${score}%`;
+                    const isLast = i === arr.length - 1;
+
+                    return (
+                      <div
+                        key={i}
+                        className="flex flex-1 items-end justify-center"
+                      >
+                        <div className="relative flex flex-col items-center">
+                          {isLast && (
+                            <div className="mb-2 text-[10px] font-medium text-indigo-200">
+                              Latest
+                            </div>
+                          )}
+
+                          <div
+                            className={[
+                              "w-2 rounded-full bg-indigo-300 shadow-[0_0_16px_rgba(129,140,248,0.8)]",
+                              isLast ? "h-2.5 w-2.5 border-2 border-white" : "",
+                            ].join(" ")}
+                            style={{ marginBottom: `calc(${height} - 8px)` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  },
+                )}
+              </div>
+
+              <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-indigo-400/20 to-transparent" />
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="features" className="mx-auto max-w-6xl px-6 pb-20">
         <h2 className="text-center text-3xl font-semibold">
           What you get in every analysis
@@ -192,7 +285,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ANALYZE BY FORMAT */}
       <section className="mx-auto max-w-6xl px-6 pb-20">
         <h2 className="text-center text-3xl font-semibold">
           Analyze content by format
@@ -223,7 +315,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* PRICING */}
       <PricingSection />
 
       <footer className="border-t border-white/10 py-10">
@@ -261,26 +352,45 @@ export default function HomePage() {
   );
 }
 
-/* ---------- UI helpers ---------- */
-
 function Pill({
   children,
-  glow,
+  tone = "free",
 }: {
   children: React.ReactNode;
-  glow?: boolean;
+  tone?: "free" | "plus" | "pro";
 }) {
+  const styles =
+    tone === "free"
+      ? "border-white/10 bg-black/30 text-zinc-300"
+      : tone === "plus"
+        ? "border-indigo-400/25 bg-indigo-500/10 text-indigo-200"
+        : "border-violet-400/30 bg-violet-500/12 text-violet-100";
+
   return (
     <span
-      className={[
-        "rounded-full border px-3 py-1 text-xs text-zinc-200",
-        glow
-          ? "border-violet-400/30 bg-violet-500/10"
-          : "border-white/10 bg-black/30",
-      ].join(" ")}
+      className={`rounded-full border px-4 py-1.5 text-sm font-medium ${styles}`}
     >
       {children}
     </span>
+  );
+}
+
+function MiniStat({
+  title,
+  value,
+  accent,
+}: {
+  title: string;
+  value: string;
+  accent?: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+      <div className="text-xs text-zinc-400">{title}</div>
+      <div className={`mt-1 text-2xl font-bold text-white ${accent ?? ""}`}>
+        {value}
+      </div>
+    </div>
   );
 }
 
@@ -329,13 +439,9 @@ function LinkCard({
       href={href}
       className="
         group relative overflow-hidden rounded-2xl
-        border border-white/10
-        bg-black/30
-        p-6
+        border border-white/10 bg-black/30 p-6
         transition-all duration-300
-        hover:-translate-y-1
-        hover:border-indigo-400/40
-        hover:bg-black/40
+        hover:-translate-y-1 hover:border-indigo-400/40 hover:bg-black/40
         hover:shadow-[0_0_0_1px_rgba(99,102,241,0.15),0_20px_40px_-20px_rgba(99,102,241,0.4)]
       "
     >
