@@ -18,7 +18,8 @@ type ResultsViewProps = {
     finalScore: number;
   } | null;
   transcript?: string | null;
-  isPro: boolean;
+  transcriptPreview?: string | null;
+  isPaid: boolean;
   mode?: "preview" | "full";
   reportId?: string;
 };
@@ -71,7 +72,7 @@ function LockedUpgradeCard({
         href="/pricing"
         className="mt-4 inline-flex rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
       >
-        Upgrade to Pro
+        Upgrade now
       </Link>
     </div>
   );
@@ -82,7 +83,8 @@ export default function ResultsView({
   viralScore,
   viralMetrics,
   transcript,
-  isPro,
+  transcriptPreview,
+  isPaid,
   mode = "preview",
 }: ResultsViewProps) {
   const isFull = mode === "full";
@@ -105,7 +107,7 @@ export default function ResultsView({
   async function handleUpgrade() {
     const res = await fetch("/api/lemon/checkout", {
       method: "POST",
-      body: JSON.stringify({ plan: "pro" }),
+      body: JSON.stringify({ plan: "plus" }),
     });
     const data = await res.json();
     if (data?.url) window.location.href = data.url;
@@ -127,10 +129,12 @@ export default function ResultsView({
     if (transcript) navigator.clipboard.writeText(transcript);
   }
 
-  const transcriptPreview =
-    transcript && transcript.trim().length > 0
-      ? previewText(transcript, 180)
-      : "Your full transcript will appear here after processing, so you can review wording, pacing and structure before publishing.";
+  const transcriptTeaser =
+    transcriptPreview && transcriptPreview.trim().length > 0
+      ? transcriptPreview
+      : transcript && transcript.trim().length > 0
+        ? previewText(transcript, 180)
+        : "Your transcript preview will appear here after processing, so you can quickly review wording, pacing and clarity before publishing.";
 
   return (
     <div className="mx-auto max-w-6xl space-y-14 px-6 pb-32 text-white">
@@ -139,13 +143,16 @@ export default function ResultsView({
           <h1 className="text-4xl font-semibold tracking-tight">
             Content Command Center
           </h1>
+
           <p className="max-w-2xl text-sm text-zinc-400">
-            Optimize your content before publishing.
+            {isPaid
+              ? "Optimize your content before publishing."
+              : "See what is working, where it breaks, and unlock the full optimization layer."}
           </p>
         </div>
 
         <div className="flex flex-wrap gap-3">
-          {isPro && isFull ? (
+          {isPaid && isFull ? (
             <>
               <button
                 onClick={copyFullReport}
@@ -168,11 +175,35 @@ export default function ResultsView({
               onClick={handleUpgrade}
               className="rounded-full bg-indigo-500 px-6 py-3 text-sm font-semibold"
             >
-              Unlock full command center
+              Unlock full report
             </button>
           )}
         </div>
       </div>
+
+      {!isPaid && (
+        <div className="rounded-3xl border border-indigo-500/25 bg-indigo-500/10 p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="text-sm font-semibold text-indigo-200">
+                Free preview unlocked
+              </div>
+              <p className="mt-2 max-w-2xl text-sm text-indigo-100/75">
+                You can already see the core diagnosis. Upgrade to unlock the
+                full transcript, full rewrite, deeper insights and performance
+                analytics.
+              </p>
+            </div>
+
+            <Link
+              href="/pricing"
+              className="inline-flex rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
+            >
+              See plans
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur">
         <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
@@ -184,7 +215,7 @@ export default function ResultsView({
 
             <div className="mt-2 text-lg font-semibold">{scoreText}</div>
 
-            {viralMetrics && isPro && (
+            {viralMetrics && isPaid && (
               <div className="mt-4 flex gap-3 text-xs text-zinc-300">
                 <span>Hook: {viralMetrics.hookStrength}</span>
                 <span>Retention: {viralMetrics.retentionPotential}</span>
@@ -206,7 +237,7 @@ export default function ResultsView({
                 Predicted longevity
               </div>
 
-              {isPro ? (
+              {isPaid ? (
                 <div className="mt-2">{firstLine(longevity.content)}</div>
               ) : (
                 <div className="relative mt-3 overflow-hidden">
@@ -231,28 +262,28 @@ export default function ResultsView({
             title="Core Insights"
             sections={SECTION_GROUPS.core}
             report={reportForInsights}
-            isPro={isPro}
+            isPaid={isPaid}
           />
 
           <InsightBlock
             title="Growth Ideas"
             sections={SECTION_GROUPS.growth}
             report={reportForInsights}
-            isPro={isPro}
+            isPaid={isPaid}
           />
 
           <InsightBlock
             title="Distribution Strategy"
             sections={SECTION_GROUPS.distribution}
             report={reportForInsights}
-            isPro={isPro}
+            isPaid={isPaid}
           />
 
           <InsightBlock
             title="Advanced Strategy"
             sections={SECTION_GROUPS.advanced}
             report={reportForInsights}
-            isPro={isPro}
+            isPaid={isPaid}
           />
         </div>
       </details>
@@ -264,7 +295,7 @@ export default function ResultsView({
 
         <div className="mt-6">
           {report.rewrite ? (
-            <RewriteBlock rewrite={report.rewrite} isPro={isPro} />
+            <RewriteBlock rewrite={report.rewrite} isPaid={isPaid} />
           ) : (
             <LockedUpgradeCard
               title="AI Rewrite"
@@ -279,7 +310,7 @@ export default function ResultsView({
           Full Transcript
         </summary>
 
-        {isPro ? (
+        {isPaid ? (
           transcript ? (
             <pre className="mt-6 whitespace-pre-wrap text-sm text-zinc-300">
               {transcript}
@@ -293,7 +324,7 @@ export default function ResultsView({
           <div className="mt-6">
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/20 p-5">
               <pre className="whitespace-pre-wrap text-sm text-zinc-300">
-                {transcriptPreview}
+                {transcriptTeaser}
               </pre>
 
               <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-[#2b2d66] via-[#2b2d66]/95 to-transparent" />
@@ -311,7 +342,7 @@ export default function ResultsView({
         )}
       </details>
 
-      {!isPro && (
+      {!isPaid && (
         <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
           <div className="text-lg font-semibold">Performance Analytics</div>
 
@@ -358,7 +389,7 @@ export default function ResultsView({
               href="/pricing"
               className="mt-6 inline-flex rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
             >
-              Upgrade to Pro
+              Upgrade now
             </Link>
           </div>
         </div>

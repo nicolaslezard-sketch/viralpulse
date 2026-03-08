@@ -6,8 +6,10 @@ type Props = {
   title: string;
   sections: string[];
   report: FullReport;
-  isPro: boolean;
+  isPaid: boolean;
 };
+
+const FREE_OPEN_SECTIONS = new Set(["SUMMARY", "VIRAL REASON", "WHAT TO FIX"]);
 
 function previewLines(text: string, maxLines = 3) {
   const lines = text
@@ -53,7 +55,7 @@ function PreviewLockedCard({
             href="/pricing"
             className="rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
           >
-            Upgrade to Pro
+            Upgrade now
           </Link>
         </div>
       </div>
@@ -61,7 +63,7 @@ function PreviewLockedCard({
   );
 }
 
-export function InsightBlock({ title, sections, report, isPro }: Props) {
+export function InsightBlock({ title, sections, report, isPaid }: Props) {
   return (
     <div className="mb-10">
       <h2 className="mb-4 text-lg font-semibold tracking-wide text-indigo-300">
@@ -73,8 +75,8 @@ export function InsightBlock({ title, sections, report, isPro }: Props) {
           const section = report.sections[key];
           if (!section) return null;
 
-          const alwaysOpen = ["SUMMARY", "VIRAL REASON"].includes(key);
-          const locked = !isPro && !alwaysOpen;
+          const isOpenForFree = FREE_OPEN_SECTIONS.has(key);
+          const locked = !isPaid && !isOpenForFree;
 
           if (locked) {
             return (

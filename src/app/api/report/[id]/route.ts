@@ -7,6 +7,27 @@ import { normalizeReport } from "@/lib/report/normalizeReport";
 
 export const runtime = "nodejs";
 
+function buildTranscriptPreview(transcript: string | null) {
+  const raw = (transcript || "").trim();
+  if (!raw) return null;
+
+  const target = 650;
+
+  if (raw.length <= target) return raw;
+
+  const sliced = raw.slice(0, target);
+  const lastBreak = Math.max(
+    sliced.lastIndexOf(". "),
+    sliced.lastIndexOf("\n"),
+    sliced.lastIndexOf(" "),
+  );
+
+  const safe =
+    lastBreak > 320 ? sliced.slice(0, lastBreak).trim() : sliced.trim();
+
+  return `${safe}…`;
+}
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -30,9 +51,9 @@ export async function GET(
       wasTrimmed: true,
       createdAt: true,
       reportFull: true,
+      reportFree: true,
       viralScore: true,
       viralMetrics: true,
-      reportFree: true,
       transcript: true,
       rewrite: true,
     },
@@ -51,8 +72,8 @@ export async function GET(
     select: { plan: true },
   });
 
-  const isPro = viewer?.plan !== "free";
-  const rawReport = isPro ? report.reportFull : report.reportFree;
+  const isPaid = viewer?.plan !== "free";
+  const rawReport = isPaid ? report.reportFull : report.reportFree;
 
   let reportJson: FullReport | null = null;
 
@@ -83,7 +104,10 @@ export async function GET(
     report: reportJson,
     viralScore: report.viralScore ?? null,
     viralMetrics: report.viralMetrics ?? null,
-    transcript: report.transcript ?? null,
-    isPro,
+    transcript: isPaid ? (report.transcript ?? null) : null,
+    transcriptPreview: isPaid
+      ? (report.transcript ?? null)
+      : buildTranscriptPreview(report.transcript ?? null),
+    isPaid,
   });
 }

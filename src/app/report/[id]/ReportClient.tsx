@@ -23,7 +23,8 @@ type ReportResponse = {
   report: FullReport | null;
   viralScore?: number | null;
   transcript: string | null;
-  isPro: boolean;
+  transcriptPreview: string | null;
+  isPaid: boolean;
 };
 
 const POLLABLE_STATUSES = new Set<ReportStatus>([
@@ -236,14 +237,17 @@ export default function ReportClient({ reportId }: { reportId: string }) {
     return <ProcessingState status={data.status} />;
   }
 
-  const isPaid = plan !== "free";
+  const isPaid = data.isPaid ?? plan !== "free";
 
   return (
     <ResultsView
       report={data.report}
       viralScore={data.viralScore ?? null}
-      transcript={data.transcript ?? null}
-      isPro={isPaid}
+      transcript={
+        isPaid ? (data.transcript ?? null) : (data.transcriptPreview ?? null)
+      }
+      transcriptPreview={data.transcriptPreview ?? null}
+      isPaid={isPaid}
       mode={isPaid ? "full" : "preview"}
     />
   );

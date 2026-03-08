@@ -7,7 +7,7 @@ type Props = {
     titles: string[];
     thumbnailIdea: string;
   };
-  isPro?: boolean;
+  isPaid?: boolean;
 };
 
 function copy(text: string) {
@@ -50,7 +50,7 @@ function LockedRewriteCard({
             href="/pricing"
             className="rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
           >
-            Upgrade to Pro
+            Upgrade now
           </Link>
         </div>
       </div>
@@ -58,8 +58,8 @@ function LockedRewriteCard({
   );
 }
 
-export function RewriteBlock({ rewrite, isPro = false }: Props) {
-  if (!isPro) {
+export function RewriteBlock({ rewrite, isPaid = false }: Props) {
+  if (!isPaid) {
     return (
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         <LockedRewriteCard
@@ -98,7 +98,7 @@ export function RewriteBlock({ rewrite, isPro = false }: Props) {
                 href="/pricing"
                 className="rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
               >
-                Upgrade to Pro
+                Upgrade now
               </Link>
             </div>
           </div>
@@ -130,7 +130,7 @@ export function RewriteBlock({ rewrite, isPro = false }: Props) {
                 href="/pricing"
                 className="rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
               >
-                Upgrade to Pro
+                Upgrade now
               </Link>
             </div>
           </div>
