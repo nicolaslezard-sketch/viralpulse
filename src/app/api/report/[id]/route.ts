@@ -55,7 +55,6 @@ export async function GET(
       viralScore: true,
       viralMetrics: true,
       transcript: true,
-      rewrite: true,
     },
   });
 
@@ -78,21 +77,7 @@ export async function GET(
   let reportJson: FullReport | null = null;
 
   if (rawReport) {
-    const normalized = normalizeReport(rawReport);
-
-    if (normalized) {
-      const persistedRewrite =
-        report.rewrite &&
-        typeof report.rewrite === "object" &&
-        !Array.isArray(report.rewrite)
-          ? (report.rewrite as FullReport["rewrite"])
-          : undefined;
-
-      reportJson = {
-        ...normalized,
-        rewrite: persistedRewrite ?? normalized.rewrite,
-      };
-    }
+    reportJson = normalizeReport(rawReport);
   }
 
   return NextResponse.json({
@@ -103,7 +88,7 @@ export async function GET(
     createdAt: report.createdAt,
     report: reportJson,
     viralScore: report.viralScore ?? null,
-    viralMetrics: report.viralMetrics ?? null,
+    viralMetrics: isPaid ? (report.viralMetrics ?? null) : null,
     transcript: isPaid ? (report.transcript ?? null) : null,
     transcriptPreview: isPaid
       ? (report.transcript ?? null)
