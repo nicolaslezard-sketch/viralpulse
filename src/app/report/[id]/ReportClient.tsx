@@ -242,7 +242,7 @@ export default function ReportClient({ reportId }: { reportId: string }) {
     <ResultsView
       report={data.report}
       viralScore={data.viralScore ?? null}
-      transcript={isPaid ? data.transcript : null}
+      transcript={data.transcript ?? null}
       isPro={isPaid}
       mode={isPaid ? "full" : "preview"}
     />

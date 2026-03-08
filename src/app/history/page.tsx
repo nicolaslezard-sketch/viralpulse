@@ -241,12 +241,13 @@ export default function HistoryPage() {
 
       {plan === "free" && (
         <div className="mt-8 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-6 text-center">
-          <p className="text-sm text-indigo-200 font-medium">
+          <p className="text-sm font-medium text-indigo-200">
             🔒 Unlock performance analytics
           </p>
 
           <p className="mt-2 text-xs text-indigo-200/70">
-            View score evolution, trends and performance insights.
+            Track score evolution, long-term trends and what is improving over
+            time.
           </p>
 
           <Link
@@ -304,10 +305,12 @@ export default function HistoryPage() {
                   )}
 
                   {plan === "free" && r.status === "done" && (
-                    <div className="mt-2 text-xs text-zinc-500 space-y-1">
+                    <div className="mt-2 space-y-1 text-xs text-zinc-500">
                       <div>🔒 Full report</div>
                       <div>🔒 Strategy insights</div>
-                      <div>🔒 Transcript</div>
+                      <div>🔒 AI Rewrite</div>
+                      <div>🔒 Full transcript</div>
+                      <div>🔒 Performance analytics</div>
                     </div>
                   )}
 

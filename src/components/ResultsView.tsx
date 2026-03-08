@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { FullReport } from "@/lib/report/types";
 import { InsightBlock } from "@/components/report/InsightBlock";
 import { RewriteBlock } from "@/components/report/RewriteBlock";
@@ -31,18 +32,49 @@ function firstLine(text: string) {
   );
 }
 
+function previewText(text: string, maxChars = 220) {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= maxChars) return clean;
+  return `${clean.slice(0, maxChars).trim()}…`;
+}
+
 function scoreLabel(score: number) {
-  if (score >= 75)
+  if (score >= 75) {
     return { label: "🔥 High Viral Potential", color: "text-emerald-300" };
-  if (score >= 50)
+  }
+
+  if (score >= 50) {
     return {
       label: "⚡ Decent Potential · Needs Sharpening",
       color: "text-amber-300",
     };
+  }
+
   return {
     label: "🧊 Low Viral Potential · Major Fixes Needed",
     color: "text-rose-300",
   };
+}
+
+function LockedUpgradeCard({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-indigo-500/25 bg-indigo-500/10 p-5 text-center">
+      <div className="text-sm font-semibold text-indigo-200">🔒 {title}</div>
+      <p className="mt-2 text-sm text-indigo-100/75">{description}</p>
+      <Link
+        href="/pricing"
+        className="mt-4 inline-flex rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
+      >
+        Upgrade to Pro
+      </Link>
+    </div>
+  );
 }
 
 export default function ResultsView({
@@ -59,6 +91,7 @@ export default function ResultsView({
 
   const summary = report?.sections?.["SUMMARY"];
   const longevity = report?.sections?.["PREDICTED LONGEVITY"];
+
   const reportForInsights: FullReport = {
     ...report,
     sections: Object.fromEntries(
@@ -68,6 +101,7 @@ export default function ResultsView({
       ),
     ),
   };
+
   async function handleUpgrade() {
     const res = await fetch("/api/lemon/checkout", {
       method: "POST",
@@ -93,20 +127,24 @@ export default function ResultsView({
     if (transcript) navigator.clipboard.writeText(transcript);
   }
 
+  const transcriptPreview =
+    transcript && transcript.trim().length > 0
+      ? previewText(transcript, 180)
+      : "Your full transcript will appear here after processing, so you can review wording, pacing and structure before publishing.";
+
   return (
     <div className="mx-auto max-w-6xl space-y-14 px-6 pb-32 text-white">
-      {/* HEADER */}
-      <div className="flex flex-col gap-6 md:flex-row md:justify-between md:items-end">
+      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div className="space-y-3">
           <h1 className="text-4xl font-semibold tracking-tight">
             Content Command Center
           </h1>
-          <p className="text-sm text-zinc-400 max-w-2xl">
+          <p className="max-w-2xl text-sm text-zinc-400">
             Optimize your content before publishing.
           </p>
         </div>
 
-        <div className="flex gap-3 flex-wrap">
+        <div className="flex flex-wrap gap-3">
           {isPro && isFull ? (
             <>
               <button
@@ -115,6 +153,7 @@ export default function ResultsView({
               >
                 Copy full report
               </button>
+
               {transcript && (
                 <button
                   onClick={copyTranscript}
@@ -135,9 +174,8 @@ export default function ResultsView({
         </div>
       </div>
 
-      {/* HERO */}
       <div className="rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-8">
+        <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
           <div>
             <div className={`text-6xl font-extrabold ${scoreColor}`}>
               {score}
@@ -146,7 +184,7 @@ export default function ResultsView({
 
             <div className="mt-2 text-lg font-semibold">{scoreText}</div>
 
-            {viralMetrics && (
+            {viralMetrics && isPro && (
               <div className="mt-4 flex gap-3 text-xs text-zinc-300">
                 <span>Hook: {viralMetrics.hookStrength}</span>
                 <span>Retention: {viralMetrics.retentionPotential}</span>
@@ -155,25 +193,34 @@ export default function ResultsView({
               </div>
             )}
 
-            {isPro && summary && (
+            {summary && (
               <div className="mt-4 text-sm text-zinc-300">
                 <b>Instant read:</b> {firstLine(summary.content)}
               </div>
             )}
           </div>
 
-          {isPro && longevity && (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-zinc-200 max-w-sm">
+          {longevity && (
+            <div className="max-w-sm rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-zinc-200">
               <div className="text-xs font-semibold text-white/70">
                 Predicted longevity
               </div>
-              <div className="mt-2">{firstLine(longevity.content)}</div>
+
+              {isPro ? (
+                <div className="mt-2">{firstLine(longevity.content)}</div>
+              ) : (
+                <div className="relative mt-3 overflow-hidden">
+                  <div className="text-zinc-300">
+                    {previewText(firstLine(longevity.content), 90)}
+                  </div>
+                  <div className="absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-[#2b2d66] to-transparent" />
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* STRATEGY */}
       <details className="rounded-3xl border border-white/10 bg-white/5 p-8">
         <summary className="cursor-pointer text-lg font-semibold">
           Strategy Insights
@@ -210,37 +257,111 @@ export default function ResultsView({
         </div>
       </details>
 
-      {/* AI REWRITE */}
+      <details className="rounded-3xl border border-white/10 bg-white/5 p-8">
+        <summary className="cursor-pointer text-lg font-semibold">
+          ✨ AI Viral Rewrite
+        </summary>
 
-      {isPro && report.rewrite && (
-        <details className="rounded-3xl border border-white/10 bg-white/5 p-8">
-          <summary className="cursor-pointer text-lg font-semibold">
-            ✨ AI Viral Rewrite
-          </summary>
+        <div className="mt-6">
+          {report.rewrite ? (
+            <RewriteBlock rewrite={report.rewrite} isPro={isPro} />
+          ) : (
+            <LockedUpgradeCard
+              title="AI Rewrite"
+              description="Unlock a stronger hook, tighter delivery and clearer wording optimized for retention."
+            />
+          )}
+        </div>
+      </details>
 
-          <div className="mt-6">
-            <RewriteBlock rewrite={report.rewrite} />
-          </div>
-        </details>
-      )}
+      <details className="rounded-3xl border border-white/10 bg-white/5 p-8">
+        <summary className="cursor-pointer text-lg font-semibold">
+          Full Transcript
+        </summary>
 
-      {/* TRANSCRIPT */}
-      {transcript && (
-        <details className="rounded-3xl border border-white/10 bg-white/5 p-8">
-          <summary className="cursor-pointer text-lg font-semibold">
-            Full Transcript
-          </summary>
-
-          {isPro ? (
+        {isPro ? (
+          transcript ? (
             <pre className="mt-6 whitespace-pre-wrap text-sm text-zinc-300">
               {transcript}
             </pre>
           ) : (
-            <div className="mt-6 text-sm text-zinc-300">
-              Upgrade to unlock transcript.
+            <div className="mt-6 text-sm text-zinc-400">
+              Transcript not available.
             </div>
-          )}
-        </details>
+          )
+        ) : (
+          <div className="mt-6">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/20 p-5">
+              <pre className="whitespace-pre-wrap text-sm text-zinc-300">
+                {transcriptPreview}
+              </pre>
+
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-[#2b2d66] via-[#2b2d66]/95 to-transparent" />
+
+              <div className="absolute inset-x-0 bottom-4 flex justify-center">
+                <Link
+                  href="/pricing"
+                  className="rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
+                >
+                  Unlock full transcript
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </details>
+
+      {!isPro && (
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <div className="text-lg font-semibold">Performance Analytics</div>
+
+          <div className="mt-6 rounded-2xl border border-indigo-500/25 bg-indigo-500/10 p-6 text-center">
+            <div className="text-sm font-semibold text-indigo-200">
+              🔒 Unlock performance analytics
+            </div>
+
+            <p className="mt-2 text-sm text-indigo-100/75">
+              Track score evolution, trends and performance insights across all
+              your content.
+            </p>
+
+            <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-5">
+              <div className="flex h-48 items-end justify-between gap-3 opacity-35">
+                <div
+                  className="w-full rounded-t-xl bg-white/10"
+                  style={{ height: "28%" }}
+                />
+                <div
+                  className="w-full rounded-t-xl bg-white/10"
+                  style={{ height: "40%" }}
+                />
+                <div
+                  className="w-full rounded-t-xl bg-white/10"
+                  style={{ height: "34%" }}
+                />
+                <div
+                  className="w-full rounded-t-xl bg-white/10"
+                  style={{ height: "52%" }}
+                />
+                <div
+                  className="w-full rounded-t-xl bg-white/10"
+                  style={{ height: "43%" }}
+                />
+                <div
+                  className="w-full rounded-t-xl bg-white/10"
+                  style={{ height: "65%" }}
+                />
+              </div>
+            </div>
+
+            <Link
+              href="/pricing"
+              className="mt-6 inline-flex rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
+            >
+              Upgrade to Pro
+            </Link>
+          </div>
+        </div>
       )}
     </div>
   );

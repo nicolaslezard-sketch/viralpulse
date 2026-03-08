@@ -69,7 +69,7 @@ export async function GET(
 
       reportJson = {
         ...normalized,
-        rewrite: isPro ? (persistedRewrite ?? normalized.rewrite) : undefined,
+        rewrite: persistedRewrite ?? normalized.rewrite,
       };
     }
   }
@@ -83,7 +83,7 @@ export async function GET(
     report: reportJson,
     viralScore: report.viralScore ?? null,
     viralMetrics: report.viralMetrics ?? null,
-    transcript: isPro ? report.transcript : null,
+    transcript: report.transcript ?? null,
     isPro,
   });
 }
