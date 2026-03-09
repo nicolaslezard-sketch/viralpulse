@@ -91,7 +91,7 @@ export default function AnalyzingExperience() {
         {STEPS.map((step, i) => (
           <div
             key={i}
-            className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-sm"
+            className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/3 px-3 py-2 text-sm"
           >
             <span
               className={`h-2 w-2 rounded-full ${
