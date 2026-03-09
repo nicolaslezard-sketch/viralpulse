@@ -5,7 +5,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 import { getUserPlan } from "@/lib/auth/getUserPlan";
 import type { PlanKey } from "@/lib/limits";
-import { canUseFreeToday } from "@/lib/usage/usage";
+import { canUseFreeToday, consumeFreeToday } from "@/lib/usage/usage";
 import { publishAnalysisJob } from "@/lib/queue/publishAnalysisJob";
 
 export const runtime = "nodejs";
@@ -77,6 +77,10 @@ export async function POST(req: Request) {
       select: { id: true },
     });
 
+    if (plan === "free") {
+      await consumeFreeToday(userId);
+    }
+
     await publishAnalysisJob({
       reportId: report.id,
       userId,
@@ -87,7 +91,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       id: report.id,
-      isPro: plan !== "free",
+      isPaid: plan !== "free",
       queued: true,
     });
   } catch (err) {

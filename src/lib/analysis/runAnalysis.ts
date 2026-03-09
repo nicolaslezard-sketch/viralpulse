@@ -5,6 +5,7 @@ import type { PlanKey } from "@/lib/limits";
 import { limitsByPlan } from "@/lib/limits";
 import { generateRewrite } from "@/lib/report/generateRewrite";
 import { buildReportForUser } from "@/lib/report/buildReportForUser";
+import { consumeMonthlyMinutes } from "@/lib/usage/usage";
 
 export async function runAnalysis({ reportId }: { reportId: string }) {
   console.log("▶️ runAnalysis start", reportId);
@@ -122,6 +123,15 @@ export async function runAnalysis({ reportId }: { reportId: string }) {
         viralMetrics: result.viralMetrics ?? undefined,
       },
     });
+
+    if (plan !== "free") {
+      const minutesToConsume = Math.max(1, Math.ceil(durationSec / 60));
+
+      await consumeMonthlyMinutes({
+        userId: report.userId,
+        minutesToConsume,
+      });
+    }
 
     console.log("✅ runAnalysis finished", reportId);
   } catch (error) {

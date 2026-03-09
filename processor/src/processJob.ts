@@ -12,6 +12,8 @@ import { getMediaDurationSeconds } from "./getMediaDurationSeconds";
 import { generateReport } from "../../src/lib/report/generateReport";
 import { generateRewrite } from "../../src/lib/report/generateRewrite";
 import { buildReportForUser } from "../../src/lib/report/buildReportForUser";
+import { getUserPlan } from "../../src/lib/auth/getUserPlan";
+import { consumeMonthlyMinutes } from "../../src/lib/usage/usage";
 
 export type AnalysisJob = {
   reportId: string;
@@ -318,6 +320,19 @@ export async function processJob(rawJob: unknown) {
       },
     });
     logStep(report.id, "db:update done", updateDoneStart);
+
+    const userPlan = await getUserPlan(report.userId);
+
+    if (userPlan !== "free") {
+      const minutesToConsume = Math.max(1, Math.ceil(durationSec / 60));
+
+      const usageStart = nowMs();
+      await consumeMonthlyMinutes({
+        userId: report.userId,
+        minutesToConsume,
+      });
+      logStep(report.id, "usage:consumeMonthlyMinutes", usageStart);
+    }
 
     try {
       const deleteStart = nowMs();

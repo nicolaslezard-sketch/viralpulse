@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useUserPlan } from "@/lib/useUserPlan";
 import type { FullReport } from "@/lib/report/types";
 import ScoreChart from "@/components/history/ScoreChart";
-import UsageIndicator from "@/components/analysis/UsageIndicator";
+import UsageIndicator, {
+  type UsageSnapshot,
+} from "@/components/analysis/UsageIndicator";
 
 type ReportStatus =
   | "queued"
@@ -29,6 +31,19 @@ type HistoryItem = {
 
 type SortOption = "latest" | "best" | "worst";
 type RangeOption = "30d" | "90d" | "all";
+
+type AccountUsageResponse = {
+  plan: "free" | "plus" | "pro";
+  usage: {
+    usedMinutesThisMonth: number;
+    monthlyLimit: number;
+    monthlyRemaining: number;
+    freeDailyLimit: number;
+    freeUsedToday: number;
+    freeRemainingToday: number;
+    usageMonth: string | null;
+  };
+};
 
 function getStatusLabel(status: ReportStatus) {
   switch (status) {
@@ -72,10 +87,12 @@ function isWithinRange(dateIso: string, range: RangeOption) {
 
 export default function HistoryPage() {
   const { plan } = useUserPlan();
+
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [sort, setSort] = useState<SortOption>("latest");
   const [range, setRange] = useState<RangeOption>("30d");
+  const [usage, setUsage] = useState<UsageSnapshot | null>(null);
 
   useEffect(() => {
     fetch("/api/history")
@@ -85,6 +102,32 @@ export default function HistoryPage() {
       })
       .then((d) => setItems(d.reports))
       .catch((e) => setError(e.message));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/account/usage", { cache: "no-store" })
+      .then((r) => {
+        if (!r.ok) throw new Error("Failed to load usage");
+        return r.json();
+      })
+      .then((d: AccountUsageResponse) => {
+        if (d.plan === "free") {
+          setUsage({
+            plan: "free",
+            freeDailyUsed: d.usage.freeUsedToday,
+            freeDailyRemaining: d.usage.freeRemainingToday,
+          });
+          return;
+        }
+
+        setUsage({
+          plan: d.plan,
+          usedMinutesThisMonth: d.usage.usedMinutesThisMonth,
+        });
+      })
+      .catch(() => {
+        setUsage(null);
+      });
   }, []);
 
   const enriched = useMemo(() => {
@@ -228,7 +271,7 @@ export default function HistoryPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap items-center gap-4">
           <Link
             href="/"
             className="inline-flex rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
@@ -236,14 +279,7 @@ export default function HistoryPage() {
             ← Back to home
           </Link>
 
-          {plan !== "free" && (
-            <UsageIndicator
-              usage={{
-                plan,
-                usedMinutesThisMonth: 60,
-              }}
-            />
-          )}
+          {usage && <UsageIndicator usage={usage} />}
         </div>
       </div>
 
