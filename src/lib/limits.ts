@@ -2,25 +2,25 @@ export const PLAN_KEYS = ["free", "plus", "pro"] as const;
 export type PlanKey = (typeof PLAN_KEYS)[number];
 
 export type PlanLimits = {
-  /** límite duro de bytes (firewall infra, antes de gastar) */
+  /** hard byte limit before spending processing */
   maxBytes: number;
 
-  /** duración máxima permitida (hard limit) */
+  /** maximum allowed duration per file */
   maxSeconds: number;
 
-  /** TTL del signed upload URL */
+  /** signed upload URL TTL */
   ttl: number;
 
-  /** qué hacer si excede duración */
+  /** what to do if duration exceeds plan */
   behavior: "block";
 };
 
 export const limitsByPlan = {
   free: {
-    // Free: video/audio realista para probar el producto
+    // Free: realistic audio/video trial
     maxSeconds: 5 * 60,
 
-    // 80 MB: suficiente para mobile video razonable sin regalar archivos absurdos
+    // Enough for reasonable mobile uploads without opening the door too much
     maxBytes: 80 * 1024 * 1024,
 
     ttl: 300, // 5 min
@@ -28,10 +28,10 @@ export const limitsByPlan = {
   },
 
   plus: {
-    // Plus: creators semanales
+    // Plus: weekly creators
     maxSeconds: 10 * 60,
 
-    // Permitimos hasta 200 MB para no romper la promesa de video upload
+    // Good ceiling for regular creator workflows
     maxBytes: 200 * 1024 * 1024,
 
     ttl: 600, // 10 min
@@ -39,10 +39,11 @@ export const limitsByPlan = {
   },
 
   pro: {
-    // Pro: daily creators / long-form workflows
+    // Pro: heavier creator workflows
     maxSeconds: 20 * 60,
 
-    maxBytes: 200 * 1024 * 1024,
+    // Higher ceiling for larger files and more demanding uploads
+    maxBytes: 400 * 1024 * 1024,
 
     ttl: 600, // 10 min
     behavior: "block",

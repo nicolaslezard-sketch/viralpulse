@@ -84,7 +84,7 @@ export default function PricingSection() {
 
         <p className="mx-auto mt-4 max-w-2xl text-zinc-400">
           Start free, then unlock deeper strategy, rewrite, transcript and
-          analytics when you’re ready to optimize seriously.
+          higher limits when you’re ready to optimize seriously.
         </p>
       </div>
 
@@ -132,6 +132,8 @@ export default function PricingSection() {
           <li>✔ Full AI rewrite</li>
           <li>✔ Full transcript</li>
           <li>✔ Analysis history</li>
+          <li>✔ Performance timeline</li>
+          <li>✔ Score timeline and trends</li>
           <li>✔ Audio + video upload</li>
           <li className="pt-2">
             🧾 Up to <span className="font-medium">120 minutes / month</span>
@@ -142,10 +144,8 @@ export default function PricingSection() {
           <li>
             🧾 Up to <span className="font-medium">200 MB per file</span>
           </li>
-          <li className="text-zinc-500">
-            ✖ Performance analytics not included
-          </li>
           <li className="text-zinc-500">✖ Priority processing not included</li>
+          <li className="text-zinc-500">✖ Faster turnaround not included</li>
 
           <UpgradeButton plan="plus" label="Upgrade to Plus" className="mt-6" />
 
@@ -156,13 +156,11 @@ export default function PricingSection() {
 
         <PlanCard
           title="Pro"
-          subtitle="For daily creators and heavier content workflows"
+          subtitle="For heavier workflows, larger uploads and priority processing"
           price="$29.99 / month"
           light
         >
           <li>✔ Everything in Plus</li>
-          <li>✔ Performance analytics</li>
-          <li>✔ Score timeline and trends</li>
           <li>✔ Priority processing</li>
           <li>✔ Faster turnaround</li>
           <li>✔ Audio + video upload</li>
@@ -173,7 +171,7 @@ export default function PricingSection() {
             🧾 Up to <span className="font-medium">20 min per file</span>
           </li>
           <li>
-            🧾 Up to <span className="font-medium">200 MB per file</span>
+            🧾 Up to <span className="font-medium">400 MB per file</span>
           </li>
 
           <UpgradeButton
