@@ -123,7 +123,7 @@ export default function PricingSection() {
           title="Plus"
           subtitle="For creators who publish every week"
           price="$14.99 / month"
-          promo="50% off your first month"
+          promo="50% off first month with code PLUS50"
           highlight
           badge="Most popular"
         >
@@ -150,7 +150,7 @@ export default function PricingSection() {
           <UpgradeButton plan="plus" label="Upgrade to Plus" className="mt-6" />
 
           <p className="mt-2 text-center text-xs text-zinc-300">
-            Secure checkout. Cancel anytime.
+            Use code PLUS50 at checkout. Cancel anytime.
           </p>
         </PlanCard>
 
