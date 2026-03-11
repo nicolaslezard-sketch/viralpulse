@@ -44,3 +44,6 @@ next-env.d.ts
 
 processor/node_modules
 processor/.env
+processor/dist
+processor/prisma/dev.db
+processor/prisma/dev.db-journal
