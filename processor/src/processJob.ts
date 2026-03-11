@@ -9,11 +9,11 @@ import { downloadToTmp } from "./downloadToTmp";
 import { extractAudio } from "./extractAudio";
 import { transcribeFromFile } from "./transcribeFromFile";
 import { getMediaDurationSeconds } from "./getMediaDurationSeconds";
-import { generateReport } from "../../src/lib/report/generateReport";
-import { generateRewrite } from "../../src/lib/report/generateRewrite";
-import { buildReportForUser } from "../../src/lib/report/buildReportForUser";
-import { getUserPlan } from "../../src/lib/auth/getUserPlan";
-import { consumeMonthlyMinutes } from "../../src/lib/usage/usage";
+import { generateReport } from "./lib/report/generateReport";
+import { generateRewrite } from "./lib/report/generateRewrite";
+import { buildReportForUser } from "./lib/report/buildReportForUser";
+import { getUserPlan } from "./lib/auth/getUserPlan";
+import { consumeMonthlyMinutes } from "./lib/usage/usage";
 
 export type AnalysisJob = {
   reportId: string;

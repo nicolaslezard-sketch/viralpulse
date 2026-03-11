@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/* ======================
+   ENUMS
+====================== */
+
+enum Plan {
+  free
+  plus
+  pro
+}
+
+/* ======================
+   MODELS
+====================== */
+
+model User {
+  id                   String   @id @default(cuid())
+  email                String?  @unique
+
+  // Plan actual
+  plan                 Plan     @default(free)
+
+  // Lemon Squeezy
+  lemonCustomerId     String?
+  lemonSubscriptionId String? @unique
+  lemonVariantId      String?
+  subscriptionStatus  String?
+  currentPeriodEnd    DateTime?
+
+  // 🔢 USAGE CONTROL
+  usedMinutesThisMonth Int      @default(0)
+  usageMonth           String?
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // Relations
+  reports              AnalysisReport[]
+  dailyUsage           DailyUsage[]
+}
+
+model AnalysisReport {
+  id           String   @id @default(cuid())
+  originalName String?
+
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status       String
+
+  /* MEDIA */
+  sourceType   String?   // audio | video
+  mimeType     String?
+  fileSize     Int?
+
+  /* STORAGE */
+  mediaKey     String?   // original upload
+  audioKey     String?
+
+  durationSec  Int?
+  wasTrimmed   Boolean  @default(false)
+
+  transcript   String?
+  reportFull   Json?
+  reportFree   Json?
+  rewrite      Json?
+
+  viralScore   Float?
+  viralMetrics Json?
+
+  createdAt    DateTime @default(now())
+}
+
+/*
+ Free plan: 1 análisis por día
+ Control diario sin cron
+*/
+model DailyUsage {
+  id     String @id @default(cuid())
+  userId String
+  day    String // "YYYY-MM-DD"
+  count  Int    @default(0)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
+}
