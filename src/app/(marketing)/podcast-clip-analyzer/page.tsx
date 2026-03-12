@@ -33,14 +33,6 @@ export default function PodcastClipAnalyzerPage() {
           content.
         </p>
 
-        <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-amber-500/20 bg-amber-500/8 px-5 py-4 text-left text-sm leading-relaxed text-amber-100">
-          <span className="font-semibold text-amber-200">Important:</span> For
-          video uploads, ViralPulse currently analyzes extracted audio and
-          transcript. It works best for spoken podcast content, interviews,
-          commentary and educational segments. Fully visual context is not
-          interpreted yet.
-        </div>
-
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
             href="/"
