@@ -99,8 +99,7 @@ export default function HomePage() {
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400 md:text-base">
                 ViralPulse analyzes spoken content from your audio or video,
                 scores viral potential, builds a transcript, generates rewrite
-                suggestions and shows what to improve before you publish. Visual
-                context is not fully interpreted yet.
+                suggestions and shows what to improve before you publish.
               </p>
 
               <ul className="mt-6 space-y-3 md:mt-8 md:space-y-4">

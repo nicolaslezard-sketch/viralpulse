@@ -2,16 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "TikTok Viral Audio Analysis – Find Clips That Go Viral | ViralPulse",
+  title:
+    "TikTok Viral Audio Analysis – Analyze Spoken Content for TikTok | ViralPulse",
   description:
-    "Analyze TikTok audio with AI to discover viral hooks, high-retention moments and clip ideas. Upload audio and get instant TikTok-ready insights.",
+    "Upload audio or video and get AI-powered transcript, hook analysis, rewrite ideas and spoken-content insights for TikTok-style clips.",
   alternates: {
     canonical: "https://viralpulse.studio/tiktok-viral-audio-analysis",
   },
   openGraph: {
-    title: "TikTok Viral Audio Analysis – Find Clips That Go Viral",
+    title: "TikTok Viral Audio Analysis – Analyze Spoken Content for TikTok",
     description:
-      "AI-powered TikTok audio analyzer that detects viral hooks, moments and content angles.",
+      "AI-powered TikTok spoken-content analyzer for hooks, clarity, rewrites and stronger short-form ideas from audio or video.",
     url: "https://viralpulse.studio/tiktok-viral-audio-analysis",
     siteName: "ViralPulse",
     type: "website",
@@ -28,16 +29,25 @@ export default function TikTokViralAudioAnalysisPage() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-300">
-          Upload your audio and let AI analyze what makes TikTok clips go viral
-          — hooks, pacing, emotional spikes and scroll-stopping moments.
+          Upload audio or video and get AI-powered transcript, hook analysis,
+          rewrite suggestions and spoken-content insights for TikTok-style
+          content.
         </p>
+
+        <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-amber-500/20 bg-amber-500/8 px-5 py-4 text-left text-sm leading-relaxed text-amber-100">
+          <span className="font-semibold text-amber-200">Important:</span> For
+          video uploads, ViralPulse currently analyzes extracted audio and
+          transcript. It works best for talking-head clips, voiceovers,
+          commentary, educational content and other spoken-content formats.
+          Fully visual context is not interpreted yet.
+        </div>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
             href="/"
             className="rounded-xl bg-white px-6 py-3 text-base font-medium text-black transition hover:bg-zinc-200"
           >
-            Analyze TikTok Audio
+            Analyze TikTok Content
           </Link>
 
           <span className="text-sm text-zinc-400">
@@ -49,23 +59,28 @@ export default function TikTokViralAudioAnalysisPage() {
       {/* HOW IT WORKS */}
       <section className="mt-32 grid gap-12 md:grid-cols-3">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-lg font-semibold">1. Upload audio</h3>
+          <h3 className="text-lg font-semibold">1. Upload audio or video</h3>
           <p className="mt-3 text-sm text-zinc-300">
-            Upload a TikTok sound, voiceover or short audio clip.
+            Upload a voiceover, spoken clip, short-form segment or video with
+            clear spoken content.
           </p>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-lg font-semibold">2. AI detects virality</h3>
+          <h3 className="text-lg font-semibold">
+            2. We analyze spoken content
+          </h3>
           <p className="mt-3 text-sm text-zinc-300">
-            ViralPulse analyzes hooks, timing, clarity and engagement triggers.
+            ViralPulse extracts audio when needed, builds a transcript and
+            reviews hook strength, clarity, structure and rewrite opportunities.
           </p>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-lg font-semibold">3. Get TikTok-ready output</h3>
+          <h3 className="text-lg font-semibold">3. Improve before you post</h3>
           <p className="mt-3 text-sm text-zinc-300">
-            Receive clip ideas, hooks, titles and posting recommendations.
+            Get transcript, rewrite suggestions and practical direction for
+            stronger TikTok-style short-form content.
           </p>
         </div>
       </section>
@@ -73,35 +88,45 @@ export default function TikTokViralAudioAnalysisPage() {
       {/* SEO CONTENT */}
       <section className="mt-32 max-w-3xl text-zinc-300">
         <h2 className="text-2xl font-semibold text-white">
-          Why analyze TikTok audio for virality?
+          Why analyze TikTok spoken content before posting?
         </h2>
 
         <p className="mt-6">
-          On TikTok, the difference between a viral clip and a dead post often
-          comes down to the first few seconds. A strong hook, clear message and
-          emotional timing are critical.
+          On TikTok, the first seconds matter. A strong spoken hook, a clear
+          point and sharp delivery can make the difference between a clip that
+          gets ignored and one that holds attention.
         </p>
 
         <p className="mt-4">
-          ViralPulse helps creators understand why certain TikTok audios work,
-          so you can replicate high-performing patterns instead of guessing.
+          ViralPulse helps creators review spoken content faster by turning
+          audio or video into transcript, analysis and rewrite suggestions. That
+          makes it easier to pressure-test hooks, tighten the message and
+          improve short-form ideas before publishing.
+        </p>
+
+        <p className="mt-4">
+          This is especially useful for talking-head videos, commentary clips,
+          educational TikToks, voiceovers and creator content where what is
+          being said drives most of the performance.
         </p>
       </section>
 
       {/* INTERLINKING / CLUSTER */}
       <section className="mt-32 border-t border-white/10 pt-16">
-        <h3 className="text-xl font-semibold">Analyze other content formats</h3>
+        <h3 className="text-xl font-semibold">
+          Analyze other creator workflows
+        </h3>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <LinkCard
             title="Podcast Clip Analyzer"
-            desc="Find viral podcast moments and clip ideas."
+            desc="Review spoken podcast content for stronger short-form clip candidates."
             href="/podcast-clip-analyzer"
           />
 
           <LinkCard
             title="YouTube Shorts Analyzer"
-            desc="Detect high-retention hooks for YouTube Shorts."
+            desc="Improve spoken-content hooks and structure for Shorts-style videos."
             href="/youtube-shorts-virality-analyzer"
           />
         </div>
@@ -110,11 +135,12 @@ export default function TikTokViralAudioAnalysisPage() {
       {/* FINAL CTA */}
       <section className="mt-32 rounded-3xl border border-white/10 bg-linear-to-br from-pink-500/20 to-indigo-500/10 p-10 text-center">
         <h2 className="text-3xl font-semibold">
-          Create TikTok clips that actually perform
+          Build stronger TikTok-style content before you post
         </h2>
 
         <p className="mx-auto mt-4 max-w-xl text-zinc-200">
-          Upload your audio and get AI-powered insights optimized for TikTok.
+          Upload audio or video and get AI-powered transcript, rewrite
+          suggestions and spoken-content insights for short-form creation.
         </p>
 
         <Link

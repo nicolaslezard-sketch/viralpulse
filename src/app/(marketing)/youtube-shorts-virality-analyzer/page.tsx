@@ -3,16 +3,17 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title:
-    "YouTube Shorts Virality Analyzer – Find High-Retention Clips | ViralPulse",
+    "YouTube Shorts Virality Analyzer – Analyze Spoken Content for Shorts | ViralPulse",
   description:
-    "Analyze YouTube Shorts with AI to discover viral hooks, retention patterns and clip ideas. Upload audio and get actionable insights for Shorts.",
+    "Upload audio or video and get AI-powered transcript, hook analysis, rewrite ideas and spoken-content insights for YouTube Shorts-style content.",
   alternates: {
     canonical: "https://viralpulse.studio/youtube-shorts-virality-analyzer",
   },
   openGraph: {
-    title: "YouTube Shorts Virality Analyzer – Find High-Retention Clips",
+    title:
+      "YouTube Shorts Virality Analyzer – Analyze Spoken Content for Shorts",
     description:
-      "AI-powered YouTube Shorts analyzer that detects viral hooks, pacing and retention triggers.",
+      "AI-powered YouTube Shorts spoken-content analyzer for hooks, clarity, rewrites and stronger short-form ideas from audio or video.",
     url: "https://viralpulse.studio/youtube-shorts-virality-analyzer",
     siteName: "ViralPulse",
     type: "website",
@@ -29,9 +30,18 @@ export default function YouTubeShortsViralityAnalyzerPage() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-300">
-          Upload your audio and let AI analyze what makes YouTube Shorts retain
-          viewers — hooks, pacing, clarity and viral moments.
+          Upload audio or video and get AI-powered transcript, hook analysis,
+          rewrite suggestions and spoken-content insights for YouTube
+          Shorts-style content.
         </p>
+
+        <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-amber-500/20 bg-amber-500/8 px-5 py-4 text-left text-sm leading-relaxed text-amber-100">
+          <span className="font-semibold text-amber-200">Important:</span> For
+          video uploads, ViralPulse currently analyzes extracted audio and
+          transcript. It works best for talking-head clips, voiceovers,
+          commentary, educational content and other spoken-content formats.
+          Fully visual context is not interpreted yet.
+        </div>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
@@ -50,24 +60,28 @@ export default function YouTubeShortsViralityAnalyzerPage() {
       {/* HOW IT WORKS */}
       <section className="mt-32 grid gap-12 md:grid-cols-3">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-lg font-semibold">1. Upload audio</h3>
+          <h3 className="text-lg font-semibold">1. Upload audio or video</h3>
           <p className="mt-3 text-sm text-zinc-300">
-            Upload narration, voiceover or short-form clip audio.
+            Upload narration, voiceover, a spoken clip or a short-form video
+            with clear spoken content.
           </p>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-lg font-semibold">2. AI analyzes retention</h3>
+          <h3 className="text-lg font-semibold">
+            2. We analyze spoken content
+          </h3>
           <p className="mt-3 text-sm text-zinc-300">
-            ViralPulse detects where attention spikes, drops and stabilizes.
+            ViralPulse extracts audio when needed, builds a transcript and
+            reviews hook strength, clarity, structure and rewrite opportunities.
           </p>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-lg font-semibold">3. Optimize for Shorts</h3>
+          <h3 className="text-lg font-semibold">3. Improve before posting</h3>
           <p className="mt-3 text-sm text-zinc-300">
-            Get clip ideas, hooks and recommendations tailored for YouTube
-            Shorts.
+            Get transcript, rewrite suggestions and practical direction for
+            stronger YouTube Shorts-style content.
           </p>
         </div>
       </section>
@@ -75,36 +89,45 @@ export default function YouTubeShortsViralityAnalyzerPage() {
       {/* SEO CONTENT */}
       <section className="mt-32 max-w-3xl text-zinc-300">
         <h2 className="text-2xl font-semibold text-white">
-          Why YouTube Shorts virality is different
+          Why review spoken content before posting YouTube Shorts?
         </h2>
 
         <p className="mt-6">
-          YouTube Shorts favor sustained retention, clear value delivery and
-          early engagement. Unlike other platforms, Shorts reward consistency
-          and watch time over shock alone.
+          On YouTube Shorts, the opening matters. A clear spoken hook, stronger
+          structure and faster value delivery can make a big difference in how a
+          short-form idea lands.
         </p>
 
         <p className="mt-4">
-          ViralPulse helps creators understand why some Shorts keep viewers
-          watching while others drop off, so you can improve performance with
-          every upload.
+          ViralPulse helps creators review spoken content faster by turning
+          audio or video into transcript, analysis and rewrite suggestions. That
+          makes it easier to tighten the message, sharpen hooks and improve
+          short-form ideas before publishing.
+        </p>
+
+        <p className="mt-4">
+          This workflow is especially useful for voiceovers, educational Shorts,
+          commentary clips, talking-head videos and creator content where what
+          is being said drives most of the result.
         </p>
       </section>
 
       {/* INTERLINKING / CLUSTER */}
       <section className="mt-32 border-t border-white/10 pt-16">
-        <h3 className="text-xl font-semibold">Analyze other content formats</h3>
+        <h3 className="text-xl font-semibold">
+          Analyze other creator workflows
+        </h3>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <LinkCard
             title="Podcast Clip Analyzer"
-            desc="Turn podcast episodes into viral short clips."
+            desc="Review spoken podcast content for stronger short-form clip candidates."
             href="/podcast-clip-analyzer"
           />
 
           <LinkCard
-            title="TikTok Virality Analyzer"
-            desc="Analyze short-form audio for TikTok retention."
+            title="TikTok Viral Audio Analysis"
+            desc="Improve hooks, clarity and spoken-content strength for TikTok-style clips."
             href="/tiktok-viral-audio-analysis"
           />
         </div>
@@ -113,12 +136,13 @@ export default function YouTubeShortsViralityAnalyzerPage() {
       {/* FINAL CTA */}
       <section className="mt-32 rounded-3xl border border-white/10 bg-linear-to-br from-red-500/20 to-indigo-500/10 p-10 text-center">
         <h2 className="text-3xl font-semibold">
-          Build Shorts with higher retention
+          Build stronger Shorts before you publish
         </h2>
 
         <p className="mx-auto mt-4 max-w-xl text-zinc-200">
-          Upload your audio and get AI-powered insights optimized for YouTube
-          Shorts.
+          Upload audio or video and get AI-powered transcript, rewrite
+          suggestions and spoken-content insights for YouTube Shorts-style
+          creation.
         </p>
 
         <Link
