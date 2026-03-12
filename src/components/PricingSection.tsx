@@ -88,14 +88,6 @@ export default function PricingSection() {
         </p>
       </div>
 
-      <div className="mx-auto mb-10 max-w-3xl rounded-2xl border border-amber-500/20 bg-amber-500/8 px-5 py-4 text-sm leading-relaxed text-amber-100">
-        <span className="font-semibold text-amber-200">Important:</span> Video
-        uploads are currently analyzed through extracted audio and transcript.
-        ViralPulse works best for talking-head clips, voiceovers, interviews,
-        commentary, podcasts and educational content. Fully visual analysis is
-        not included yet.
-      </div>
-
       <div className="grid gap-8 md:grid-cols-3">
         <PlanCard
           title="Free"
