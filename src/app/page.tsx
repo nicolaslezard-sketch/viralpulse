@@ -25,7 +25,7 @@ export default function HomePage() {
       <section className="mx-auto max-w-6xl px-6 pb-8 pt-12 text-center md:pt-16">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-1 text-xs text-zinc-300 backdrop-blur">
           <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-          Audio-first content analysis for short-form creators{" "}
+          Video + audio analysis for short-form creators{" "}
         </div>
 
         <h1 className="mt-5 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
@@ -38,7 +38,7 @@ export default function HomePage() {
         <p className="mx-auto mt-5 max-w-3xl text-base text-zinc-400 sm:text-lg">
           <p className="mx-auto mt-5 max-w-3xl text-base text-zinc-400 sm:text-lg">
             Upload a video or audio file and get score, transcript, rewrite and
-            publishing strategy from spoken content in minutes.
+            publishing strategy in minutes.
           </p>
         </p>
 
@@ -89,11 +89,11 @@ export default function HomePage() {
 
             <div className="order-2 rounded-3xl border border-white/10 bg-black/25 p-6 md:p-8 lg:order-1 lg:p-10">
               <div className="inline-flex items-center rounded-full border border-indigo-400/20 bg-indigo-500/10 px-3 py-1 text-xs text-indigo-300">
-                Audio-first analysis for creators who sell with what they say.
+                Upload once. Optimize before you post.
               </div>
 
               <h2 className="mt-5 text-3xl font-extrabold tracking-tight md:mt-6 md:text-4xl">
-                Upload once. Leave with a spoken-content optimization plan.
+                Upload once. Leave with a publish-ready plan.
               </h2>
 
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400 md:text-base">
