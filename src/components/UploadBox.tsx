@@ -325,7 +325,7 @@ export default function UploadBox() {
 
             <p className="mt-2 max-w-md text-sm text-zinc-400">
               Upload one file to generate score, transcript, rewrite and
-              strategy insights.
+              strategy insights from spoken content.
             </p>
 
             <label
@@ -387,6 +387,20 @@ export default function UploadBox() {
               Analyze
             </button>
 
+            <div className="mt-4 w-full max-w-lg rounded-2xl border border-amber-500/20 bg-amber-500/8 px-4 py-3 text-left text-[11px] text-amber-100 sm:text-xs">
+              <p className="font-medium text-amber-200">
+                Current video analysis scope
+              </p>
+              <p className="mt-1 leading-relaxed text-amber-100/90">
+                For video uploads, ViralPulse currently extracts audio and
+                transcript. It works best for talking-head videos, voiceovers,
+                commentary, interviews, podcasts and educational content. Visual
+                jokes, on-screen actions, edits, text overlays, facial
+                expressions and image-dependent moments are not fully
+                interpreted yet.
+              </p>
+            </div>
+
             <div className="mt-4 text-center text-[11px] text-zinc-500 sm:text-xs">
               <p className="leading-relaxed">
                 <span className="text-zinc-400">Supported:</span> MP3, WAV, M4A,
@@ -419,10 +433,7 @@ export default function UploadBox() {
 
         {result && (
           <div className="fade-up">
-            <ReportReady
-              reportId={result.id}
-              isPaid={currentPlan !== "free"}
-            />{" "}
+            <ReportReady reportId={result.id} isPaid={currentPlan !== "free"} />
           </div>
         )}
       </div>

@@ -13,10 +13,13 @@ export default function TermsPage() {
 
         <h2 className="text-lg font-semibold text-white">1. The Service</h2>
         <p>
-          ViralPulse provides AI-powered analysis of uploaded video and audio
-          content, including transcripts, insights, rewrites and content
-          recommendations. The Service is provided on an &quot;as is&quot; and
-          &quot;as available&quot; basis.
+          ViralPulse provides AI-powered analysis of uploaded audio content and
+          spoken content extracted from uploaded videos, including transcripts,
+          insights, rewrites and content recommendations. Visual elements of
+          videos — including on-screen actions, edits, text overlays, facial
+          expressions and image-based humor — may not be fully interpreted. The
+          Service is provided on an &quot;as is&quot; and &quot;as
+          available&quot; basis.
         </p>
 
         <h2 className="text-lg font-semibold text-white">2. Accounts</h2>

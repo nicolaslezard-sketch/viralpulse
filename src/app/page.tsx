@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import UploadBox from "@/components/UploadBox";
 import PricingSection from "@/components/PricingSection";
+import FAQSection from "@/components/FAQSection";
 import Link from "next/link";
 
 const TIMELINE_POINTS = [
@@ -24,7 +25,7 @@ export default function HomePage() {
       <section className="mx-auto max-w-6xl px-6 pb-8 pt-12 text-center md:pt-16">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-1 text-xs text-zinc-300 backdrop-blur">
           <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-          Video + audio analysis for short-form creators
+          Audio-first content analysis for short-form creators{" "}
         </div>
 
         <h1 className="mt-5 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
@@ -35,8 +36,10 @@ export default function HomePage() {
         </h1>
 
         <p className="mx-auto mt-5 max-w-3xl text-base text-zinc-400 sm:text-lg">
-          Upload a video or audio file and get score, transcript, rewrite and
-          publishing strategy in minutes.
+          <p className="mx-auto mt-5 max-w-3xl text-base text-zinc-400 sm:text-lg">
+            Upload a video or audio file and get score, transcript, rewrite and
+            publishing strategy from spoken content in minutes.
+          </p>
         </p>
 
         <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -86,17 +89,18 @@ export default function HomePage() {
 
             <div className="order-2 rounded-3xl border border-white/10 bg-black/25 p-6 md:p-8 lg:order-1 lg:p-10">
               <div className="inline-flex items-center rounded-full border border-indigo-400/20 bg-indigo-500/10 px-3 py-1 text-xs text-indigo-300">
-                Upload once. Optimize before you post.
+                Audio-first analysis for creators who sell with what they say.
               </div>
 
               <h2 className="mt-5 text-3xl font-extrabold tracking-tight md:mt-6 md:text-4xl">
-                Upload once. Leave with a publish-ready plan.
+                Upload once. Leave with a spoken-content optimization plan.
               </h2>
 
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400 md:text-base">
-                ViralPulse analyzes your video or audio, scores viral potential,
-                builds a transcript, generates rewrite suggestions and shows
-                what to improve before you publish.
+                ViralPulse analyzes spoken content from your audio or video,
+                scores viral potential, builds a transcript, generates rewrite
+                suggestions and shows what to improve before you publish. Visual
+                context is not fully interpreted yet.
               </p>
 
               <ul className="mt-6 space-y-3 md:mt-8 md:space-y-4">
@@ -148,7 +152,7 @@ export default function HomePage() {
           />
           <Step
             title="Transcript"
-            desc="We turn speech into text so the full context can be understood."
+            desc="For video uploads, we extract audio and turn speech into text for analysis."
           />
           <Step
             title="Analysis"
@@ -379,6 +383,7 @@ export default function HomePage() {
       </section>
 
       <PricingSection />
+      <FAQSection />
 
       <footer className="border-t border-white/10 py-10">
         <div className="mx-auto max-w-6xl px-6 text-center text-sm text-zinc-500">
