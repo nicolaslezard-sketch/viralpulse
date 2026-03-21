@@ -23,6 +23,11 @@ export default function HomePage() {
 
       {/* HERO */}
       <section className="mx-auto max-w-6xl px-6 pb-8 pt-12 text-center md:pt-16">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-gradient-to-r from-white/[0.06] to-white/[0.03] px-4 py-2 text-sm font-medium text-white/85 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur-md">
+          <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(74,222,128,0.7)]" />
+          <span>Early Access · Get feedback before you publish</span>
+        </div>
+
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-1 text-xs text-zinc-300 backdrop-blur">
           <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
           Video + audio analysis for short-form creators{" "}
