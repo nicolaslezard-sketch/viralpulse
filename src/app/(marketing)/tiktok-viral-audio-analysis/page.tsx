@@ -7,13 +7,13 @@ export const metadata: Metadata = {
   description:
     "Upload audio or video and get AI-powered transcript, hook analysis, rewrite ideas and spoken-content insights for TikTok-style clips.",
   alternates: {
-    canonical: "https://viralpulse.studio/tiktok-viral-audio-analysis",
+    canonical: "https://www.viralpulse.studio/tiktok-viral-audio-analysis",
   },
   openGraph: {
     title: "TikTok Viral Audio Analysis – Analyze Spoken Content for TikTok",
     description:
       "AI-powered TikTok spoken-content analyzer for hooks, clarity, rewrites and stronger short-form ideas from audio or video.",
-    url: "https://viralpulse.studio/tiktok-viral-audio-analysis",
+    url: "https://www.viralpulse.studio/tiktok-viral-audio-analysis",
     siteName: "ViralPulse",
     type: "website",
   },

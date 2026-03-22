@@ -7,14 +7,14 @@ export const metadata: Metadata = {
   description:
     "Upload audio or video and get AI-powered transcript, hook analysis, rewrite ideas and spoken-content insights for YouTube Shorts-style content.",
   alternates: {
-    canonical: "https://viralpulse.studio/youtube-shorts-virality-analyzer",
+    canonical: "https://www.viralpulse.studio/youtube-shorts-virality-analyzer",
   },
   openGraph: {
     title:
       "YouTube Shorts Virality Analyzer – Analyze Spoken Content for Shorts",
     description:
       "AI-powered YouTube Shorts spoken-content analyzer for hooks, clarity, rewrites and stronger short-form ideas from audio or video.",
-    url: "https://viralpulse.studio/youtube-shorts-virality-analyzer",
+    url: "https://www.viralpulse.studio/youtube-shorts-virality-analyzer",
     siteName: "ViralPulse",
     type: "website",
   },

@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   description:
     "Upload podcast audio or video and get AI-powered transcript, hook analysis, rewrite ideas and short-form content insights from spoken content.",
   alternates: {
-    canonical: "https://viralpulse.studio/podcast-clip-analyzer",
+    canonical: "https://www.viralpulse.studio/podcast-clip-analyzer",
   },
   openGraph: {
     title: "Podcast Clip Analyzer – Analyze Podcast Audio or Video",
     description:
       "AI-powered podcast clip analyzer for spoken content. Upload podcast audio or video to get transcript, hook analysis and clip-ready insights.",
-    url: "https://viralpulse.studio/podcast-clip-analyzer",
+    url: "https://www.viralpulse.studio/podcast-clip-analyzer",
     siteName: "ViralPulse",
     type: "website",
   },
