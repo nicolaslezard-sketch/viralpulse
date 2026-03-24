@@ -23,7 +23,7 @@ export default function HomePage() {
 
       {/* HERO */}
       <section className="mx-auto max-w-6xl px-6 pb-8 pt-12 text-center md:pt-16">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-gradient-to-r from-white/[0.06] to-white/[0.03] px-4 py-2 text-sm font-medium text-white/85 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur-md">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-linear-to-r from-white/[0.06] to-white/[0.03] px-4 py-2 text-sm font-medium text-white/85 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur-md">
           <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(74,222,128,0.7)]" />
           <span>Early Access · Get feedback before you publish</span>
         </div>
@@ -404,6 +404,15 @@ export default function HomePage() {
               Refund Policy
             </a>
           </div>
+          <p className="mt-6 text-sm text-white/45">
+            Interested in acquiring ViralPulse?{" "}
+            <a
+              href="mailto:support@viralpulse.studio?subject=Acquiring%20ViralPulse"
+              className="underline underline-offset-4 hover:text-white/75 transition-colors"
+            >
+              We’re open to strategic conversations.
+            </a>
+          </p>
 
           <p className="mt-6 text-xs text-zinc-500">
             © {new Date().getFullYear()} ViralPulse. All rights reserved.
