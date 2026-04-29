@@ -1,9 +1,18 @@
+type BrowserAudioContextConstructor = {
+  new (): AudioContext;
+};
+
+type WindowWithWebkitAudioContext = Window & {
+  webkitAudioContext?: BrowserAudioContextConstructor;
+};
+
 export async function getAudioDurationSeconds(
   file: File
 ): Promise<number | null> {
   try {
-    const AudioCtx =
-      (window as any).AudioContext || (window as any).webkitAudioContext;
+    const win = window as WindowWithWebkitAudioContext;
+    const AudioCtx = window.AudioContext || win.webkitAudioContext;
+
     if (!AudioCtx) return null;
 
     // Avoid decoding very large files on the client (can be slow / memory heavy)

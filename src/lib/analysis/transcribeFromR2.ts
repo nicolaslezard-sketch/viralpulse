@@ -3,6 +3,7 @@ import path from "path";
 import os from "os";
 import { pipeline } from "stream/promises";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
+import type { Readable } from "stream";
 import ffmpeg from "fluent-ffmpeg";
 import OpenAI from "openai";
 
@@ -30,6 +31,15 @@ function extractAudio(input: string, output: string) {
   });
 }
 
+function isReadableStream(body: unknown): body is Readable {
+  return (
+    typeof body === "object" &&
+    body !== null &&
+    "pipe" in body &&
+    typeof (body as { pipe?: unknown }).pipe === "function"
+  );
+}
+
 export async function transcribeFromR2(
   key: string,
   mimeType: string,
@@ -54,8 +64,11 @@ export async function transcribeFromR2(
     );
 
     if (!obj.Body) throw new Error("R2 object empty");
+    if (!isReadableStream(obj.Body)) {
+      throw new Error("R2 object body is not a readable stream");
+    }
 
-    await pipeline(obj.Body as any, fs.createWriteStream(mediaPath));
+    await pipeline(obj.Body, fs.createWriteStream(mediaPath));
 
     let finalAudio = mediaPath;
 

@@ -27,11 +27,11 @@ function PlanCard({
   return (
     <div
       className={[
-        "relative rounded-2xl p-8 backdrop-blur",
+        "relative flex h-full flex-col rounded-2xl p-8 backdrop-blur",
         light
           ? "border border-white bg-white text-black"
           : highlight
-            ? "border border-indigo-500/40 bg-indigo-500/10"
+            ? "border border-indigo-500/50 bg-indigo-500/15 shadow-2xl shadow-indigo-950/40"
             : "border border-white/10 bg-black/30 text-white",
       ].join(" ")}
     >
@@ -52,7 +52,7 @@ function PlanCard({
       {promo && (
         <div
           className={[
-            "mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold",
+            "mt-3 inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold",
             light
               ? "bg-black/5 text-zinc-700"
               : "bg-indigo-500/20 text-indigo-200",
@@ -64,7 +64,7 @@ function PlanCard({
 
       <ul
         className={[
-          "mt-6 space-y-3 text-sm",
+          "mt-6 flex-1 space-y-3 text-sm",
           light ? "text-zinc-700" : "text-zinc-300",
         ].join(" ")}
       >
@@ -78,20 +78,25 @@ export default function PricingSection() {
   return (
     <section id="pricing" className="mx-auto max-w-6xl px-6 py-24 text-white">
       <div className="mb-16 text-center">
+        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-indigo-300">
+          Pricing
+        </p>
+
         <h2 className="text-4xl font-semibold">
-          Simple pricing for serious creators
+          Start free. Upgrade when ViralPulse becomes part of your workflow.
         </h2>
 
         <p className="mx-auto mt-4 max-w-2xl text-zinc-400">
-          Start free, then unlock deeper strategy, rewrite, transcript and
-          higher limits when you’re ready to optimize spoken content seriously.
+          Analyze hooks, spoken content, transcripts and rewrites before you
+          publish. Free is enough to test the workflow. Paid plans unlock the
+          full report, full rewrite and higher upload limits.
         </p>
       </div>
 
       <div className="grid gap-8 md:grid-cols-3">
         <PlanCard
           title="Free"
-          subtitle="Try the workflow before you upgrade"
+          subtitle="Test the workflow before paying"
           price="$0"
         >
           <li>✔ 3 analyses per day</li>
@@ -99,9 +104,9 @@ export default function PricingSection() {
           <li>✔ Up to 5 min per file</li>
           <li>✔ Up to 80 MB per file</li>
           <li>✔ Viral score included</li>
-          <li>✔ Preview strategy insights</li>
-          <li>✔ Preview AI rewrite</li>
-          <li>✔ Preview transcript</li>
+          <li>✔ Strategy preview</li>
+          <li>✔ AI rewrite preview</li>
+          <li>✔ Transcript preview</li>
           <li className="text-zinc-500">✖ Full report locked</li>
           <li className="text-zinc-500">✖ Full AI rewrite locked</li>
           <li className="text-zinc-500">✖ Full transcript locked</li>
@@ -109,7 +114,7 @@ export default function PricingSection() {
 
           <Link
             href="/"
-            className="mt-6 block w-full rounded-xl border border-white/15 px-4 py-3 text-center text-sm hover:bg-white/5"
+            className="mt-6 block w-full rounded-xl border border-white/15 px-4 py-3 text-center text-sm font-semibold hover:bg-white/5"
           >
             Start free
           </Link>
@@ -120,12 +125,12 @@ export default function PricingSection() {
         </PlanCard>
 
         <PlanCard
-          title="Plus"
+          title="Creator"
           subtitle="For creators who publish every week"
-          price="$14.99 / month"
-          promo="50% off first month with code PLUS50"
+          price="$7.99 / month"
+          promo="Lower launch pricing"
           highlight
-          badge="Most popular"
+          badge="Best starting point"
         >
           <li>✔ Full viral report</li>
           <li>✔ Full strategy insights</li>
@@ -147,23 +152,28 @@ export default function PricingSection() {
           <li className="text-zinc-500">✖ Priority processing not included</li>
           <li className="text-zinc-500">✖ Faster turnaround not included</li>
 
-          <UpgradeButton plan="plus" label="Upgrade to Plus" className="mt-6" />
+          <UpgradeButton
+            plan="plus"
+            label="Upgrade to Creator"
+            className="mt-6"
+          />
 
           <p className="mt-2 text-center text-xs text-zinc-300">
-            Use code PLUS50 at checkout. Cancel anytime.
+            Cancel anytime. Built for regular creators.
           </p>
         </PlanCard>
 
         <PlanCard
           title="Pro"
-          subtitle="For heavier workflows, larger uploads and priority processing"
-          price="$29.99 / month"
+          subtitle="For heavy creators, agencies and larger uploads"
+          price="$19.99 / month"
           light
         >
-          <li>✔ Everything in Plus</li>
+          <li>✔ Everything in Creator</li>
           <li>✔ Priority processing</li>
           <li>✔ Faster turnaround</li>
           <li>✔ Audio + video upload</li>
+          <li>✔ Better fit for client workflows</li>
           <li className="pt-2">
             🧾 Up to <span className="font-medium">400 minutes / month</span>
           </li>
@@ -187,10 +197,16 @@ export default function PricingSection() {
         </PlanCard>
       </div>
 
-      <p className="mt-14 text-center text-xs text-zinc-500">
-        Payments are securely handled by Lemon. You’re only charged if you
-        upgrade.
-      </p>
+      <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-5 text-center">
+        <p className="text-sm font-medium text-indigo-100">
+          Coming next: one-time credit packs for users who prefer not to
+          subscribe.
+        </p>
+        <p className="mt-1 text-xs text-zinc-400">
+          Subscriptions are handled securely by Lemon Squeezy. You’re only
+          charged if you upgrade.
+        </p>
+      </div>
     </section>
   );
 }

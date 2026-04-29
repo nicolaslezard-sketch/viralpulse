@@ -1,8 +1,18 @@
 import type { FullReport } from "./types";
 import type { ReportSectionKey } from "./sectionNames";
 
+type ReportPayload = {
+  metrics?: FullReport["metrics"];
+  rewrite?: FullReport["rewrite"];
+  sections?: Record<string, unknown>;
+};
+
+function isReportPayload(payload: unknown): payload is ReportPayload {
+  return typeof payload === "object" && payload !== null;
+}
+
 export function toFullReport(payload: unknown): FullReport {
-  const data = payload as any;
+  const data: ReportPayload = isReportPayload(payload) ? payload : {};
 
   const report: FullReport = {
     sections: {},
@@ -19,8 +29,7 @@ export function toFullReport(payload: unknown): FullReport {
   const sections = data.sections ?? {};
 
   for (const key of Object.keys(sections) as ReportSectionKey[]) {
-    const content =
-      (sections as Record<string, string>)[key] ?? "No relevant data.";
+    const content = sections[key] ?? "No relevant data.";
 
     report.sections[key] = {
       title: key,

@@ -1,25 +1,46 @@
 import type { FullReport } from "./types";
 
-export function normalizeReport(report: any): FullReport | null {
-  if (!report) return null;
+type LegacySection = {
+  title?: unknown;
+  content?: unknown;
+};
+
+type LegacyReport = Record<string, unknown> & {
+  sections?: unknown;
+  rewrite?: FullReport["rewrite"];
+};
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isLegacySection(value: unknown): value is LegacySection {
+  return isObject(value) && "content" in value;
+}
+
+export function normalizeReport(report: unknown): FullReport | null {
+  if (!isObject(report)) return null;
+
+  const candidate = report as LegacyReport;
 
   // ya es formato nuevo
-  if (report.sections) {
+  if (candidate.sections) {
     return {
-      ...report,
-      rewrite: report.rewrite ?? undefined,
-    } as FullReport;
+      ...(candidate as unknown as FullReport),
+      rewrite: candidate.rewrite ?? undefined,
+    };
   }
+
   // formato viejo
   const sections: Record<string, { title: string; content: string }> = {};
 
-  for (const key of Object.keys(report)) {
-    const section = report[key];
+  for (const key of Object.keys(candidate)) {
+    const section = candidate[key];
 
-    if (section && typeof section === "object" && "content" in section) {
+    if (isLegacySection(section)) {
       sections[key] = {
-        title: section.title ?? key,
-        content: section.content ?? "",
+        title: typeof section.title === "string" ? section.title : key,
+        content: typeof section.content === "string" ? section.content : "",
       };
     }
   }
@@ -33,6 +54,6 @@ export function normalizeReport(report: any): FullReport | null {
       shareability: 0,
       finalScore: 0,
     },
-    rewrite: report.rewrite ?? undefined,
+    rewrite: candidate.rewrite ?? undefined,
   };
 }

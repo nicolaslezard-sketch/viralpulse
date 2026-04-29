@@ -1,5 +1,6 @@
 import { getOpenAIClient } from "../openai";
 import { VIRAL_REWRITE_PROMPT } from "../prompts/rewritePrompt";
+import type { FullReport } from "./types";
 
 export type RewriteResult = {
   hookRewrite: string;
@@ -8,12 +9,34 @@ export type RewriteResult = {
   thumbnailIdea: string;
 };
 
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function parseRewrite(raw: string): RewriteResult | null {
+  try {
+    const parsed = JSON.parse(raw) as Partial<RewriteResult>;
+
+    return {
+      hookRewrite:
+        typeof parsed.hookRewrite === "string" ? parsed.hookRewrite : "",
+      optimizedScript:
+        typeof parsed.optimizedScript === "string" ? parsed.optimizedScript : "",
+      titles: isStringArray(parsed.titles) ? parsed.titles : [],
+      thumbnailIdea:
+        typeof parsed.thumbnailIdea === "string" ? parsed.thumbnailIdea : "",
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function generateRewrite({
   transcript,
   report,
 }: {
   transcript: string;
-  report: any;
+  report: FullReport | Record<string, unknown>;
 }): Promise<RewriteResult | null> {
   const openai = getOpenAIClient();
 
@@ -37,17 +60,5 @@ ${JSON.stringify(report)}
   });
 
   const raw = completion.choices[0]?.message?.content ?? "{}";
-
-  try {
-    const parsed = JSON.parse(raw);
-
-    return {
-      hookRewrite: parsed.hookRewrite ?? "",
-      optimizedScript: parsed.optimizedScript ?? "",
-      titles: parsed.titles ?? [],
-      thumbnailIdea: parsed.thumbnailIdea ?? "",
-    };
-  } catch {
-    return null;
-  }
+  return parseRewrite(raw);
 }
