@@ -139,7 +139,8 @@ Output rules:
 - The rewrittenScript must preserve the user's core idea, but make it faster and punchier.
 - The rewrittenScript should be 90-160 words unless the input is very short.
 - Title ideas must be specific, not generic motivational titles.
-- Platform advice must include one concrete format recommendation for the selected platform, written as a short execution plan.
+- Platform advice must include one concrete format recommendation for the selected platform, written as a short execution plan with 3 numbered steps.
+- For TikTok, YouTube Shorts and Instagram Reels, include what should happen in the first 2 seconds, what text should appear on screen, and how to end the video.
 - CTA suggestion must be specific to the user's topic. Avoid generic CTAs like "follow for more tips".
 - Use direct, plain English. No corporate tone.
 - Avoid clickbait unless it is supported by the content.
