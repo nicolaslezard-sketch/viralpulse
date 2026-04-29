@@ -49,10 +49,17 @@ export default function HomePage() {
 
         <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
-            href="/#analyze"
+            href="/tools/hook-analyzer"
             className="inline-flex min-w-45 items-center justify-center rounded-2xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400"
           >
-            Analyze now
+            Analyze a script free
+          </Link>
+
+          <Link
+            href="/#analyze"
+            className="inline-flex min-w-45 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+          >
+            Upload audio/video
           </Link>
 
           <Link
