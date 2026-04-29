@@ -23,14 +23,16 @@ export default function HomePage() {
 
       {/* HERO */}
       <section className="mx-auto max-w-6xl px-6 pb-8 pt-12 text-center md:pt-16">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-linear-to-r from-white/[0.06] to-white/[0.03] px-4 py-2 text-sm font-medium text-white/85 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur-md">
-          <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(74,222,128,0.7)]" />
-          <span>Early Access · Get feedback before you publish</span>
-        </div>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/25 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-100 shadow-[0_0_0_1px_rgba(99,102,241,0.08)] backdrop-blur-md">
+            <span className="inline-block h-2 w-2 rounded-full bg-indigo-300 shadow-[0_0_10px_rgba(165,180,252,0.7)]" />
+            <span>Free Script Analyzer</span>
+          </div>
 
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-1 text-xs text-zinc-300 backdrop-blur">
-          <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-          Video + audio analysis for short-form creators{" "}
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/25 bg-violet-500/10 px-4 py-2 text-sm font-medium text-violet-100 backdrop-blur-md">
+            <span className="h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_10px_rgba(196,181,253,0.65)]" />
+            <span>Audio + Video Reports</span>
+          </div>
         </div>
 
         <h1 className="mt-5 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
@@ -55,7 +57,7 @@ export default function HomePage() {
 
           <Link
             href="/#analyze"
-            className="inline-flex min-w-45 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+            className="inline-flex min-w-45 items-center justify-center rounded-2xl border border-violet-400/30 bg-violet-500/15 px-5 py-3 text-sm font-semibold text-violet-100 transition hover:border-violet-300/50 hover:bg-violet-500/25 hover:text-white"
           >
             Upload audio/video
           </Link>
