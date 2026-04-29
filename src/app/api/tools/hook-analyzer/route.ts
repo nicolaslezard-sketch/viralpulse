@@ -32,39 +32,87 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
 
+function capScoreByAnalysis({
+  score,
+  mainIssue,
+  whyPeopleMaySkip,
+}: {
+  score: number;
+  mainIssue: string;
+  whyPeopleMaySkip: string;
+}) {
+  const combined = `${mainIssue} ${whyPeopleMaySkip}`.toLowerCase();
+
+  const severeWeakSignals = [
+    "lacks immediate engagement",
+    "lacks urgency",
+    "too lengthy",
+    "too long",
+    "generic",
+    "vague",
+    "doesn't hook",
+    "does not hook",
+    "doesn't grab",
+    "does not grab",
+    "weak hook",
+    "slow",
+    "no clear hook",
+    "lacks a strong hook",
+  ];
+
+  const hasSevereWeakSignal = severeWeakSignals.some((signal) =>
+    combined.includes(signal),
+  );
+
+  if (hasSevereWeakSignal) {
+    return Math.min(score, 72);
+  }
+
+  return score;
+}
+
 function normalizeResult(value: unknown): HookAnalyzerResponse {
   const data =
     typeof value === "object" && value !== null
       ? (value as Record<string, unknown>)
       : {};
 
+  const mainIssue =
+    typeof data.mainIssue === "string"
+      ? data.mainIssue
+      : "The opening does not create enough immediate tension.";
+
+  const whyPeopleMaySkip =
+    typeof data.whyPeopleMaySkip === "string"
+      ? data.whyPeopleMaySkip
+      : "The viewer may not understand quickly enough why they should keep watching.";
+
+  const rawScore = clampScore(data.score);
+  const score = capScoreByAnalysis({
+    score: rawScore,
+    mainIssue,
+    whyPeopleMaySkip,
+  });
+
   return {
-    score: clampScore(data.score),
-    mainIssue:
-      typeof data.mainIssue === "string"
-        ? data.mainIssue
-        : "The opening does not create enough immediate tension.",
-    whyPeopleMaySkip:
-      typeof data.whyPeopleMaySkip === "string"
-        ? data.whyPeopleMaySkip
-        : "The viewer may not understand quickly enough why they should keep watching.",
+    score,
+    mainIssue,
+    whyPeopleMaySkip,
     betterHook:
       typeof data.betterHook === "string"
         ? data.betterHook
         : "Start with a sharper claim, problem or surprising result.",
     rewrittenScript:
-      typeof data.rewrittenScript === "string"
-        ? data.rewrittenScript
-        : "",
+      typeof data.rewrittenScript === "string" ? data.rewrittenScript : "",
     titleIdeas: isStringArray(data.titleIdeas) ? data.titleIdeas.slice(0, 5) : [],
     ctaSuggestion:
       typeof data.ctaSuggestion === "string"
         ? data.ctaSuggestion
-        : "Ask the viewer to comment, save or try the idea.",
+        : "Ask the viewer to apply the idea to their own content.",
     platformAdvice:
       typeof data.platformAdvice === "string"
         ? data.platformAdvice
-        : "Make the first line clearer, faster and more specific.",
+        : "Use a simple structure: problem, mistake, fix, takeaway.",
   };
 }
 
@@ -103,7 +151,7 @@ export async function POST(req: Request) {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       response_format: { type: "json_object" },
-      temperature: 0.75,
+      temperature: 0.65,
       messages: [
         {
           role: "system",
@@ -130,7 +178,12 @@ Scoring rules:
 - 55-74: useful content, weak opening or too much context.
 - 30-54: generic, slow, unclear or low-retention.
 - 0-29: very weak or confusing.
-Do not over-score. If the first sentence is slow, generic or explanatory, score below 75.
+- Do not over-score.
+- If the first sentence is slow, generic, explanatory or starts with broad context, score below 72.
+- If the script has a good idea but the opening is not immediately scroll-stopping, the score should usually be 60-72.
+- Only score above 75 when the first line creates immediate tension, curiosity or a clear painful problem.
+- If mainIssue says the hook is weak, vague, slow, generic, too long, or lacks urgency, the score must be 72 or lower.
+- If whyPeopleMaySkip says the intro is generic or does not grab attention quickly, the score must be 72 or lower.
 
 Output rules:
 - Be specific to the user's script. Do not give generic advice.
