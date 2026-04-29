@@ -46,7 +46,7 @@ export default function Header() {
 
           <div className="flex items-center gap-2">
             <Link
-              href="/#analyze"
+              href="/tools/hook-analyzer"
               className="
                 inline-flex flex-1 items-center justify-center rounded-xl
                 border border-indigo-400/35 bg-indigo-500/20
@@ -54,7 +54,7 @@ export default function Header() {
                 transition hover:border-indigo-300/50 hover:bg-indigo-500/30
               "
             >
-              Analyze now
+              Hook Analyzer
             </Link>
 
             <Link
@@ -86,6 +86,13 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <nav className="flex items-center gap-5">
               <Link
+                href="/tools/hook-analyzer"
+                className="text-sm font-medium text-indigo-200 transition hover:text-white"
+              >
+                Free Hook Analyzer
+              </Link>
+
+              <Link
                 href="/#features"
                 className="text-sm text-zinc-400 transition hover:text-white"
               >
@@ -108,7 +115,7 @@ export default function Header() {
                   transition hover:border-indigo-300/50 hover:bg-indigo-500/25 hover:text-white
                 "
               >
-                Analyze
+                Upload
               </Link>
             </nav>
 

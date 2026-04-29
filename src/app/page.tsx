@@ -34,17 +34,15 @@ export default function HomePage() {
         </div>
 
         <h1 className="mt-5 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
-          Know if your content works{" "}
+          Fix your hook before your video{" "}
           <span className="block bg-linear-to-r from-indigo-300 to-violet-300 bg-clip-text text-transparent">
-            before you publish it
+            loses viewers
           </span>
         </h1>
 
         <p className="mx-auto mt-5 max-w-3xl text-base text-zinc-400 sm:text-lg">
-          <p className="mx-auto mt-5 max-w-3xl text-base text-zinc-400 sm:text-lg">
-            Upload a video or audio file and get score, transcript, rewrite and
-            publishing strategy in minutes.
-          </p>
+          Paste a script for instant hook feedback, or upload audio/video for a
+          full report with score, transcript, rewrite and publishing strategy.
         </p>
 
         <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
