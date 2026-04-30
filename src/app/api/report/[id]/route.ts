@@ -75,8 +75,41 @@ export async function GET(
   });
 
   const isPaid = viewer?.plan !== "free";
-  const canSeeFull =
-    isPaid || report.freeFullPreview || report.oneShotUnlocked;
+
+  let freeFullPreview = report.freeFullPreview;
+
+  /*
+    Safety fallback:
+    The processor should mark the first completed free report as freeFullPreview.
+    If it didn't, the report API grants it when the user opens their first done report.
+  */
+  if (
+    !isPaid &&
+    report.status === "done" &&
+    report.reportFull &&
+    !report.freeFullPreview &&
+    !report.oneShotUnlocked
+  ) {
+    const existingFreeFullPreview = await prisma.analysisReport.findFirst({
+      where: {
+        userId,
+        status: "done",
+        freeFullPreview: true,
+      },
+      select: { id: true },
+    });
+
+    if (!existingFreeFullPreview) {
+      await prisma.analysisReport.update({
+        where: { id: report.id },
+        data: { freeFullPreview: true },
+      });
+
+      freeFullPreview = true;
+    }
+  }
+
+  const canSeeFull = isPaid || freeFullPreview || report.oneShotUnlocked;
 
   const rawReport = canSeeFull ? report.reportFull : report.reportFree;
 
@@ -115,7 +148,7 @@ export async function GET(
       : buildTranscriptPreview(report.transcript ?? null),
     isPaid,
     canSeeFull,
-    freeFullPreview: report.freeFullPreview,
+    freeFullPreview,
     oneShotUnlocked: report.oneShotUnlocked,
   });
 }
