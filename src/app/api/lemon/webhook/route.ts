@@ -6,13 +6,15 @@ const WEBHOOK_SECRET = process.env.LEMON_WEBHOOK_SECRET!;
 const VARIANT_PRO = process.env.LEMON_VARIANT_PRO;
 
 /* =========================
-   Types (mínimos necesarios)
+   Types mínimos necesarios
 ========================= */
 type LemonWebhookEvent = {
   meta?: {
     event_name?: string;
     custom_data?: {
       userId?: string;
+      reportId?: string;
+      checkoutType?: string;
     };
   };
   data?: {
@@ -23,6 +25,8 @@ type LemonWebhookEvent = {
       checkout_data?: {
         custom?: {
           userId?: string;
+          reportId?: string;
+          checkoutType?: string;
         };
       };
     };
@@ -75,19 +79,60 @@ export async function POST(req: Request) {
 
   const eventName = payload.meta?.event_name ?? null;
 
-  /* =========================
-     Resolve userId (CLAVE)
-  ========================= */
   const customFromMeta = payload.meta?.custom_data ?? null;
   const customFromCheckout =
     payload.data?.attributes?.checkout_data?.custom ?? null;
 
   const userId = customFromMeta?.userId ?? customFromCheckout?.userId ?? null;
+  const reportId =
+    customFromMeta?.reportId ?? customFromCheckout?.reportId ?? null;
+  const checkoutType =
+    customFromMeta?.checkoutType ?? customFromCheckout?.checkoutType ?? null;
 
   console.log("🟠 CUSTOM META:", customFromMeta);
   console.log("🟠 CUSTOM CHECKOUT:", customFromCheckout);
   console.log("🟠 USER ID:", userId);
+  console.log("🟠 REPORT ID:", reportId);
+  console.log("🟠 CHECKOUT TYPE:", checkoutType);
   console.log("🟢 EVENT NAME:", eventName);
+
+  /* =========================
+     One-shot report unlock
+  ========================= */
+  if (eventName === "order_created" && checkoutType === "report_unlock") {
+    if (!userId || !reportId) {
+      console.log("⚠️ REPORT UNLOCK WITHOUT USER/REPORT – IGNORED");
+      return NextResponse.json({ ok: true });
+    }
+
+    const report = await prisma.analysisReport.findUnique({
+      where: { id: reportId },
+      select: {
+        id: true,
+        userId: true,
+        oneShotUnlocked: true,
+      },
+    });
+
+    if (!report || report.userId !== userId) {
+      console.log("⚠️ REPORT UNLOCK INVALID OWNERSHIP – IGNORED");
+      return NextResponse.json({ ok: true });
+    }
+
+    if (!report.oneShotUnlocked) {
+      await prisma.analysisReport.update({
+        where: { id: reportId },
+        data: {
+          oneShotUnlocked: true,
+          lemonOrderId: payload.data?.id ?? null,
+        },
+      });
+
+      console.log("✅ REPORT ONE-SHOT UNLOCKED:", reportId);
+    }
+
+    return NextResponse.json({ ok: true });
+  }
 
   if (!userId) {
     console.log("⚠️ WEBHOOK SIN USER ID – IGNORADO");

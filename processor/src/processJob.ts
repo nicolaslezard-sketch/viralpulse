@@ -305,6 +305,23 @@ export async function processJob(rawJob: unknown) {
 
     const reportFree = buildReportForUser(reportFull, "free");
 
+    const userPlan = await getUserPlan(report.userId);
+
+    const existingFreeFullPreview =
+      userPlan === "free"
+        ? await prisma.analysisReport.findFirst({
+            where: {
+              userId: report.userId,
+              freeFullPreview: true,
+              status: "done",
+            },
+            select: { id: true },
+          })
+        : null;
+
+    const shouldGrantFreeFullPreview =
+      userPlan === "free" && !existingFreeFullPreview;
+
     const updateDoneStart = nowMs();
     await prisma.analysisReport.update({
       where: { id: report.id },
@@ -314,6 +331,7 @@ export async function processJob(rawJob: unknown) {
         transcript,
         reportFull,
         reportFree,
+        freeFullPreview: shouldGrantFreeFullPreview,
         viralScore: result.viralScore,
         viralMetrics: result.viralMetrics ?? undefined,
         rewrite: rewrite ?? undefined,
@@ -321,7 +339,9 @@ export async function processJob(rawJob: unknown) {
     });
     logStep(report.id, "db:update done", updateDoneStart);
 
-    const userPlan = await getUserPlan(report.userId);
+    if (shouldGrantFreeFullPreview) {
+      console.log(`[${report.id}] First free full report unlocked`);
+    }
 
     if (userPlan !== "free") {
       const minutesToConsume = Math.max(1, Math.ceil(durationSec / 60));

@@ -52,6 +52,8 @@ export async function GET(
       createdAt: true,
       reportFull: true,
       reportFree: true,
+      freeFullPreview: true,
+      oneShotUnlocked: true,
       viralScore: true,
       viralMetrics: true,
       transcript: true,
@@ -73,7 +75,10 @@ export async function GET(
   });
 
   const isPaid = viewer?.plan !== "free";
-  const rawReport = isPaid ? report.reportFull : report.reportFree;
+  const canSeeFull =
+    isPaid || report.freeFullPreview || report.oneShotUnlocked;
+
+  const rawReport = canSeeFull ? report.reportFull : report.reportFree;
 
   let reportJson: FullReport | null = null;
 
@@ -103,11 +108,14 @@ export async function GET(
     createdAt: report.createdAt,
     report: reportJson,
     viralScore: report.viralScore ?? null,
-    viralMetrics: isPaid ? (report.viralMetrics ?? null) : null,
-    transcript: isPaid ? (report.transcript ?? null) : null,
-    transcriptPreview: isPaid
+    viralMetrics: canSeeFull ? (report.viralMetrics ?? null) : null,
+    transcript: canSeeFull ? (report.transcript ?? null) : null,
+    transcriptPreview: canSeeFull
       ? (report.transcript ?? null)
       : buildTranscriptPreview(report.transcript ?? null),
     isPaid,
+    canSeeFull,
+    freeFullPreview: report.freeFullPreview,
+    oneShotUnlocked: report.oneShotUnlocked,
   });
 }

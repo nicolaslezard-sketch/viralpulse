@@ -73,6 +73,11 @@ model AnalysisReport {
   reportFree   Json?
   rewrite      Json?
 
+  // Free-to-paid conversion
+  freeFullPreview Boolean @default(false)
+  oneShotUnlocked Boolean @default(false)
+  lemonOrderId    String?
+
   viralScore   Float?
   viralMetrics Json?
 

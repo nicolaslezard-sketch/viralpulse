@@ -2,14 +2,20 @@ const LEMON_API_KEY = process.env.LEMON_API_KEY!;
 const LEMON_STORE_ID = process.env.LEMON_STORE_ID!;
 const LEMON_API_URL = "https://api.lemonsqueezy.com/v1";
 
+type CustomDataValue = string | number | boolean | null | undefined;
+
 export async function createLemonCheckout({
   variantId,
   userId,
   email,
+  customData,
+  redirectUrl,
 }: {
   variantId: string;
   userId: string;
   email?: string;
+  customData?: Record<string, CustomDataValue>;
+  redirectUrl?: string;
 }) {
   const res = await fetch(`${LEMON_API_URL}/checkouts`, {
     method: "POST",
@@ -22,10 +28,18 @@ export async function createLemonCheckout({
       data: {
         type: "checkouts",
         attributes: {
+          ...(redirectUrl
+            ? {
+                product_options: {
+                  redirect_url: redirectUrl,
+                },
+              }
+            : {}),
           checkout_data: {
             email,
             custom: {
               userId,
+              ...(customData ?? {}),
             },
           },
         },
