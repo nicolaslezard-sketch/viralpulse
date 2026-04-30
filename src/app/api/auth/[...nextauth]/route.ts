@@ -22,6 +22,10 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
 
+  pages: {
+    signIn: "/login",
+  },
+
   callbacks: {
     /**
      * 🔐 Se ejecuta al loguear
